@@ -1,0 +1,54 @@
+<html>
+<head>
+    <title>Freemarker SSTI 检查项</title>
+</head>
+<body>
+<h1>Freemarker SSTI 检查项</h1>
+<h2>漏洞类型</h2>
+<p>
+    <strong>服务器端模板注入（SSTI, Server-Side Template Injection）</strong> 是一种漏洞，攻击者可以通过向模板中注入恶意数据，导致服务器执行未预期的代码。这种漏洞的危害包括任意代码执行、数据泄露、甚至完全控制服务器等风险。
+</p>
+<h2>检查了什么内容</h2>
+<p>
+    该条目检查了代码中使用 <code>freemarker.cache.StringTemplateLoader</code> 和 <code>freemarker.template.Template</code> 的情况，尤其是对 <code>putTemplate</code> 方法的调用和 <code>Template</code> 类的实例化。它会分析这些代码，判断是否存在可能的模板注入风险。
+</p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到 <code>StringTemplateLoader</code> 类中调用了 <code>putTemplate</code> 方法，则认为存在潜在的 SSTI 风险。</li>
+    <li>如果检测到创建 <code>Template</code> 类的实例，则同样认为可能存在 SSTI 风险，因为此类的实例化可能用于未安全处理的模板渲染。</li>
+    <li>在这些情况下，会在相关代码处显示警告，提醒开发者可能存在的安全问题。</li>
+</ul>
+<h2>修复建议</h2>
+<p>
+    为了避免 SSTI 风险，建议开发者在使用 Freemarker 进行模板渲染时，确保模板内容的安全性。具体可以采取以下措施：
+</p>
+<ul>
+    <li>对用户输入进行严格的验证和过滤，避免将未处理的用户数据传递给模板。</li>
+    <li>使用安全的模板加载机制，避免直接使用 <code>putTemplate</code> 方法来动态添加用户生成的模板。</li>
+    <li>审查所有模板的内容，确保不会执行未授权的代码片段。</li>
+</ul>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下调用：
+</p>
+<pre>
+<code>
+StringTemplateLoader loader = new StringTemplateLoader();
+loader.putTemplate("templateName", userProvidedTemplate);  // 可能不安全
+
+Template template = new Template("templateName", userProvidedReader, configuration);  // 可能不安全
+</code>
+    </pre>
+<p>
+    修复建议是确保 <code>userProvidedTemplate</code> 和 <code>userProvidedReader</code> 的数据是经过验证和过滤的。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SSTI 漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Template_Injection">OWASP: Server-Side Template Injection</a></li>
+    <li><a href="https://freemarker.apache.org/">Freemarker 官方文档</a></li>
+</ul>
+</p>
+</body>
+</html>
