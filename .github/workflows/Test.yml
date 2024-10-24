@@ -37,7 +37,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.event.inputs.release_tag }}
+        upload_url: https://uploads.github.com/repos/SpringKill-team/SecurityInspector/releases/181666135/assets?name=SecurityInspector-Preview-v1.0.jar
         asset_path: ./build/libs/SecurityInspector-${{ github.event.inputs.release_tag }}.jar
         asset_name: SecurityInspector-${{ github.event.inputs.release_tag }}.jar
         asset_content_type: application/java-archive
