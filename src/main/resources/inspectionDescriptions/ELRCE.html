@@ -1,27 +1,53 @@
 <html>
+<head>
+    <title>EL RCE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>EL RCE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（RCE，Remote Code Execution）</strong> 是一种高危漏洞，攻击者可以通过不安全的输入执行任意代码，导致服务器被控制。对于 Java 中使用的 <code>javax.el.ELProcessor</code> 和 <code>javax.el.ExpressionFactory</code>，如果使用不当，可能会引发 RCE 风险。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了 <code>javax.el.ELProcessor</code> 和 <code>javax.el.ExpressionFactory</code> 的方法调用，特别是 <code>eval</code>、<code>getValue</code> 和 <code>createValueExpression</code> 方法。这些方法如果接收不可信的输入，可能会导致 RCE 攻击。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>当检测到调用 <code>ELProcessor.eval</code>、<code>ELProcessor.getValue</code> 或 <code>ExpressionFactory.createValueExpression</code> 方法时，认为这些调用存在潜在的 RCE 风险。</li>
+    <li>在代码中标记出这些问题，并向开发者提供风险警告。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 RCE 风险，建议开发者确保在使用 EL 表达式时，对输入进行严格的验证与过滤，避免传入不可信的数据源。可以使用更安全的 API 或预先定义的安全上下文来执行 EL 表达式，减少潜在的攻击面。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供的提示有助于开发者发现可能存在风险的代码位置，并鼓励开发者使用更安全的替代方案。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的 EL 表达式调用：
+</p>
+<pre>
+<code>
+ELProcessor processor = new ELProcessor();
+processor.eval("untrustedInput");  // 不安全
 
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+ExpressionFactory factory = ExpressionFactory.newInstance();
+factory.createValueExpression(context, "untrustedInput", String.class);  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是对输入进行严格校验，并尽量避免在 EL 表达式中直接使用不可信的数据。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 EL 表达式的安全性以及如何防止 RCE 的方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Expression_Language_Injection">OWASP: Expression Language Injection</a></li>
+    <li><a href="https://docs.oracle.com/javaee/7/api/javax/el/ELProcessor.html">Java ELProcessor Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

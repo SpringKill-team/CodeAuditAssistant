@@ -1,27 +1,54 @@
 <html>
+<head>
+    <title>Reflection Invocation Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Reflection Invocation Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Reflection Invocation Risk</strong> refers to the potential security risks when using Java reflection APIs (such as <code>Method.invoke()</code>, <code>ClassLoader.loadClass()</code>). Attackers may manipulate input parameters to execute unintended classes and methods, leading to remote code execution (RCE) or other security issues.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for calls to the following methods:
 </p>
+<ul>
+    <li><code>java.lang.reflect.Method.invoke()</code></li>
+    <li><code>java.lang.ClassLoader.loadClass()</code></li>
+    <li><code>java.net.URLClassLoader.newInstance()</code></li>
+    <li><code>org.codehaus.groovy.runtime.InvokerHelper.invokeMethod()</code></li>
+</ul>
 <p>
-    Embed code snippets:
+    If the parameters of these methods include unvalidated user input, it can lead to attackers invoking arbitrary methods through reflection, resulting in security vulnerabilities.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>Fix Recommendation</h2>
+<p>
+    Developers are advised to validate all input parameters thoroughly when using reflection to avoid directly using user input for method invocation or class loading. Use predefined method calls or restrict the range of accessible classes to minimize security risks.
+</p>
+<h3>Quick Fix</h3>
+<p>
+    This item provides quick fix suggestions to help developers identify unsafe reflection calls and remind them to perform input validation.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe reflection call:
+</p>
+<pre>
+<code>
+Method method = someClass.getMethod(methodName, parameterTypes);
+method.invoke(instance, userProvidedArgs);  // Unsafe
+</code>
+    </pre>
+<p>
+    It is recommended to validate <code>methodName</code> and <code>userProvidedArgs</code> to ensure only trusted inputs are allowed.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about reflection risks and mitigation techniques, refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Reflection_Attack">OWASP: Reflection Attack</a></li>
+    <li><a href="https://docs.oracle.com/javase/tutorial/reflect/">Java Reflection Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

@@ -8,23 +8,428 @@
     <name>SecurityInspector</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="support@yourcompany.com" url="https://www.yourcompany.com">YourCompany</vendor>
+    <vendor email="zzzlovestudy@gmail.com" url="https://github.com/SpringKill-team">SK-Team</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    Enter short description for your plugin here.<br>
-    <em>most HTML tags may be used</em>
-  ]]></description>
+    本插件的目的在于快速寻找Java代码中的Sink点，辅助安全人员进行代码审计工作。<br/>
+    <ui>
+        <li>本插件的工作原理是利用IDEA原生Inspection机制检查活跃文件，为原生Inspection提供了一套新的规则集。</li>
+        <li>本插件提供的规则均在<b>SecurityInspector</b>分组下。</li>
+    </ui>
+    <hr>
+    电子邮件<br/>
+    SpringKill: <a href="mailto:zzzlovestudy@gmail.com">zzzlovestudy@gmail.com</a> <br/>
+    Unam4: <a href="mailto:136979459@qq.com">136979459@qq.com</a><br/>
+    GitHub: <a href="https://github.com/SpringKill-team" target="_blank">https://github.com/SpringKill-team</a><br/>
+    <br/>
+    感谢<br/>
+    深信服深蓝实验室天威战队开源项目: <a href="https://github.com/KimJun1010/inspector" target="_blank">https://github.com/KimJun1010/inspector</a>
+    <br/>
+    ]]></description>
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
+
+        <toolWindow id="Decompiler" factoryClass="org.skgroup.securityinspector.ui.DecompilerToolWindowFactory"
+                    anchor="left"
+                    icon="/META-INF/pluginIcon.svg"
+        />
+
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.SystemEXITDOS"
+                implementationClass="org.skgroup.securityinspector.rules.dos.SystemDOS"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.PatternMatchesDOS"
+                implementationClass="org.skgroup.securityinspector.rules.dos.PatternDOS"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.NettyResponseSplittingRisk"
+                implementationClass="org.skgroup.securityinspector.rules.dos.NettyResponseSplitting"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.ReadFile"
+                implementationClass="org.skgroup.securityinspector.rules.files.read.ReadFile"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.CommonIOFileWrite"
+                implementationClass="org.skgroup.securityinspector.rules.files.write.CommonsIO"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.IOFilesWrite"
+                implementationClass="org.skgroup.securityinspector.rules.files.write.IOFiles"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JDBCAttack"
+                implementationClass="org.skgroup.securityinspector.rules.jdbc.JDBCAttack"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JNDIInjection"
+                implementationClass="org.skgroup.securityinspector.rules.jndi.JNDIInjection"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.LDAPUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.jndi.LDAPUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.BroadCORSAllowOrigin"
+                implementationClass="org.skgroup.securityinspector.rules.misc.BroadCORSAllowOrigin"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.HardCodedCredential"
+                implementationClass="org.skgroup.securityinspector.rules.misc.HardcodedCredentials"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.OpenSAML2IgnoreComments"
+                implementationClass="org.skgroup.securityinspector.rules.openSAML2.OpenSAML2IgnoreComment"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.BSHRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.BSHRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.BurlapUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.BurlapUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.CastorUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.CastorUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.CompilableRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.CompilableRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.ELRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.ELRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.ExpressionRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.ExpressionRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.FastjsonAutoType"
+                implementationClass="org.skgroup.securityinspector.rules.rce.FastjsonAutoType"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.FastjsonUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.FastjsonUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.GroovyRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.GroovyRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.HessianUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.HessianUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JacksonDatabindDefaultTyping"
+                implementationClass="org.skgroup.securityinspector.rules.rce.JacksonDatabindDefaultTyping"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JEXLRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.JEXLRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JSchOSRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.JSchOSRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JsonIOUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.JsonIOUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JYamlUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.JYamlUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JythonRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.JythonRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.KryoUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.KryoUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.MVELRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.MVELRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.NashornScriptEngineRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.NashornScriptEngineRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.ObjectInputStreamUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.ObjectInputStreamUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.OGNLInjectionRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.OGNLInjectionRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.RhinoRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.RhinoRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.RuntimeRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.RuntimeRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.ScriptEngineRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.ScriptEngineRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.SnakeYamlUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.SnakeYamlUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.SPELRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.SPELRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.XMLDecoderUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.XMLDecoderUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.XSLTRCE"
+                implementationClass="org.skgroup.securityinspector.rules.rce.XSLTRCE"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.XStreamUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.XStreamUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.YamlBeansUnserialize"
+                implementationClass="org.skgroup.securityinspector.rules.rce.YamlBeansUnserialize"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JakartaRedirect"
+                implementationClass="org.skgroup.securityinspector.rules.redirect.JakartaRedirect"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JavaxRedirect"
+                implementationClass="org.skgroup.securityinspector.rules.redirect.JavaxRedirect"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.Reflect"
+                implementationClass="org.skgroup.securityinspector.rules.reflect.Reflect"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.MybatisAnnotationSQLi"
+                implementationClass="org.skgroup.securityinspector.rules.sqli.MybatisAnnotationSQLi"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.MybatisXmlSQLi"
+                implementationClass="org.skgroup.securityinspector.rules.sqli.MybatisXmlSQLi"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.PlaceholderStringSQLi"
+                implementationClass="org.skgroup.securityinspector.rules.sqli.PlaceholderStringSQLi"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.PolyadicExpressionSQLi"
+                implementationClass="org.skgroup.securityinspector.rules.sqli.PolyadicExpressionSQLi"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.SQLi"
+                implementationClass="org.skgroup.securityinspector.rules.sqli.SQLi"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.ApacheSSRF"
+                implementationClass="org.skgroup.securityinspector.rules.ssrf.ApacheSSRF"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.GoogleIOSSRF"
+                implementationClass="org.skgroup.securityinspector.rules.ssrf.GoogleIOSSRF"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JavaURLSSRF"
+                implementationClass="org.skgroup.securityinspector.rules.ssrf.JavaURLSSRF"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JsoupSSRF"
+                implementationClass="org.skgroup.securityinspector.rules.ssrf.JsoupSSRF"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.OkhttpSSRF"
+                implementationClass="org.skgroup.securityinspector.rules.ssrf.OkhttpSSRF"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.SpringSSRF"
+                implementationClass="org.skgroup.securityinspector.rules.ssrf.SpringSSRF"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.BeetlSSTI"
+                implementationClass="org.skgroup.securityinspector.rules.ssti.BeetlSSTI"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.FreemarkeraSSTI"
+                implementationClass="org.skgroup.securityinspector.rules.ssti.FreemarkerSSTI"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.JinjavaSSTI"
+                implementationClass="org.skgroup.securityinspector.rules.ssti.JinjavaSSTI"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.PebbleSSTI"
+                implementationClass="org.skgroup.securityinspector.rules.ssti.PebbleSSTI"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.ThymeleafSSTI"
+                implementationClass="org.skgroup.securityinspector.rules.ssti.ThymeleafSSTI"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.ValidationSSTI"
+                implementationClass="org.skgroup.securityinspector.rules.ssti.ValidationSSTI"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.VelocitySSTI"
+                implementationClass="org.skgroup.securityinspector.rules.ssti.VelocitySSTI"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.XXE"
+                implementationClass="org.skgroup.securityinspector.rules.xxe.XXEInspector"
+        />
+
 
     </extensions>
 </idea-plugin>

@@ -1,27 +1,66 @@
 <html>
+<head>
+    <title>XXE Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>XXE Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>XML External Entity (XXE) Injection</strong> is a vulnerability that occurs when an XML parser is configured improperly, allowing attackers to inject malicious XML code. This can lead to server-side data leakage, file disclosure, and other security risks.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks the usage of XML parsers in the code, specifically looking for configurations that enable external entity processing. Common checks include:
 </p>
+<ul>
+    <li>Whether <code>DocumentBuilderFactory</code>, <code>SAXParserFactory</code>, and other XML parsers are configured properly to disable external entities.</li>
+    <li>Whether default configurations are used, which may be vulnerable to XXE attacks.</li>
+</ul>
 <p>
-    Embed code snippets:
+    If unsafe XML parsing configurations are detected, the tool flags the relevant code and prompts developers for correction.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>Fix Recommendation</h2>
+<p>
+    Developers are advised to explicitly disable external entity processing when using XML parsers to ensure that the parser does not load external resources. This can be done using the following configuration:
+</p>
+<pre>
+<code>
+DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+</code>
+    </pre>
+<h3>Quick Fix</h3>
+<p>
+    This item provides quick fix suggestions to help developers disable external entity processing, protecting the application from XXE attacks.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe XML parser configuration:
+</p>
+<pre>
+<code>
+DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+DocumentBuilder db = dbf.newDocumentBuilder();
+</code>
+    </pre>
+<p>
+    It is recommended to change it to:
+</p>
+<pre>
+<code>
+dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+</code>
+    </pre>
+<h2>References</h2>
+<p>
+    To learn more about XXE vulnerabilities and how to protect against them, refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing">OWASP: XML External Entity (XXE) Processing</a></li>
+    <li><a href="https://docs.oracle.com/javase/tutorial/jaxp/dom/readingXML.html">Java XML Parsing Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

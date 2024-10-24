@@ -1,27 +1,57 @@
 <html>
+<head>
+    <title>Apache SSRF Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Apache SSRF Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Server-Side Request Forgery (SSRF)</strong> is a vulnerability where an attacker can manipulate the server to send HTTP requests to internal resources or unauthorized remote services, potentially leading to information leakage or other malicious activities.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for calls to the following methods when using the Apache HTTP client library:
 </p>
+<ul>
+    <li><code>org.apache.http.client.fluent.Request.Get()</code></li>
+    <li><code>org.apache.http.client.fluent.Request.Post()</code></li>
+    <li><code>org.apache.http.client.methods.HttpRequestBase.setURI()</code></li>
+    <li><code>org.apache.http.client.methods.RequestBuilder.get()</code></li>
+    <li><code>org.apache.http.client.methods.RequestBuilder.post()</code></li>
+    <li>and other HTTP request-related APIs.</li>
+</ul>
 <p>
-    Embed code snippets:
+    This inspection identifies cases where user input is passed directly to these methods without proper validation, posing a potential SSRF risk.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>Fix Recommendation</h2>
+<p>
+    It is recommended to strictly validate and sanitize any user-provided URLs before passing them to HTTP request methods. Using a whitelist validation mechanism can ensure the legitimacy of the URLs.
+</p>
+<h3>Quick Fix</h3>
+<p>
+    This item offers quick fix suggestions, helping developers to identify unsafe URL handling scenarios and reminding them to perform appropriate input validation.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe calls:
+</p>
+<pre>
+<code>
+Request.Get(userInputUrl).execute();  // Unsafe
+HttpRequestBase request = new HttpRequestBase();
+request.setURI(new URI(userInputUrl));  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to validate <code>userInputUrl</code> for legitimacy before making the request.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about SSRF vulnerabilities and how to mitigate them, refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Request_Forgery">OWASP: Server Side Request Forgery (SSRF)</a></li>
+    <li><a href="https://hc.apache.org/">Apache HTTPClient Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

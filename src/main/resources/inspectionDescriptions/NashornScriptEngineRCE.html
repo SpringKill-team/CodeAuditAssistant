@@ -1,27 +1,56 @@
 <html>
+<head>
+    <title>Nashorn Script Engine RCE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Nashorn Script Engine RCE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（RCE，Remote Code Execution）</strong> 是一种严重的安全漏洞，允许攻击者在目标系统上执行任意代码。当使用不受信任的输入调用 <code>NashornScriptEngine</code> 的 <code>eval</code> 方法时，攻击者可以通过特制的脚本执行恶意代码，从而对系统造成危害。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对 <code>jdk.nashorn.api.scripting.NashornScriptEngine</code> 的 <code>eval</code> 方法的调用，判断是否存在潜在的 RCE 风险。<code>eval</code> 方法可以执行传入的脚本代码，如果这些脚本代码包含不受信任的用户输入，可能导致攻击者控制系统。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到调用了 <code>NashornScriptEngine</code> 的 <code>eval</code> 方法，则认为存在潜在的远程代码执行风险。</li>
+    <li>在检测到的问题代码处，会显示警告并建议开发者进行修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了防止 RCE 风险，建议避免在 <code>eval</code> 方法中使用用户提供的输入。如果必须使用，应该对输入进行严格的验证和过滤，确保只允许可信的脚本执行。此外，考虑使用其他更加安全的脚本执行方式或沙箱环境来限制代码执行的范围。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提醒开发者重新评估使用 <code>eval</code> 的必要性，并检查输入的来源和可信度。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+NashornScriptEngine engine = new NashornScriptEngine();
+engine.eval(userInput);  // 潜在的安全风险
+</code>
+    </pre>
+<p>
+    建议避免直接使用用户输入，或对输入进行严格的验证和过滤：
+</p>
+<pre>
+<code>
+String safeInput = sanitizeInput(userInput);
+engine.eval(safeInput);  // 经过过滤的输入
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 RCE 漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Remote_Code_Execution">OWASP: Remote Code Execution</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/jdk/api/nashorn/jdk/nashorn/api/scripting/NashornScriptEngine.html">NashornScriptEngine 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

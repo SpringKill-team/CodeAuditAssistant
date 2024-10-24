@@ -1,27 +1,56 @@
 <html>
+<head>
+    <title>MyBatis XML SQL Injection Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>MyBatis XML SQL Injection Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>SQL Injection (SQLi)</strong> is a critical security vulnerability where an attacker can manipulate database queries by injecting malicious input. In MyBatis XML configuration files, using <code>${}</code> placeholders can lead to SQL injection since these placeholders directly interpolate user input into SQL statements.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks SQL queries in MyBatis XML files, especially those using <code>${}</code> variables. It identifies potential SQL injection risks when user inputs are directly concatenated into SQL strings. If a risk is detected, it highlights the problematic code and suggests a fix.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>Identifies the use of <code>${}</code> placeholders and evaluates their use in SQL query construction.</li>
+    <li>If the placeholder is used in a way that could lead to SQL injection (e.g., concatenating user inputs in <code>WHERE</code> or <code>LIKE</code> clauses), it flags the code as potentially unsafe.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    It is recommended to replace <code>${}</code> placeholders with <code>#{}</code> to leverage parameterized queries, which safely escape and handle user input. Parameterized queries help mitigate SQL injection risks.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item provides an automatic fix that replaces unsafe <code>${}</code> expressions with safer <code>#{}</code> expressions or adds <code>&lt;foreach&gt;</code> tags for handling collection inputs when appropriate.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the MyBatis XML contains the following unsafe queries:
+</p>
+<pre>
+<code>
+SELECT * FROM users WHERE id = ${userId};  // Unsafe
+SELECT * FROM products WHERE name LIKE '%${searchTerm}%';  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix would be:
+</p>
+<pre>
+<code>
+SELECT * FROM users WHERE id = #{userId};  // Safe
+SELECT * FROM products WHERE name LIKE CONCAT('%', #{searchTerm}, '%');  // Safe
+</code>
+    </pre>
+<h2>References</h2>
+<p>
+    To learn more about SQL Injection vulnerabilities and how to prevent them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/SQL_Injection">OWASP: SQL Injection</a></li>
+    <li><a href="https://mybatis.org/mybatis-3/">MyBatis Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

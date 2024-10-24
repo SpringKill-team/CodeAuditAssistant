@@ -1,10 +1,10 @@
-package com.skgroup.securityinspector.inspectors
+package org.skgroup.securityinspector.inspectors
 
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool
 import com.intellij.psi.*
-import com.skgroup.securityinspector.utils.SecExpressionUtils
-import com.skgroup.securityinspector.visitors.BaseFixElementWalkingVisitor
 import org.apache.commons.codec.digest.MurmurHash3
+import org.skgroup.securityinspector.utils.SecExpressionUtils
+import org.skgroup.securityinspector.visitors.BaseFixElementWalkingVisitor
 
 abstract class BaseLocalInspectionTool : AbstractBaseJavaLocalInspectionTool() {
 

@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>MVEL 远程代码执行 (RCE) 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>MVEL 远程代码执行 (RCE) 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（RCE，Remote Code Execution）</strong> 是一种高危漏洞，攻击者可以通过注入恶意输入，使应用程序执行未经授权的代码。MVEL 是一个表达式语言框架，当不安全地使用时，可能会引入 RCE 漏洞，允许攻击者执行任意代码。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对 MVEL 相关类和方法的调用，尤其是那些可能导致远程代码执行的方法。例如，<code>org.mvel2.MVEL</code> 类中的 <code>eval</code> 方法，如果传入了未经过滤的用户输入，可能会导致代码执行漏洞。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>遍历 MVEL 的相关类和方法（如 <code>org.mvel2.MVEL</code>、<code>org.mvel2.jsr223.MvelScriptEngine</code>），如果检测到调用了 <code>eval</code> 或其他高风险方法，则认为存在安全隐患。</li>
+    <li>在发现潜在问题的位置，会标记并警告开发者可能存在的安全风险。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 RCE 漏洞的风险，建议避免直接使用 <code>eval</code> 方法处理用户输入的数据。可以考虑使用更安全的表达式解析机制，或者在执行表达式之前对输入进行严格的校验和过滤。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提醒开发者重新审视使用 MVEL 的代码逻辑，并建议替换或修改高风险的表达式解析方法。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+MVEL.eval(userInput);  // 不安全
+scriptEngine.eval(userInputScript);  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是对 <code>userInput</code> 或 <code>userInputScript</code> 进行严格的输入校验，或者使用更安全的解析方式。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 RCE 漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Code_Injection">OWASP: Code Injection</a></li>
+    <li><a href="https://mvel2.org/">MVEL 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

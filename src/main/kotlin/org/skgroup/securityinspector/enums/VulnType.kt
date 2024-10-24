@@ -1,4 +1,4 @@
-package org.skgroup.securityinspector.utils
+package org.skgroup.securityinspector.enums
 
 enum class VulnType {
 

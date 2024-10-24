@@ -1,27 +1,56 @@
 <html>
+<head>
+    <title>Placeholder String SQL Injection Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Placeholder String SQL Injection Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>SQL Injection (SQLi)</strong> is a severe security vulnerability where an attacker can manipulate SQL queries through malicious input. This can lead to unauthorized access to database data, modification of database content, or even execution of administrative operations. Using string formatting methods to build SQL queries can introduce risks if not handled properly.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for potential SQL injection risks when using the <code>format</code> method of the <code>java.lang.String</code> class. Specifically, it focuses on cases where the formatted string contains SQL fragments and is concatenated with user inputs.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If it detects the use of <code>String.format</code> and the formatted string contains SQL-like patterns (e.g., placeholders like <code>%s</code>), it further analyzes the content to see if it involves SQL queries.</li>
+    <li>If the concatenation involves unsafe user inputs without proper handling, it flags the code as potentially vulnerable to SQL injection.</li>
+    <li>In such cases, a warning is displayed, guiding the developer to address the potential security issue.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    It is recommended to use <strong>PreparedStatement</strong> or similar parameterized query methods instead of using string concatenation for building SQL queries. Parameterized queries ensure a clear separation between SQL logic and user inputs, effectively preventing SQL injection risks.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts the developer to review their SQL query construction methods and suggests replacing them with more secure APIs.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe string formatting:
+</p>
+<pre>
+<code>
+String query = String.format("SELECT * FROM users WHERE name = '%s'", userInput);  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to use parameterized queries like:
+</p>
+<pre>
+<code>
+PreparedStatement stmt = connection.prepareStatement("SELECT * FROM users WHERE name = ?");
+stmt.setString(1, userInput);  // Safe
+</code>
+    </pre>
+<h2>References</h2>
+<p>
+    To learn more about SQL injection risks and how to mitigate them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/SQL_Injection">OWASP: SQL Injection</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html">Java PreparedStatement Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

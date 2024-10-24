@@ -3,53 +3,53 @@
     <title>Netty Response Splitting Inspection</title>
 </head>
 <body>
-<h1>Netty Response Splitting 检查项</h1>
-<h2>漏洞类型</h2>
+<h1>Netty Response Splitting Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    <strong>HTTP Response Splitting（HTTP 响应分割）</strong> 是一种安全漏洞，攻击者可以通过注入 CRLF 字符（回车符和换行符）来篡改 HTTP 响应头，从而进行 HTTP Header 注入攻击。这可能导致响应头被修改、跨站脚本（XSS）攻击、缓存投毒等安全问题。
+    <strong>HTTP Response Splitting</strong> is a security vulnerability where an attacker can inject CRLF characters (Carriage Return and Line Feed) to manipulate HTTP response headers. This can lead to HTTP header injection attacks, such as Cross-Site Scripting (XSS), cache poisoning, and other security issues.
 </p>
-<h2>检查了什么内容</h2>
+<h2>What This Item Checks</h2>
 <p>
-    这个条目检查了代码中是否存在 <code>io.netty.handler.codec.http.DefaultHttpHeaders</code> 和 <code>io.netty.handler.codec.http.DefaultHttpResponse</code> 的实例化操作，并确保它们的构造方法中没有使用不安全的参数（例如 <code>false</code>）。
+    This item checks for instances of <code>io.netty.handler.codec.http.DefaultHttpHeaders</code> and <code>io.netty.handler.codec.http.DefaultHttpResponse</code> in the code, ensuring that unsafe arguments (like <code>false</code>) are not used in their constructors.
 </p>
-<h3>检查逻辑</h3>
+<h3>Inspection Logic</h3>
 <ul>
-    <li>如果检测到创建了 <code>DefaultHttpHeaders</code> 或 <code>DefaultHttpResponse</code> 对象，并且其构造方法中的安全性标志（如 <code>isValidateHeaders</code> 或 <code>validateHeaders</code>）被设置为 <code>false</code>，则认为存在安全隐患。</li>
-    <li>在存在问题的代码处，会显示警告并提供修复建议。</li>
+    <li>If it detects the creation of <code>DefaultHttpHeaders</code> or <code>DefaultHttpResponse</code> objects with a security flag (such as <code>isValidateHeaders</code> or <code>validateHeaders</code>) set to <code>false</code>, it flags the code as potentially unsafe.</li>
+    <li>A warning is displayed at the problematic code locations, along with suggestions for how to fix the issue.</li>
 </ul>
-<h2>修复建议</h2>
+<h2>Fix Recommendation</h2>
 <p>
-    为了避免 HTTP 响应分割漏洞的风险，建议在创建 <code>DefaultHttpHeaders</code> 或 <code>DefaultHttpResponse</code> 实例时，确保构造方法中的安全标志设置为 <code>true</code>。这意味着应该启用对 HTTP 响应头的校验，以防止不安全的输入被注入到响应头中。
+    To prevent HTTP response splitting risks, it is recommended to ensure that the security flag is set to <code>true</code> when creating <code>DefaultHttpHeaders</code> or <code>DefaultHttpResponse</code> instances. This means enabling validation of HTTP headers to prevent unsafe inputs from being injected into response headers.
 </p>
-<h3>快速修复</h3>
+<h3>Quick Fix</h3>
 <p>
-    该条目提供了快速修复功能，可以自动将不安全的参数（如 <code>false</code>）替换为 <code>true</code>，从而确保代码的安全性。
+    This item provides a quick fix that automatically replaces unsafe arguments (like <code>false</code>) with <code>true</code>, ensuring the code adheres to security best practices.
 </p>
-<h2>相关示例</h2>
+<h2>Example</h2>
 <p>
-    例如，如果代码中存在以下不安全的实例化方式：
-</p>
-<pre>
-<code>
-new DefaultHttpHeaders(false);  // 不安全
-new DefaultHttpResponse(version, status, false);  // 不安全
-</code>
-    </pre>
-<p>
-    修复建议是将其修改为：
+    For instance, if the code contains the following unsafe instantiation:
 </p>
 <pre>
 <code>
-new DefaultHttpHeaders(true);  // 安全
-new DefaultHttpResponse(version, status, true);  // 安全
+new DefaultHttpHeaders(false);  // Unsafe
+new DefaultHttpResponse(version, status, false);  // Unsafe
 </code>
     </pre>
-<h2>参考资料</h2>
 <p>
-    了解更多关于 HTTP Response Splitting 漏洞的风险和修复方法，可以参考以下资源：
+    The recommended fix would be to change it to:
+</p>
+<pre>
+<code>
+new DefaultHttpHeaders(true);  // Safe
+new DefaultHttpResponse(version, status, true);  // Safe
+</code>
+    </pre>
+<h2>References</h2>
+<p>
+    To learn more about the risks of HTTP Response Splitting and how to fix them, you can refer to the following resources:
 <ul>
     <li><a href="https://owasp.org/www-community/attacks/HTTP_Response_Splitting">OWASP: HTTP Response Splitting</a></li>
-    <li><a href="https://netty.io/">Netty 官方文档</a></li>
+    <li><a href="https://netty.io/">Netty Documentation</a></li>
 </ul>
 </p>
 </body>

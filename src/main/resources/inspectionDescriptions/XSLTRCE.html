@@ -1,27 +1,56 @@
 <html>
+<head>
+    <title>XSLT RCE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>XSLT RCE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（RCE，Remote Code Execution）</strong> 是一种高危漏洞，攻击者可以通过特定的输入执行未经授权的代码。在使用 XSLT（可扩展样式表语言转换）进行 XML 处理时，若不小心使用了不安全的配置或允许外部实体注入，则可能导致远程代码执行风险。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中使用 <code>javax.xml.transform.TransformerFactory</code> 的 <code>newInstance</code> 方法的调用，以确保没有不安全的使用模式。此类方法如果配置不当，可能会被滥用来执行恶意的 XSLT 代码，导致远程代码执行。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到调用了 <code>javax.xml.transform.TransformerFactory.newInstance()</code>，则会标记出可能的风险。</li>
+    <li>在代码中标记出该问题，并建议开发者审查使用的 XSLT 配置，以确保其安全性。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 XSLT 导致的 RCE 风险，建议开发者：
+<ul>
+    <li>使用安全的 TransformerFactory 实例，并禁用外部实体解析。</li>
+    <li>避免在不受信任的输入中直接使用 XSLT 进行转换。</li>
+    <li>参考安全配置的示例，确保 Transformer 的使用遵循安全最佳实践。</li>
+</ul>
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+TransformerFactory factory = TransformerFactory.newInstance();
+</code>
+    </pre>
+<p>
+    建议修改为：
+</p>
+<pre>
+<code>
+TransformerFactory factory = TransformerFactory.newInstance();
+factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 XSLT RCE 漏洞的风险和修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing">OWASP: XML External Entity (XXE) Processing</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/api/javax/xml/transform/TransformerFactory.html">Java TransformerFactory 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

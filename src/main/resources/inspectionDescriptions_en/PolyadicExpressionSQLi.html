@@ -1,27 +1,56 @@
 <html>
+<head>
+    <title>Polyadic Expression SQL Injection Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Polyadic Expression SQL Injection Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>SQL Injection (SQLi)</strong> is a critical security vulnerability. It occurs when attackers can construct malicious SQL queries due to improperly handled input, allowing them to manipulate database contents, access sensitive information, or compromise data integrity. In Java, this is particularly risky when concatenating strings to build SQL queries.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for <code>PsiPolyadicExpression</code> types in the code, especially those involving multiple strings or variables being concatenated into SQL queries. It analyzes these concatenated parts to identify potential SQL injection risks.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>Decomposes polyadic expressions and concatenates them into a complete SQL query string.</li>
+    <li>Checks if any variables and placeholders used in the concatenation pose injection risks.</li>
+    <li>If a potential SQL injection risk is identified in the concatenated query, it flags the problematic code and provides guidance for developers to fix it.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To prevent SQL injection vulnerabilities, it is recommended to use parameterized queries (Prepared Statements) or ORM frameworks instead of directly concatenating user inputs into SQL queries. If concatenation is unavoidable, ensure that all inputs are strictly validated and escaped.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to correctly use placeholders when concatenating SQL strings, avoiding direct concatenation of variables to improve code security.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe SQL concatenation:
+</p>
+<pre>
+<code>
+String query = "SELECT * FROM users WHERE name = '" + userInput + "'";
+</code>
+    </pre>
+<p>
+    The recommended fix would be to change it to:
+</p>
+<pre>
+<code>
+PreparedStatement stmt = connection.prepareStatement("SELECT * FROM users WHERE name = ?");
+stmt.setString(1, userInput);
+</code>
+    </pre>
+<h2>References</h2>
+<p>
+    To learn more about SQL injection risks and how to fix them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/SQL_Injection">OWASP: SQL Injection</a></li>
+    <li><a href="https://docs.oracle.com/javase/tutorial/jdbc/basics/prepared.html">Java PreparedStatement Tutorial</a></li>
+</ul>
+</p>
 </body>
 </html>

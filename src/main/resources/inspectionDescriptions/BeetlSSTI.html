@@ -1,26 +1,50 @@
 <html>
+<head>
+    <title>Beetl SSTI 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Beetl SSTI 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the description easier to read.
-Make sure the description doesn’t just repeat the inspection title.
-</p>  
-<p>
-See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    <strong>服务器端模板注入（SSTI）</strong> 是一种漏洞，当模板引擎直接渲染包含用户输入的模板时，攻击者可以注入恶意代码，从而在服务器端执行未预期的操作。SSTI 漏洞可能导致远程代码执行（RCE）或数据泄露。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-
-Embed code snippets:
+    该条目检查了 Beetl 模板引擎中 <code>org.beetl.core.GroupTemplate.getTemplate()</code> 方法的调用，特别是传入的模板名称或内容是否来自未经验证的用户输入。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to pre-select a UI element.</p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到 <code>getTemplate()</code> 方法中使用了用户输入作为模板的路径或内容，则认为存在潜在的 SSTI 风险。</li>
+    <li>工具会在不安全的代码位置显示警告，并提供修复建议。</li>
+</ul>
+<h2>修复建议</h2>
+<p>
+    建议开发者在使用 Beetl 模板引擎加载模板时，对用户输入进行严格的验证和过滤，确保只加载安全的模板。避免直接使用用户输入作为模板路径或内容。
+</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复建议，帮助开发者替换不安全的模板加载方式，并确保模板来源的安全性。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的模板加载：
+</p>
+<pre>
+<code>
+GroupTemplate groupTemplate = new GroupTemplate();
+Template template = groupTemplate.getTemplate(userProvidedTemplate);  // 不安全
+</code>
+    </pre>
+<p>
+    建议对 <code>userProvidedTemplate</code> 进行验证，确保仅允许合法的模板路径或内容。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SSTI 漏洞的风险和防护措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server-Side_Template_Injection">OWASP: Server-Side Template Injection (SSTI)</a></li>
+    <li><a href="https://beetl.org/">Beetl 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

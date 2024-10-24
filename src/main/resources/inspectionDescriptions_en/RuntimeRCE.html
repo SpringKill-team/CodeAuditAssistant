@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Runtime RCE Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Runtime RCE Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Remote Code Execution (RCE)</strong> is a critical security vulnerability that allows an attacker to execute arbitrary code on a target system. With RCE, attackers may execute system commands, read or modify system data, and potentially gain full control over the targeted server.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for the usage of the <code>java.lang.Runtime</code> class's <code>exec</code> method and the <code>java.lang.ProcessBuilder</code>. These methods can be exploited to execute system commands, leading to potential RCE vulnerabilities.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If it detects the use of <code>Runtime.exec()</code> or instantiation of <code>ProcessBuilder</code>, it flags the code as having potential RCE risks.</li>
+    <li>A warning is displayed at these code locations, reminding developers to review the safety of these calls.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To mitigate the risk of RCE vulnerabilities, developers should avoid using <code>Runtime.exec()</code> and <code>ProcessBuilder</code> directly for executing system commands whenever possible. If command execution is necessary, ensure that all input parameters are strictly validated and sanitized to prevent injection attacks.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to review command execution logic in their code, ensuring that all inputs are properly validated and sanitized to prevent malicious inputs from being executed.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe calls:
+</p>
+<pre>
+<code>
+Runtime.getRuntime().exec("cmd /c some_command");  // Unsafe
+new ProcessBuilder("cmd", "/c", "some_command").start();  // Unsafe
+</code>
+    </pre>
+<p>
+    Developers are advised to thoroughly review these calls and ensure they use safer alternatives or secure methods for executing commands.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about RCE vulnerabilities and how to prevent them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Remote_Code_Execution">OWASP: Remote Code Execution</a></li>
+    <li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html">Java Runtime Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

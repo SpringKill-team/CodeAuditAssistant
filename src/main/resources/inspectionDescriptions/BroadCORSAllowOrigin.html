@@ -1,27 +1,57 @@
 <html>
+<head>
+    <title>宽泛的 CORS 允许来源检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>宽泛的 CORS 允许来源检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>宽泛的 CORS 允许来源</strong> 是一种常见的安全配置问题。当应用程序在设置 CORS 时允许所有来源（即 <code>*</code>）时，可能会导致未授权的外部网站访问敏感资源，造成数据泄露和其他安全问题。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了以下方法的使用情况，以识别宽泛的 CORS 配置：
 </p>
+<ul>
+    <li><code>javax.servlet.http.HttpServletResponse.setHeader("Access-Control-Allow-Origin", "*")</code></li>
+    <li><code>org.springframework.web.cors.CorsConfiguration.addAllowedOrigin("*")</code></li>
+    <li><code>@CrossOrigin(origins = "*")</code> 注解的使用</li>
+</ul>
 <p>
-    Embed code snippets:
+    如果检测到这些方法或注解中允许所有来源，则会认为存在潜在的安全隐患。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>修复建议</h2>
+<p>
+    建议开发者在配置 CORS 时，不要使用通配符 <code>*</code>，而是明确列出允许的来源域名，以减少敏感数据被不受信任的来源访问的风险。
+</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复建议，帮助开发者识别不安全的 CORS 配置，并提醒使用更精确的来源控制。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的 CORS 配置：
+</p>
+<pre>
+<code>
+response.setHeader("Access-Control-Allow-Origin", "*");  // 不安全
+</code>
+    </pre>
+<p>
+    建议将其修改为：
+</p>
+<pre>
+<code>
+response.setHeader("Access-Control-Allow-Origin", "https://trusted.example.com");  // 安全
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 CORS 配置的安全风险和防护措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/CORS_OriginHeaderScrutiny">OWASP: CORS Origin Header Scrutiny</a></li>
+    <li><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/CORS">MDN: CORS 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Thymeleaf SSTI 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Thymeleaf SSTI 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>服务端模板注入（SSTI，Server-Side Template Injection）</strong> 是一种严重的漏洞类型。攻击者可以通过恶意输入注入模板引擎的解析过程，从而执行任意代码，甚至完全接管服务器。SSTI 在使用不安全的模板引擎调用时尤其容易发生。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了对 <code>org.thymeleaf.ITemplateEngine</code> 接口中 <code>process</code> 和 <code>processThrottled</code> 方法的调用。这些方法在处理用户输入的模板时，若未进行妥善的输入校验或过滤，可能会导致 SSTI 漏洞。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>遍历检查方法调用的类和方法名称，判断是否使用了 <code>ITemplateEngine</code> 的 <code>process</code> 或 <code>processThrottled</code> 方法。</li>
+    <li>如果检测到这些方法的调用，则会在代码中标记出问题的位置，并提示开发者可能存在 SSTI 风险。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了防止 SSTI 漏洞，建议开发者在使用模板引擎时，对所有输入进行严格的校验和过滤，并尽可能避免直接将用户输入传递给模板引擎的解析过程。此外，使用较新的 Thymeleaf 版本可能带有更多的安全防护机制。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提示开发者审查模板引擎的使用方式，确保输入源的安全性，并根据情况添加必要的校验。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+templateEngine.process(template, context);  // 可能不安全
+templateEngine.processThrottled(template, context);  // 可能不安全
+</code>
+    </pre>
+<p>
+    建议开发者对模板内容进行严格的输入校验，避免使用未过滤的用户输入直接进行模板渲染。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SSTI 漏洞及其防护方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Template_Injection">OWASP: Server-Side Template Injection</a></li>
+    <li><a href="https://www.thymeleaf.org/documentation.html">Thymeleaf 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

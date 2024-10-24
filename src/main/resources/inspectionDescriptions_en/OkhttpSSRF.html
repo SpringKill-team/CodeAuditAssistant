@@ -1,27 +1,49 @@
 <html>
+<head>
+    <title>OkHttp SSRF Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>OkHttp SSRF Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>SSRF (Server-Side Request Forgery)</strong> is an attack where an attacker can manipulate an application's HTTP requests to make the server send requests to internal resources it shouldn't access. This can lead to serious issues such as sensitive data leaks and internal service discovery.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for the use of OkHttp to make HTTP requests in the code, specifically focusing on calls to the <code>url</code> method of <code>com.squareup.okhttp.Request$Builder</code> and <code>okhttp3.Request$Builder</code> classes, as well as other high-risk methods like <code>execute</code> and <code>newCall</code>.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>Scans the code for instances where OkHttp is used to create HTTP requests, including calls to the <code>url</code> method and executions of <code>execute</code> methods.</li>
+    <li>If it detects potential SSRF vulnerabilities, it highlights the problematic parts of the code and prompts the developer to make corrections.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To prevent SSRF attacks, it is recommended to validate and restrict URLs from external input strictly. Ensure that only expected and verified addresses can be passed to OkHttp request methods. Additionally, consider adding IP address filtering and DNS resolution checks at the application level to prevent unintended access to internal resources.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to review and correct the usage of URL parameters from external inputs, ensuring that only safe URLs are passed to OkHttp requests.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe call:
+</p>
+<pre>
+<code>
+new OkHttpClient().newCall(new Request.Builder().url(userInput).build()).execute();  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to perform strict validation on <code>userInput</code> and ensure it matches expected formats or domains.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about SSRF vulnerabilities and how to address them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Request_Forgery">OWASP: Server-Side Request Forgery (SSRF)</a></li>
+    <li><a href="https://square.github.io/okhttp/">OkHttp Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

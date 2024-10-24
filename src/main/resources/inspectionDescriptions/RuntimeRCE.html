@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Runtime RCE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Runtime RCE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（Remote Code Execution, RCE）</strong> 是一种严重的安全漏洞，攻击者可以通过该漏洞在目标系统上执行任意代码。利用 RCE 漏洞，攻击者可能会执行系统命令、读取或修改系统数据，甚至完全控制目标服务器。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    这个条目检查了代码中对 <code>java.lang.Runtime</code> 的 <code>exec</code> 方法以及 <code>java.lang.ProcessBuilder</code> 的使用。这些方法可能会被滥用来执行系统命令，从而引发 RCE 漏洞。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到使用了 <code>Runtime.exec()</code> 方法，或直接实例化了 <code>ProcessBuilder</code>，则认为存在潜在的远程代码执行风险。</li>
+    <li>在这些代码位置，会显示警告并提醒开发者检查该调用的安全性。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 RCE 漏洞的风险，建议开发者尽量避免直接使用 <code>Runtime.exec()</code> 和 <code>ProcessBuilder</code> 来执行系统命令。如果确实需要执行系统命令，请确保输入参数经过严格的校验和过滤，以避免注入攻击。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提示开发者重新评估代码中的命令执行操作，并确保所有输入都经过了验证和清理，防止恶意输入被执行。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+Runtime.getRuntime().exec("cmd /c some_command");  // 不安全
+new ProcessBuilder("cmd", "/c", "some_command").start();  // 不安全
+</code>
+    </pre>
+<p>
+    建议开发者仔细检查这些调用，并确保使用安全的方式执行命令或考虑使用更安全的替代方案。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 RCE 漏洞及其防御方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Remote_Code_Execution">OWASP: Remote Code Execution</a></li>
+    <li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Runtime.html">Java Runtime 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

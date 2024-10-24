@@ -1,15 +1,15 @@
-package com.skgroup.securityinspector.utils
+package org.skgroup.securityinspector.utils
 
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import java.util.regex.Pattern
 
-object SQLiUtil {
+object  SQLiUtil {
 
-    private val whereInEndPattern = Pattern.compile("(where|and|or)\\s+\\S+?\\s+in\\s*\\(?\\s*$", Pattern.CASE_INSENSITIVE)
-    private val likeEndPattern = Pattern.compile("\\S+?\\s+like\\s+('|\")%?$", Pattern.CASE_INSENSITIVE)
-    private val placeholderPattern = Pattern.compile("%(\\d\\$\\d{0,5})?s", Pattern.CASE_INSENSITIVE)
-    private val dollarVarPattern = Pattern.compile("\\$\\{(\\S+?)\\}")
+    internal    val whereInEndPattern = Pattern.compile("(where|and|or)\\s+\\S+?\\s+in\\s*\\(?\\s*$", Pattern.CASE_INSENSITIVE)
+    internal val likeEndPattern = Pattern.compile("\\S+?\\s+like\\s+('|\")%?$", Pattern.CASE_INSENSITIVE)
+    internal val placeholderPattern = Pattern.compile("%(\\d\\$\\d{0,5})?s", Pattern.CASE_INSENSITIVE)
+    internal val dollarVarPattern = Pattern.compile("\\$\\{(\\S+?)\\}")
 
     /**
      * 检测SQL拼接点列表是否存在注入风险

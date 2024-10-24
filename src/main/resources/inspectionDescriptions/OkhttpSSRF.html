@@ -1,27 +1,49 @@
 <html>
+<head>
+    <title>OkHttp SSRF 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>OkHttp SSRF 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>SSRF（Server-Side Request Forgery，服务端请求伪造）</strong> 是一种攻击形式，攻击者可以通过利用应用程序发出的请求，强制服务器向其不应访问的内部资源发送请求。这可能导致敏感信息泄露、内部服务探测等严重的安全问题。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中使用 OkHttp 进行 HTTP 请求的部分，尤其是对 <code>com.squareup.okhttp.Request$Builder</code> 和 <code>okhttp3.Request$Builder</code> 类中的 <code>url</code> 方法的调用，以及其他高风险的网络请求方法，如 <code>execute</code> 和 <code>newCall</code>。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>扫描代码中使用 OkHttp 进行网络请求的实例化和方法调用，包括 <code>url</code> 方法的调用和 <code>execute</code> 方法的执行。</li>
+    <li>如果检测到潜在的 SSRF 漏洞使用方式，会标记出代码中的问题，并提示开发者进行修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了防止 SSRF 攻击，建议对外部输入的 URL 进行严格的校验和白名单限制。应确保只有预期的、经过验证的地址才能被传递给 OkHttp 的请求方法。此外，可以考虑在应用层增加 IP 地址过滤和 DNS 解析检查，以阻止对内部资源的意外访问。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提示开发者检查和修正对外部输入的 URL 参数的使用，确保只允许安全的 URL 传递到 OkHttp 请求中。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+new OkHttpClient().newCall(new Request.Builder().url(userInput).build()).execute();  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是对 <code>userInput</code> 进行严格的校验，并确保其符合预期的格式或域名。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SSRF 漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Request_Forgery">OWASP: Server-Side Request Forgery (SSRF)</a></li>
+    <li><a href="https://square.github.io/okhttp/">OkHttp 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

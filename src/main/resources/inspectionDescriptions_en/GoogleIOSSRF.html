@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Google Guava SSRF Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Google Guava SSRF Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Server-Side Request Forgery (SSRF)</strong> is a critical security vulnerability where an attacker can manipulate requests made by a server to internal or external resources. Exploiting SSRF can allow attackers to access internal services or data that are otherwise protected, potentially enabling further attacks.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for method calls to the <code>com.google.common.io.Resources</code> class in the Google Guava library, specifically methods like <code>asByteSource</code>, <code>asCharSource</code>, <code>copy</code>, <code>readLines</code>, <code>toByteArray</code>, and <code>toString</code>. These methods can pose an SSRF risk when they accept a <code>URL</code> as a parameter.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If any of the above methods are detected with a <code>URL</code> parameter, it is considered a potential SSRF risk.</li>
+    <li>A warning will be displayed at the identified code locations, alerting the developer to the potential SSRF vulnerability.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To prevent SSRF vulnerabilities, it is recommended to validate the <code>URL</code> parameter strictly, ensuring that only trusted, whitelisted URLs are allowed. This can be achieved through regular expression checks or domain validation. Additionally, consider using safer APIs that do not directly interact with external resources.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item alerts the developer to potential SSRF risks in their code and suggests adding security checks when using URL parameters to prevent using unchecked URLs.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe calls:
+</p>
+<pre>
+<code>
+Resources.toByteArray(new URL("http://example.com"));  // Unsafe
+Resources.asCharSource(new URL("http://example.com"), Charset.defaultCharset());  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to add validation to the URL, ensuring that only trusted domains or IP addresses are permitted.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about SSRF vulnerabilities and how to mitigate them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Request_Forgery">OWASP: Server-Side Request Forgery (SSRF)</a></li>
+    <li><a href="https://guava.dev/">Google Guava Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

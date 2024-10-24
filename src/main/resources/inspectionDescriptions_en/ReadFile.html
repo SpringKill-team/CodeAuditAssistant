@@ -1,27 +1,61 @@
 <html>
+<head>
+    <title>File Read Vulnerability Inspection</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>File Read Vulnerability Inspection</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>File Read Vulnerability</strong> refers to the risk of unauthorized access to data when an application reads file contents in an insecure manner. This can expose sensitive files (such as configuration files or user data) to malicious users, leading to potential data leaks.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for the usage of file read APIs (i.e., <code>sinks</code>) in the code, including the following methods and classes:
 </p>
+<ul>
+    <li><code>java.io.FileInputStream</code> constructor</li>
+    <li><code>java.lang.Class#getResourceAsStream</code></li>
+    <li><code>org.apache.commons.io.FileUtils#readFileToByteArray</code></li>
+    <li><code>org.apache.commons.io.FileUtils#readFileToString</code></li>
+    <li><code>org.apache.commons.io.FileUtils#readLines</code></li>
+    <li><code>java.nio.file.Files#readAllBytes</code></li>
+    <li><code>java.nio.file.Files#readAllLines</code></li>
+    <li><code>java.io.BufferedReader#readLine</code></li>
+    <li><code>java.io.FileReader</code> constructor</li>
+</ul>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If the use of any of the above file read methods is detected (e.g., <code>readFileToString</code> or <code>readAllBytes</code>), the code is flagged as potentially vulnerable.</li>
+    <li>A warning is displayed at the location of the issue, prompting the developer to review the safety of these file read operations.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To prevent file read vulnerabilities, developers should ensure that file paths are properly validated before use, especially if they come from untrusted sources. It is also advisable to use the least privilege principle for file access and consider sandboxing mechanisms to limit file access.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item suggests developers validate file paths and apply necessary checks before performing file reads, ensuring that paths do not include sensitive or unauthorized locations.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe file read operations:
+</p>
+<pre>
+<code>
+new FileInputStream("/path/to/file");  // Unsafe
+Files.readAllBytes(Paths.get("/path/to/secret"));  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to validate the path rigorously or use a more restricted file reading approach.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about file read vulnerabilities and how to address them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Path_Traversal">OWASP: Path Traversal</a></li>
+    <li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/FileInputStream.html">Java FileInputStream Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

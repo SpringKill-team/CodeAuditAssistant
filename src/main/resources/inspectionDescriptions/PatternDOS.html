@@ -1,27 +1,51 @@
 <html>
+<head>
+    <title>Pattern DOS 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Pattern DOS 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>正则表达式拒绝服务（ReDoS，Regular Expression Denial of Service）</strong> 是一种常见的漏洞。当正则表达式具有指数复杂度时，攻击者可以通过特制的输入字符串，使正则表达式的解析过程消耗大量的 CPU 资源，导致应用程序的响应变慢甚至完全无法响应。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对 <code>Pattern.compile</code> 和 <code>String.matches</code> 方法的调用，判断正则表达式是否具有指数复杂度。例如，像 <code>([a-z]+)+</code> 这样的模式被认为是不安全的，因为它们可能会导致 ReDoS 攻击。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到使用 <code>Pattern.compile</code> 或 <code>String.matches</code> 方法，并且其中的正则表达式具有潜在的指数型复杂度，则认为存在安全隐患。</li>
+    <li>此时，会在代码中标记出问题的位置，并提示开发者进行修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 ReDoS 漏洞的风险，建议开发者在使用正则表达式时，避免使用具有指数复杂度的模式。可以尝试简化正则表达式，或者使用预编译且经过优化的正则表达式库。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提示开发者重新检查正则表达式的安全性，避免使用具有潜在风险的复杂正则表达式模式。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的正则表达式：
+</p>
+<pre>
+<code>
+Pattern.compile("([a-z]+)+");  // 不安全
+"abc".matches("(([a-z])?([a-z]+))+");  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是将其修改为更安全的正则表达式模式，或分解复杂度较高的部分。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 ReDoS 漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://cloud.tencent.com/developer/article/1041326">浅析ReDoS的原理与实践</a></li>
+    <li><a href="https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS">OWASP: Regular Expression Denial of Service</a></li>
+    <li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/regex/Pattern.html">Java Pattern 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

@@ -1,27 +1,57 @@
-            <html>
+<html>
+<head>
+    <title>Broad CORS Allow Origin Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Broad CORS Allow Origin Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Broad CORS Allow Origin</strong> is a common security misconfiguration. When an application allows all origins (using <code>*</code>) in its CORS settings, it can expose sensitive resources to unauthorized external websites, leading to data leaks and other security concerns.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for the usage of the following methods to identify overly permissive CORS configurations:
 </p>
+<ul>
+    <li><code>javax.servlet.http.HttpServletResponse.setHeader("Access-Control-Allow-Origin", "*")</code></li>
+    <li><code>org.springframework.web.cors.CorsConfiguration.addAllowedOrigin("*")</code></li>
+    <li>Use of the <code>@CrossOrigin(origins = "*")</code> annotation</li>
+</ul>
 <p>
-    Embed code snippets:
+    If these methods or annotations allow all origins, they are flagged as potentially insecure.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>Fix Recommendation</h2>
+<p>
+    Developers are advised to avoid using the wildcard <code>*</code> when configuring CORS. Instead, specify trusted origin domains to reduce the risk of sensitive data being accessed by untrusted sources.
+</p>
+<h3>Quick Fix</h3>
+<p>
+    This item provides quick fix suggestions to help developers identify insecure CORS configurations and recommends more precise origin controls.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe CORS configuration:
+</p>
+<pre>
+<code>
+response.setHeader("Access-Control-Allow-Origin", "*");  // Unsafe
+</code>
+    </pre>
+<p>
+    It is recommended to change it to:
+</p>
+<pre>
+<code>
+response.setHeader("Access-Control-Allow-Origin", "https://trusted.example.com");  // Safe
+</code>
+    </pre>
+<h2>References</h2>
+<p>
+    To learn more about CORS configuration risks and how to secure them, refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/CORS_OriginHeaderScrutiny">OWASP: CORS Origin Header Scrutiny</a></li>
+    <li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">MDN: CORS Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

@@ -1,25 +1,50 @@
 <html>
+<head>
+    <title>Beetl SSTI Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Beetl SSTI Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the description easier to read.
-Make sure the description doesn’t just repeat the inspection title.
+    <strong>Server-Side Template Injection (SSTI)</strong> is a vulnerability that occurs when a template engine renders user input directly, allowing attackers to inject malicious code. SSTI can lead to remote code execution (RCE) or data leaks.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks the use of the <code>org.beetl.core.GroupTemplate.getTemplate()</code> method in the Beetl template engine, focusing on whether the template name or content comes from unvalidated user input.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If user input is used as the template path or content in the <code>getTemplate()</code> method, it is flagged as potentially risky due to SSTI.</li>
+    <li>Warnings are displayed at insecure code locations, along with suggestions for fixing the issues.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-Embed code snippets:
+    It is recommended to validate and sanitize user input when using the Beetl template engine to load templates, ensuring that only safe templates are loaded. Avoid directly using user input as the template path or content.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item provides quick fix suggestions to help developers replace unsafe template loading methods and ensure the security of template sources.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe template loading:
+</p>
+<pre>
+<code>
+GroupTemplate groupTemplate = new GroupTemplate();
+Template template = groupTemplate.getTemplate(userProvidedTemplate);  // Unsafe
+</code>
+    </pre>
+<p>
+    It is recommended to validate <code>userProvidedTemplate</code> to ensure that only legitimate template paths or content are allowed.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about SSTI vulnerabilities and how to mitigate them, refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server-Side_Template_Injection">OWASP: Server-Side Template Injection (SSTI)</a></li>
+    <li><a href="https://beetl.org/">Beetl Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

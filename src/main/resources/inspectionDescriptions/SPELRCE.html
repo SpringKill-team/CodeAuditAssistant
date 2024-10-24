@@ -1,27 +1,56 @@
 <html>
+<head>
+    <title>SPEL RCE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>SPEL RCE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（RCE，Remote Code Execution）</strong> 是一种严重的安全漏洞，它允许攻击者在目标系统上执行任意代码。在 Spring 应用中，使用 SpEL（Spring Expression Language）时，如果解析输入不受控制，就可能导致 RCE 漏洞。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中使用 <code>org.springframework.expression.ExpressionParser</code> 和 <code>org.springframework.expression.spel.standard.SpelExpressionParser</code> 的 <code>parseExpression</code> 和 <code>parseRaw</code> 方法的情况。这些方法如果使用了不受信任的输入，可能会导致远程代码执行漏洞。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到调用了上述类中的方法，则会标记代码为潜在的安全风险，提示开发者进一步检查这些方法的输入是否安全。</li>
+    <li>检查时会显示问题位置，并提供修改建议以提升代码的安全性。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了防止 RCE 漏洞，建议开发者避免将未经验证的输入传递给 SpEL 解析器。应该使用预定义的安全表达式，或者在输入时进行严格的校验和过滤，确保解析的内容不包含恶意代码。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提醒开发者注意可能的不安全调用，并建议修改代码以确保传入表达式的安全性。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+ExpressionParser parser = new SpelExpressionParser();
+parser.parseExpression(userInput);  // 不安全
+</code>
+    </pre>
+<p>
+    建议将其修改为使用经过校验的输入，或限制输入的范围：
+</p>
+<pre>
+<code>
+ExpressionParser parser = new SpelExpressionParser();
+parser.parseExpression(validatedInput);  // 安全
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 RCE 漏洞及其防御措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Remote_Code_Execution">OWASP: Remote Code Execution</a></li>
+    <li><a href="https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#expressions">Spring Framework SpEL Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

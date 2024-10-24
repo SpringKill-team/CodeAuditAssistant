@@ -1,27 +1,66 @@
 <html>
+<head>
+    <title>XXE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>XXE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>XML 外部实体注入（XXE）</strong> 是一种漏洞，当解析 XML 文档时，如果未正确配置 XML 解析器，攻击者可以利用外部实体注入恶意的 XML 代码，可能导致服务器端信息泄露、文件读取等风险。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对 XML 解析器的使用，特别是是否启用了外部实体的解析。常见的检查包括：
 </p>
+<ul>
+    <li><code>DocumentBuilderFactory</code>、<code>SAXParserFactory</code> 等 XML 解析器是否正确配置，禁用了外部实体。</li>
+    <li>是否使用了默认配置的 XML 解析器，可能导致 XXE 漏洞。</li>
+</ul>
 <p>
-    Embed code snippets:
+    如果检测到使用不安全的 XML 解析配置，工具会标记出相关代码，并提示开发者进行修改。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>修复建议</h2>
+<p>
+    建议开发者在使用 XML 解析器时，显式地禁用外部实体解析，确保 XML 解析器不会加载外部资源。可以通过以下配置来防止 XXE 漏洞：
+</p>
+<pre>
+<code>
+DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+</code>
+    </pre>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复建议，帮助开发者禁用外部实体解析，从而保护应用程序免受 XXE 攻击。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中使用了以下不安全的 XML 解析器配置：
+</p>
+<pre>
+<code>
+DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+DocumentBuilder db = dbf.newDocumentBuilder();
+</code>
+    </pre>
+<p>
+    建议将其修改为：
+</p>
+<pre>
+<code>
+dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 XXE 漏洞的风险和防护措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing">OWASP: XML External Entity (XXE) Processing</a></li>
+    <li><a href="https://docs.oracle.com/javase/tutorial/jaxp/dom/readingXML.html">Java XML 解析文档</a></li>
+</ul>
+</p>
 </body>
 </html>

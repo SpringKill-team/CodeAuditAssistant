@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>XMLDecoder Unserialization Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>XMLDecoder Unserialization Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Insecure Deserialization</strong> is a common security vulnerability. When using the <code>readObject</code> method of the <code>java.beans.XMLDecoder</code> class, if the input data is controlled by an attacker, it can lead to Remote Code Execution (RCE). Attackers can craft malicious XML data to control the deserialization process, potentially executing arbitrary code.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for the usage of the <code>readObject</code> method of the <code>java.beans.XMLDecoder</code> class in the code. This method poses a potential risk during XML deserialization, especially when handling data from untrusted sources.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If a call to the <code>readObject</code> method of the <code>XMLDecoder</code> class is detected, it is flagged as an insecure deserialization risk.</li>
+    <li>This item marks the problematic code locations and advises the developer to take appropriate security measures.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To avoid insecure deserialization vulnerabilities, it is recommended to avoid using <code>XMLDecoder</code> for handling XML data from untrusted sources. Consider using a more secure XML parsing library or thoroughly validating the input data to ensure its integrity.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to re-evaluate the use of the <code>readObject</code> method and suggests using safer alternatives.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe call:
+</p>
+<pre>
+<code>
+XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream("data.xml")));
+Object obj = decoder.readObject();  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommendation is to avoid using <code>XMLDecoder</code> directly for deserialization, or to validate the input data strictly before usage.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about insecure deserialization and its mitigation, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/api/java/beans/XMLDecoder.html">Java XMLDecoder Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Java URL SSRF 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Java URL SSRF 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>服务器端请求伪造（SSRF，Server-Side Request Forgery）</strong> 是一种攻击，攻击者通过精心构造的请求，诱使服务器发出本不应该发送的网络请求。这可能导致内部服务的暴露、数据泄露、甚至执行任意代码等风险。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中使用潜在 SSRF 风险的 API 调用或对象创建操作。例如，通过 <code>java.net.URL</code> 的 <code>openStream</code>、<code>openConnection</code>，或 <code>java.net.Socket</code> 的构造方法可能会引发 SSRF 攻击。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到调用了 <code>java.net.URI</code> 的 <code>create</code> 方法，或 <code>java.net.URL</code> 的 <code>openStream</code> 或 <code>openConnection</code> 方法，则标记为存在潜在的 SSRF 风险。</li>
+    <li>此外，如果创建了 <code>java.net.URL</code> 或 <code>java.net.Socket</code> 实例，也会触发警告。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 SSRF 漏洞，建议在处理用户提供的 URL 或 URI 时，严格验证输入。例如，可以使用白名单机制，确保只允许访问特定的域名或 IP 地址范围。同时，避免直接使用 <code>openStream</code>、<code>openConnection</code> 等方法进行外部资源的访问。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提示开发者重新审查代码中的 URL 和网络连接使用方式，并建议进行适当的输入验证和访问限制。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的网络调用：
+</p>
+<pre>
+<code>
+new URL(userInput).openStream();  // 不安全
+HttpClient.newBuilder().uri(URI.create(userInput)).build();  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是对 <code>userInput</code> 进行严格的校验，确保其只能访问可信的资源。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SSRF 漏洞的风险和修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Request_Forgery">OWASP: Server-Side Request Forgery</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/api/java/net/URL.html">Java URL 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

@@ -1,27 +1,54 @@
 <html>
+<head>
+    <title>Freemarker SSTI Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Freemarker SSTI Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Server-Side Template Injection (SSTI)</strong> is a vulnerability where an attacker can inject malicious data into templates, causing unintended code execution on the server. The risks include arbitrary code execution, data leakage, and potentially full server compromise.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for the usage of <code>freemarker.cache.StringTemplateLoader</code> and <code>freemarker.template.Template</code> in the code, especially focusing on calls to the <code>putTemplate</code> method and instantiation of the <code>Template</code> class. It analyzes these instances to determine potential template injection risks.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If a call to the <code>putTemplate</code> method of the <code>StringTemplateLoader</code> class is detected, it is flagged as a potential SSTI risk.</li>
+    <li>If instantiation of the <code>Template</code> class is detected, it is also flagged as potentially risky, as this class might be used for rendering templates that are not properly sanitized.</li>
+    <li>In these cases, warnings are displayed at the relevant code locations, alerting developers to potential security issues.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To prevent SSTI risks, developers are advised to ensure the safety of template content when using Freemarker for rendering. Recommended actions include:
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
+<ul>
+    <li>Strictly validate and sanitize user inputs to prevent passing unsanitized data to templates.</li>
+    <li>Use secure template loading mechanisms and avoid using the <code>putTemplate</code> method to dynamically add user-generated templates.</li>
+    <li>Review all template content to ensure that no unauthorized code snippets are executed.</li>
+</ul>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following:
+</p>
+<pre>
+<code>
+StringTemplateLoader loader = new StringTemplateLoader();
+loader.putTemplate("templateName", userProvidedTemplate);  // Potentially unsafe
 
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+Template template = new Template("templateName", userProvidedReader, configuration);  // Potentially unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to ensure that <code>userProvidedTemplate</code> and <code>userProvidedReader</code> data are properly validated and sanitized.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about SSTI vulnerabilities and how to mitigate them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Template_Injection">OWASP: Server-Side Template Injection</a></li>
+    <li><a href="https://freemarker.apache.org/">Freemarker Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

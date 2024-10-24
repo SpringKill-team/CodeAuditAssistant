@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Kryo 反序列化检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Kryo 反序列化检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>不安全的反序列化</strong> 是一种严重的安全漏洞。当应用程序从不可信来源反序列化数据时，攻击者可以构造恶意对象进行反序列化，从而在目标系统上执行任意代码。这种漏洞尤其在使用 Kryo 序列化库时容易出现，因为 Kryo 允许反序列化任意对象。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中是否调用了 <code>com.esotericsoftware.kryo.Kryo</code> 类的反序列化方法，如 <code>readObject</code>、<code>readObjectOrNull</code> 和 <code>readClassAndObject</code>。这些方法可能会反序列化来自不可信来源的数据，从而带来安全风险。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到使用 Kryo 的反序列化方法（如 <code>readObject</code> 等），则会将这些调用标记为潜在的安全问题。</li>
+    <li>在检测到的代码位置，会显示警告并提醒开发者注意不安全的反序列化操作。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免不安全的反序列化漏洞，建议开发者在使用 Kryo 序列化库时，确保反序列化的数据来源可信，并使用严格的类白名单来限制可以被反序列化的对象类型。此外，可以考虑使用替代的安全反序列化机制。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提醒开发者审查 Kryo 反序列化的使用场景，避免从不可信来源读取数据，并建议添加类白名单进行严格控制。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+Kryo kryo = new Kryo();
+Object obj = kryo.readObject(input, MyClass.class);  // 潜在不安全
+</code>
+    </pre>
+<p>
+    修复建议是确保 <code>input</code> 的来源是可信的，并且对可反序列化的类进行限制。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于不安全反序列化漏洞的风险和修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Deserialization_of_Untrusted_Data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://github.com/EsotericSoftware/kryo">Kryo 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

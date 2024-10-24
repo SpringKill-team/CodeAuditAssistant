@@ -1,27 +1,56 @@
 <html>
+<head>
+    <title>SnakeYAML Unserialization Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>SnakeYAML Unserialization Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Deserialization Vulnerabilities</strong> are a critical security issue where attackers can exploit the deserialization process to execute arbitrary code, potentially taking control of the system. Certain deserialization methods in the SnakeYAML library, such as <code>load</code>, <code>loadAll</code>, <code>parse</code>, and <code>loadAs</code>, can pose such a risk if not handled properly.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for calls to SnakeYAML's <code>load</code>, <code>loadAll</code>, <code>parse</code>, and <code>loadAs</code> methods in the code. If untrusted YAML data is passed into these methods, it could lead to deserialization vulnerabilities, allowing attackers to execute arbitrary code.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>This item scans for critical methods of the <code>org.yaml.snakeyaml.Yaml</code> class (such as <code>load</code> and <code>loadAll</code>) and warns developers about potential security risks in these methods.</li>
+    <li>When a problematic method call is detected, it flags the code and raises a security warning.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To avoid deserialization vulnerabilities, it is recommended to ensure that any data passed to SnakeYAML is trusted and comes from secure sources. Avoid deserializing untrusted data directly. It is also advised to use whitelisting mechanisms to restrict the types of objects that can be deserialized, or apply strict validation to the input data.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to use safer methods for handling YAML data, such as limiting deserialized object types or adding strong validation before deserializing the data.
+</p>
+<h2>Example</h2>
+<p>
+    For example, the following code has a potential deserialization vulnerability:
+</p>
+<pre>
+<code>
+Yaml yaml = new Yaml();
+Object data = yaml.load(yamlString);  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to use a safer approach with object type restrictions or perform strict input validation:
+</p>
+<pre>
+<code>
+Yaml yaml = new Yaml(new Constructor(SafeClass.class));  // Type restriction for safety
+SafeClass data = yaml.load(yamlString);  // Safer deserialization
+</code>
+    </pre>
+<h2>References</h2>
+<p>
+    To learn more about deserialization vulnerabilities and how to address them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://bitbucket.org/snakeyaml/snakeyaml">SnakeYAML Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

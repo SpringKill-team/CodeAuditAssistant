@@ -1,25 +1,56 @@
 <html>
+<head>
+    <title>Netty Response Splitting Inspection</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Netty Response Splitting 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the description easier to read.
-Make sure the description doesn’t just repeat the inspection title.
-</p>  
-<p>
-See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    <strong>HTTP Response Splitting（HTTP 响应分割）</strong> 是一种安全漏洞，攻击者可以通过注入 CRLF 字符（回车符和换行符）来篡改 HTTP 响应头，从而进行 HTTP Header 注入攻击。这可能导致响应头被修改、跨站脚本（XSS）攻击、缓存投毒等安全问题。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-Embed code snippets:
+    这个条目检查了代码中是否存在 <code>io.netty.handler.codec.http.DefaultHttpHeaders</code> 和 <code>io.netty.handler.codec.http.DefaultHttpResponse</code> 的实例化操作，并确保它们的构造方法中没有使用不安全的参数（例如 <code>false</code>）。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to pre-select a UI element.</p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到创建了 <code>DefaultHttpHeaders</code> 或 <code>DefaultHttpResponse</code> 对象，并且其构造方法中的安全性标志（如 <code>isValidateHeaders</code> 或 <code>validateHeaders</code>）被设置为 <code>false</code>，则认为存在安全隐患。</li>
+    <li>在存在问题的代码处，会显示警告并提供修复建议。</li>
+</ul>
+<h2>修复建议</h2>
+<p>
+    为了避免 HTTP 响应分割漏洞的风险，建议在创建 <code>DefaultHttpHeaders</code> 或 <code>DefaultHttpResponse</code> 实例时，确保构造方法中的安全标志设置为 <code>true</code>。这意味着应该启用对 HTTP 响应头的校验，以防止不安全的输入被注入到响应头中。
+</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复功能，可以自动将不安全的参数（如 <code>false</code>）替换为 <code>true</code>，从而确保代码的安全性。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的实例化方式：
+</p>
+<pre>
+<code>
+new DefaultHttpHeaders(false);  // 不安全
+new DefaultHttpResponse(version, status, false);  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是将其修改为：
+</p>
+<pre>
+<code>
+new DefaultHttpHeaders(true);  // 安全
+new DefaultHttpResponse(version, status, true);  // 安全
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 HTTP Response Splitting 漏洞的风险和修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/HTTP_Response_Splitting">OWASP: HTTP Response Splitting</a></li>
+    <li><a href="https://netty.io/">Netty 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

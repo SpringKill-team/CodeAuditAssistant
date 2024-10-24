@@ -1,4 +1,4 @@
-package org.skgroup.securityinspector.SSRF
+package org.skgroup.securityinspector.rules.ssrf
 
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
@@ -14,17 +14,15 @@ import org.skgroup.securityinspector.utils.SecExpressionUtils
 class ApacheSSRF : BaseLocalInspectionTool() {
 
     companion object {
-        private val MESSAGE = InspectionBundle.message("apache.ssrf.msg")
+        private val MESSAGE = InspectionBundle.message("vuln.massage.ApacheSSRF")
 
-        // 定义具有潜在SSRF风险的类方法
-        private val methodSinks = mapOf(
+        private val APACHESSRF_METHOD_SINKS = mapOf(
             "org.apache.http.client.fluent.Request" to listOf("Get", "Post"),
             "org.apache.http.client.methods.HttpRequestBase" to listOf("setURI"),
             "org.apache.http.client.methods.RequestBuilder" to listOf("get", "post", "put", "delete", "options", "head", "trace", "patch")
         )
 
-        // 定义具有潜在SSRF风险的类构造函数
-        private val constructorSinks = listOf(
+        private val APACHESSRF_NEWEXPRESSION_SINKS = listOf(
             "org.apache.commons.httpclient.methods.GetMethod",
             "org.apache.commons.httpclient.methods.PostMethod",
             "org.apache.http.client.methods.HttpGet",
@@ -45,37 +43,17 @@ class ApacheSSRF : BaseLocalInspectionTool() {
         return object : JavaElementVisitor() {
 
             override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
-                if (isMethodSink(expression)) {
+                if (SecExpressionUtils.isMethodSink(expression, APACHESSRF_METHOD_SINKS)) {
                     holder.registerProblem(expression, MESSAGE, ProblemHighlightType.GENERIC_ERROR_OR_WARNING)
                 }
             }
 
             override fun visitNewExpression(expression: PsiNewExpression) {
-                if (isConstructorSink(expression)) {
+                if (SecExpressionUtils.isNewExpressionSink(expression, APACHESSRF_NEWEXPRESSION_SINKS)) {
                     holder.registerProblem(expression, MESSAGE, ProblemHighlightType.GENERIC_ERROR_OR_WARNING)
-                }
-            }
-
-            /**
-             * 检查方法调用是否属于已知的SSRF Sink
-             */
-            private fun isMethodSink(expression: PsiMethodCallExpression): Boolean {
-                methodSinks.forEach { (className, methods) ->
-                    if (methods.any { method -> SecExpressionUtils.hasFullQualifiedName(expression, className, method) }) {
-                        return true
-                    }
-                }
-                return false
-            }
-
-            /**
-             * 检查类的构造方法是否属于已知的SSRF Sink
-             */
-            private fun isConstructorSink(expression: PsiNewExpression): Boolean {
-                return constructorSinks.any { className ->
-                    SecExpressionUtils.hasFullQualifiedName(expression, className)
                 }
             }
         }
     }
 }
+

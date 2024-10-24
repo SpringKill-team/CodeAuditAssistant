@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Jsoup SSRF 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Jsoup SSRF 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>服务器端请求伪造（SSRF，Server-Side Request Forgery）</strong> 是一种漏洞，攻击者可以通过该漏洞让服务器发起任意的 HTTP 请求。这种攻击可能导致服务器访问内部网络或执行未授权的操作，从而对系统安全造成严重威胁。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中使用 <code>org.jsoup.Jsoup</code> 类的 <code>connect</code> 方法，以及 <code>org.jsoup.Connection</code> 接口的 <code>get</code>、<code>post</code> 和 <code>execute</code> 方法。这些方法如果使用不当，可能会导致 SSRF 风险。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到调用了 <code>Jsoup.connect</code> 或 <code>Connection</code> 的 <code>get</code>、<code>post</code>、<code>execute</code> 方法，则认为该代码可能存在 SSRF 风险。</li>
+    <li>会在潜在风险位置标记警告，提示开发者进一步检查并进行修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 SSRF 漏洞，建议在使用 <code>Jsoup</code> 时，验证传入的 URL 是否符合预期范围，避免直接使用用户输入的 URL。可以设置白名单，限制只允许访问可信任的域名，并对 URL 进行格式化和校验。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提醒开发者在调用这些方法时加强 URL 验证逻辑，从而减少 SSRF 风险。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+Jsoup.connect(userInputUrl).get();  // 不安全
+connection.execute();  // 可能不安全
+</code>
+    </pre>
+<p>
+    修复建议是对 <code>userInputUrl</code> 进行校验，确保其来源和格式合法，并避免对可疑的 URL 进行请求。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SSRF 漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Request_Forgery">OWASP: Server-Side Request Forgery</a></li>
+    <li><a href="https://jsoup.org/">Jsoup 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

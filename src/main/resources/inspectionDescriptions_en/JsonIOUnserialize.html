@@ -1,28 +1,49 @@
 <html>
+<head>
+    <title>JsonIO Unserialization Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>JsonIO Unserialization Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Insecure Deserialization</strong> is a common security vulnerability. When an application uses deserialization methods to load objects from untrusted data sources, attackers can craft input that leads to arbitrary code execution (RCE) or other unintended behaviors. This risk is particularly significant when handling JSON data, especially during unsafe deserialization operations.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plu
-    gins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for calls to the <code>readObject</code> method of the <code>com.cedarsoftware.util.io.JsonReader</code> class, identifying potential unsafe deserialization operations. These calls can pose security risks when deserializing untrusted JSON data.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>Iterates over all the methods under inspection, and if it detects the use of <code>JsonReader.readObject</code>, it flags it as a potential security risk.</li>
+    <li>A warning is displayed at the problematic code locations, prompting the developer to review and fix the issue.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To mitigate the risks of insecure deserialization, it is recommended to use secure libraries or strict input validation when deserializing JSON data. Avoid directly deserializing untrusted external data and, where possible, use whitelisting mechanisms to restrict the classes that can be deserialized.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts the developer to review the deserialization logic, ensuring that data being passed to <code>JsonReader.readObject</code> comes from a trusted source.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe call:
+</p>
+<pre>
+<code>
+JsonReader.readObject(jsonString);  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommendation is to use a safer way to parse JSON, such as manually parsing the data or applying strict validation.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about insecure deserialization and how to address it, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://github.com/jdereg/json-io">json-io Library Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

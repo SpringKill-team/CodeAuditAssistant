@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>YamlBeans Unserialization Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>YamlBeans Unserialization Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Insecure Deserialization</strong> is a critical security vulnerability. When an application deserializes data from untrusted sources, an attacker might craft malicious input data that could lead to remote code execution (RCE). In some scenarios, this could allow the attacker to gain full control over the application.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for calls to the <code>read</code> method of the <code>com.esotericsoftware.yamlbeans.YamlReader</code> class in the code. Using these methods directly to read YAML data can pose a risk of insecure deserialization if the data source is not trusted, making it exploitable by attackers.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If it detects the use of the <code>YamlReader.read</code> method to parse YAML data, it flags this as a potential insecure deserialization risk.</li>
+    <li>A warning is displayed at the problematic code locations, encouraging developers to review and address the issue.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To avoid the risks of insecure deserialization, developers should ensure that the input data is from a trusted source when using the <code>YamlReader.read</code> method. Consider performing strict validation and filtering on input data or using a more secure YAML parsing library.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item advises developers to be aware of the potential security risks and to tightly control the data sources to minimize the risk of RCE attacks.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe calls:
+</p>
+<pre>
+<code>
+YamlReader reader = new YamlReader(input);
+Object data = reader.read();  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to ensure that the <code>input</code> data comes from a trusted source or to use a safer method for parsing YAML data.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about the risks of insecure deserialization and how to address them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://github.com/EsotericSoftware/yamlbeans">YamlBeans Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

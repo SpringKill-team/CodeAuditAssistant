@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>XStream Unserialization Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>XStream Unserialization Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Insecure Deserialization</strong> is a critical security vulnerability. When deserializing untrusted input, an attacker can craft malicious input that can lead to arbitrary code execution (RCE), potentially taking full control of the target application. XStream is a popular XML serialization library, but its <code>fromXML</code> method can be dangerous if processing untrusted XML data.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for calls to the <code>fromXML</code> method of the <code>com.thoughtworks.xstream.XStream</code> class. These calls can introduce a risk of insecure deserialization if they process XML data from untrusted sources.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If the use of the <code>fromXML</code> method on the <code>XStream</code> class is detected, it is considered a potential security risk.</li>
+    <li>The inspection highlights these locations in the code, prompting the developer to review and address the issue.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To prevent insecure deserialization risks, it is recommended to only deserialize trusted input when using <code>XStream</code> and to strictly configure its whitelist mechanism. For untrusted data, consider using more secure parsing methods.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to reassess their use of the <code>fromXML</code> method, ensuring that no untrusted inputs are being processed.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe call:
+</p>
+<pre>
+<code>
+XStream xstream = new XStream();
+Object obj = xstream.fromXML(untrustedXml);  // Potentially unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to ensure that <code>untrustedXml</code> comes from a trusted source or to use a more secure XML parsing approach.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about insecure deserialization and how to fix it, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Deserialization_of_Untrusted_Data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://x-stream.github.io/">XStream Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

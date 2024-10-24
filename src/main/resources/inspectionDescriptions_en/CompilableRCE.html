@@ -1,27 +1,51 @@
 <html>
+<head>
+    <title>Compilable RCE Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Compilable RCE Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Remote Code Execution (RCE)</strong> is a critical security vulnerability where an attacker can execute arbitrary code on the target system by crafting malicious input. In Java environments, using the <code>javax.script.Compilable</code> and <code>javax.script.CompiledScript</code> classes poses this risk. If user inputs are not properly validated and sanitized, attackers may leverage these methods to execute malicious code.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for calls to the <code>compile</code> method of <code>javax.script.Compilable</code> and the <code>eval</code> method of <code>javax.script.CompiledScript</code>, assessing whether there is a potential risk of remote code execution. These methods may introduce RCE risks when processing unvalidated user inputs.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If it detects calls to <code>javax.script.Compilable.compile</code> or <code>javax.script.CompiledScript.eval</code>, especially when potentially unfiltered user input is involved, it flags the code as a potential security risk.</li>
+    <li>A warning is displayed at the problematic code locations, prompting the developer to address the risk.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To prevent RCE vulnerabilities, it is recommended to rigorously validate and sanitize all user inputs before using these methods. Consider using safer script execution methods or restricting the capabilities of the scripting engine.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to re-evaluate calls to methods related to script compilation and execution, ensuring that inputs are handled securely.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe calls:
+</p>
+<pre>
+<code>
+Compilable compilable = scriptEngine.getCompilable();
+CompiledScript script = compilable.compile(userInput);  // Unsafe
+script.eval();  // Unsafe
+</code>
+    </pre>
+<p>
+    It is recommended to perform strict input validation on <code>userInput</code> before calling the <code>compile</code> and <code>eval</code> methods to ensure that its content is safe.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about RCE vulnerabilities and how to address them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Remote_Code_Execution">OWASP: Remote Code Execution</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/api/javax/script/package-summary.html">Java Scripting API Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

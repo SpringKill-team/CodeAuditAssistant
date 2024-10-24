@@ -1,27 +1,54 @@
 <html>
+<head>
+    <title>OpenSAML2 Ignore Comments Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>OpenSAML2 Ignore Comments Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>SAML Comment Bypass Vulnerability</strong> occurs when parsing SAML messages if the XML parser is not configured to ignore comments. Attackers can use XML comments to insert malicious content into SAML messages, potentially bypassing SAML assertion validation.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks whether the OpenSAML2 library properly configures the XML parser to ignore comments when parsing SAML messages. If the parser allows comments without proper validation, it poses a security risk.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If the SAML message parser is found to be not ignoring comments, it is flagged as potentially insecure.</li>
+    <li>Warnings are displayed at insecure code locations, along with suggestions for fixing the issues.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    It is recommended to configure the OpenSAML2 parser to ignore XML comments when parsing SAML messages to ensure that the parser does not process comment content, thereby mitigating potential security risks.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item provides quick fix suggestions to help developers enable the ignore-comments configuration, ensuring the security of SAML message processing.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe SAML parsing configuration:
+</p>
+<pre>
+<code>
+parser.setIgnoringComments(false);  // Unsafe
+</code>
+    </pre>
+<p>
+    It is recommended to change it to:
+</p>
+<pre>
+<code>
+parser.setIgnoringComments(true);  // Safe
+</code>
+    </pre>
+<h2>References</h2>
+<p>
+    To learn more about SAML security configurations and how to mitigate risks, refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-project-top-ten/">OWASP Documentation</a></li>
+    <li><a href="https://shibboleth.net/products/opensaml-java/">OpenSAML Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

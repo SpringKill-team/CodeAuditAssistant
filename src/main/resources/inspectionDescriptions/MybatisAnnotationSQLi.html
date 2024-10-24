@@ -1,27 +1,56 @@
 <html>
+<head>
+    <title>Mybatis 注解 SQL 注入检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Mybatis 注解 SQL 注入检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>SQL 注入（SQL Injection, SQLi）</strong> 是一种常见的数据库攻击方式，攻击者可以通过构造恶意输入操控 SQL 查询，从而未授权访问数据库或修改数据。在 MyBatis 中，使用注解进行 SQL 查询构建时，可能因为不安全的字符串拼接而导致 SQL 注入风险。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了 <code>org.apache.ibatis.annotations.Select</code>、<code>org.apache.ibatis.annotations.Insert</code>、<code>org.apache.ibatis.annotations.Update</code> 和 <code>org.apache.ibatis.annotations.Delete</code> 注解中的 SQL 内容，识别是否存在可能导致 SQL 注入的动态拼接内容，特别是使用 <code>$</code> 的参数引用。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>检查注解中的 SQL 是否包含动态拼接的变量，尤其是 <code>${}</code> 形式的未处理变量。</li>
+    <li>如果检测到存在潜在的 SQL 注入风险，会在对应代码位置提示开发者，并建议进行修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    建议在 MyBatis 中使用 <code>#{}</code> 形式的参数绑定，而非 <code>${}</code> 直接拼接参数。<code>#{}</code> 会自动处理 SQL 参数，避免 SQL 注入风险。必要时，可以对输入内容进行预处理或使用数据库层的防护措施。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了自动将 <code>${}</code> 替换为更安全的形式（如 <code>#{}</code>）的快速修复功能，或者在无法自动修复时，添加相关的帮助注释。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的 SQL 注解：
+</p>
+<pre>
+<code>
+@Select("SELECT * FROM users WHERE name = '${name}'")  // 不安全
+@Update("UPDATE users SET email = '${email}' WHERE id = #{id}")  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是将其修改为：
+</p>
+<pre>
+<code>
+@Select("SELECT * FROM users WHERE name = #{name}")  // 安全
+@Update("UPDATE users SET email = #{email} WHERE id = #{id}")  // 安全
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SQL 注入漏洞及其防护方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/SQL_Injection">OWASP: SQL Injection</a></li>
+    <li><a href="https://mybatis.org/mybatis-3/">MyBatis 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

@@ -1,27 +1,51 @@
 <html>
+<head>
+    <title>JSch OS RCE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>JSch OS RCE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（RCE, Remote Code Execution）</strong> 是一种高危漏洞，允许攻击者在受害系统上执行任意代码。当代码中使用不安全的方法与外部系统进行交互（如通过 JSch 库管理 SSH 会话）时，如果没有进行适当的输入验证，攻击者可能会利用这些方法注入恶意命令，从而在目标系统上执行任意代码。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对 <code>com.jcraft.jsch.JSch</code> 类的敏感方法调用，包括 <code>getSession</code>、<code>setCommand</code>、<code>setPassword</code> 和 <code>setConfig</code>。这些方法如果使用不当，可能会导致远程代码执行的风险。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>检查是否调用了 <code>JSch</code> 类的特定方法，这些方法可能会接受用户输入并直接与外部系统进行交互。</li>
+    <li>当发现不安全的调用时，会在代码中标记出问题的位置，提示开发者进行进一步的审查和修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 RCE 漏洞的风险，建议开发者在调用 <code>getSession</code>、<code>setCommand</code>、<code>setPassword</code> 和 <code>setConfig</code> 等方法时，确保对输入进行严格的验证和转义。尤其是在处理用户输入时，应避免直接传递到这些方法中。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提示开发者检查对 JSch 库方法的调用，并确保输入经过适当的验证，减少被攻击者利用的可能性。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+JSch jsch = new JSch();
+Session session = jsch.getSession(userInput);  // 不安全
+session.setPassword(userProvidedPassword);  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是对 <code>userInput</code> 和 <code>userProvidedPassword</code> 进行验证，确保它们不包含恶意输入。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 RCE 漏洞的风险及修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Code_Injection">OWASP: Code Injection</a></li>
+    <li><a href="http://www.jcraft.com/jsch/">JSch 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

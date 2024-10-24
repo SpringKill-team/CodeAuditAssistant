@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Fastjson AutoType Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Fastjson AutoType Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Fastjson Deserialization Risk</strong> is a type of Remote Code Execution (RCE) vulnerability. When the Fastjson library enables <code>AutoTypeSupport</code>, attackers can craft malicious JSON data to trigger unexpected class loading and instantiation, potentially leading to the execution of arbitrary code.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for calls to the <code>setAutoTypeSupport(true)</code> method of the <code>com.alibaba.fastjson.parser.ParserConfig</code> class in the code, as well as JVM configurations that enable AutoTypeSupport using <code>-Dfastjson.parser.autoTypeSupport=true</code>. These settings can expose the application to deserialization attacks.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If it detects code such as <code>ParserConfig.getGlobalInstance().setAutoTypeSupport(true)</code> or similar patterns, it flags the code as potentially unsafe.</li>
+    <li>A warning is displayed at the problematic code locations, recommending developers to disable this setting.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To mitigate the risk of Fastjson deserialization attacks, it is recommended to avoid enabling <code>AutoTypeSupport</code>. If this feature is necessary, it should only be used with data from trusted sources, and deserialization should be restricted to specific, known-safe classes.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item offers a quick fix that can automatically remove unsafe calls to <code>setAutoTypeSupport(true)</code>, reducing the security risk.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe calls:
+</p>
+<pre>
+<code>
+ParserConfig.getGlobalInstance().setAutoTypeSupport(true);  // Unsafe
+parseConfLocalVar.setAutoTypeSupport(true);  // Unsafe
+</code>
+    </pre>
+<p>
+    It is recommended to remove these calls or set the value to <code>false</code> to avoid potential security risks.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about the risks of Fastjson deserialization, you can refer to the following resources:
+<ul>
+    <li><a href="https://github.com/alibaba/fastjson/wiki">Fastjson Official Documentation</a></li>
+    <li><a href="https://owasp.org/www-community/attacks/Deserialization_of_untrusted_data">OWASP: Deserialization of Untrusted Data</a></li>
+</ul>
+</p>
 </body>
 </html>

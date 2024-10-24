@@ -1,27 +1,55 @@
 <html>
+<head>
+    <title>Velocity SSTI Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Velocity SSTI Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Server-Side Template Injection (SSTI)</strong> is a critical security vulnerability that occurs when user-controlled data is directly embedded into the template engine for rendering. Attackers can leverage SSTI to execute arbitrary code or access sensitive data on the server, potentially gaining full control over the server.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for method calls involving the Velocity template engine, specifically the following class and method combinations:
 </p>
+<ul>
+    <li><code>org.apache.velocity.app.Velocity</code> with the <code>evaluate</code> and <code>mergeTemplate</code> methods</li>
+    <li><code>org.apache.velocity.app.VelocityEngine</code> with the <code>evaluate</code> and <code>mergeTemplate</code> methods</li>
+    <li><code>org.apache.velocity.runtime.RuntimeServices</code> with the <code>evaluate</code> and <code>parse</code> methods</li>
+    <li><code>org.apache.velocity.runtime.RuntimeSingleton</code> with the <code>parse</code> method</li>
+    <li><code>org.apache.velocity.runtime.resource.util.StringResourceRepository</code> with the <code>putStringResource</code> method</li>
+</ul>
 <p>
-    Embed code snippets:
+    If these methods are detected, they are flagged as potential SSTI risks, with a warning displayed in the code.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>Fix Recommendation</h2>
+<p>
+    To prevent SSTI vulnerabilities, developers should strictly control user input when using template engines, ensuring that user data is not directly embedded into templates. Consider using appropriate input validation, data sanitization, and leveraging the secure modes of the template engine.
+</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to review the usage of these methods, especially how user input is handled, ensuring that it is not directly rendered into templates.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe template rendering methods:
+</p>
+<pre>
+<code>
+Velocity.evaluate(context, writer, "logTag", userInput);  // Unsafe
+velocityEngine.mergeTemplate(userTemplate, "UTF-8", context, writer);  // Unsafe
+</code>
+    </pre>
+<p>
+    It is recommended to validate and sanitize inputs more carefully or avoid directly rendering user input through these methods.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about SSTI vulnerabilities and how to mitigate them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server-Side_Template_Injection">OWASP: Server-Side Template Injection</a></li>
+    <li><a href="https://velocity.apache.org/">Apache Velocity Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

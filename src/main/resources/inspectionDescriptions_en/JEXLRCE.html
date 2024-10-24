@@ -1,27 +1,51 @@
 <html>
+<head>
+    <title>JEXL RCE Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>JEXL RCE Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Remote Code Execution (RCE)</strong> is a critical security vulnerability that allows attackers to execute arbitrary code on the target system. When applications use scripting engines like JEXL with untrusted input, they can become vulnerable to RCE. Attackers may inject malicious scripts or expressions to manipulate the application's behavior.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for the use of relevant methods in the <code>org.apache.commons.jexl3</code> and <code>org.apache.commons.jexl2</code> packages, including <code>evaluate</code>, <code>callable</code>, <code>getProperty</code>, and <code>setProperty</code>, to ensure that these methods are not used to execute unsafe code.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If it detects the use of <code>evaluate</code> or <code>callable</code> methods on JEXL expressions or scripts, as well as property manipulation methods like <code>getProperty</code> and <code>setProperty</code> in the JEXL engine, it flags them as potential RCE risks.</li>
+    <li>These invocations could allow attackers to inject malicious code or scripts through untrusted input, leading to remote code execution.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To mitigate the risk of RCE vulnerabilities, developers are advised to strictly control the sources of input when using JEXL expressions or scripts. Use whitelisting, rigorous input validation, or consider using a more secure expression parsing library.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to review the usage of JEXL expressions and scripts, ensuring that these methods are not used in unsafe contexts and that input sources are secure.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe use of JEXL:
+</p>
+<pre>
+<code>
+JexlEngine engine = new JexlBuilder().create();
+JexlExpression expression = engine.createExpression("expression");
+expression.evaluate(context);  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommendation is to perform stricter validation of inputs or use predefined, reviewed expressions.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about RCE vulnerabilities and how to address them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Code_Injection">OWASP: Code Injection</a></li>
+    <li><a href="https://commons.apache.org/proper/commons-jexl/">Apache Commons JEXL Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

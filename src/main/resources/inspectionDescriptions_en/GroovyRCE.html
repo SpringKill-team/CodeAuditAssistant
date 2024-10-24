@@ -1,27 +1,60 @@
-    <html>
+<html>
+<head>
+    <title>Groovy RCE Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Groovy RCE Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Remote Code Execution (RCE)</strong> is a critical security vulnerability that allows attackers to execute arbitrary code on the target system. In applications using Groovy, using unsafe methods like <code>evaluate</code>, <code>parse</code>, or <code>run</code> may allow attackers to inject malicious code, leading to RCE.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks the code for the use of the following classes and methods, which may pose RCE risks:
 </p>
+<ul>
+    <li><code>groovy.lang.GroovyClassLoader</code> - <code>parseClass</code></li>
+    <li><code>groovy.lang.GroovyShell</code> - <code>evaluate</code>, <code>parse</code>, <code>run</code></li>
+    <li><code>groovy.util.Eval</code> - <code>me</code>, <code>x</code>, <code>xy</code>, <code>xyz</code></li>
+    <li><code>org.codehaus.groovy.control.CompilationUnit</code> - <code>compile</code></li>
+    <li><code>org.codehaus.groovy.tools.javac.JavaAwareCompilationUnit</code> - <code>compile</code></li>
+</ul>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If it detects calls to these methods within the specified classes, it flags the code as potentially risky for RCE.</li>
+    <li>A warning is displayed at the problematic code locations, prompting the developer to take action.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To mitigate RCE risks, it is recommended that developers avoid using these potentially unsafe Groovy methods directly. If their use is necessary, inputs should be strictly validated and the scope of code execution should be limited to ensure safety.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item advises developers to review their use of these methods and consider using safer alternatives for script execution.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe calls:
+</p>
+<pre>
+<code>
+GroovyShell shell = new GroovyShell();
+shell.evaluate("malicious code");  // Unsafe
 
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+GroovyClassLoader loader = new GroovyClassLoader();
+loader.parseClass("malicious code");  // Unsafe
+</code>
+    </pre>
+<p>
+    It is recommended to perform strict input validation or use safer alternatives for executing scripts.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about RCE vulnerabilities and their mitigation, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Code_Injection">OWASP: Code Injection</a></li>
+    <li><a href="https://groovy-lang.org/">Groovy Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

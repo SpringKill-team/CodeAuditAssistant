@@ -1,12 +1,10 @@
-package com.skgroup.securityinspector.utils
+package org.skgroup.securityinspector.utils
 
 import com.intellij.AbstractBundle
 import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
 
-// 顶层定义 BUNDLE 常量
-@NonNls
-const val BUNDLE = "Inspection"+"Bundle"
+const val BUNDLE = "InspectionBundle"
 
 object InspectionBundle : AbstractBundle(BUNDLE) {
 

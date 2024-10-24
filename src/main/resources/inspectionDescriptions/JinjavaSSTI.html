@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Jinjava SSTI 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Jinjava SSTI 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>服务器端模板注入（SSTI，Server-Side Template Injection）</strong> 是一种严重的安全漏洞。当用户提供的输入未经适当的过滤直接传递给模板引擎进行渲染时，攻击者可能通过构造恶意输入，执行任意代码、访问服务器上的敏感数据，甚至完全控制服务器。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了使用 <code>com.hubspot.jinjava.Jinjava</code> 类中的 <code>render</code> 和 <code>renderForResult</code> 方法时，是否存在潜在的 SSTI 漏洞。这些方法在处理未经清理的用户输入时，容易引发 SSTI 漏洞。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>遍历代码中的方法调用，如果检测到使用 <code>Jinjava</code> 类的 <code>render</code> 或 <code>renderForResult</code> 方法，且输入未经适当处理，则认为存在安全隐患。</li>
+    <li>在问题代码处，会显示警告，并建议开发者进行修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 SSTI 漏洞，建议在渲染模板之前，确保用户输入经过严格的过滤和验证。可以使用白名单机制或对输入进行编码，以防止恶意代码被注入到模板中。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提醒开发者检查模板渲染时的输入来源，并确保输入内容是安全的，避免直接使用未经处理的用户输入进行模板渲染。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的模板渲染：
+</p>
+<pre>
+<code>
+Jinjava jinjava = new Jinjava();
+String result = jinjava.render(template, context);  // 不安全
+</code>
+    </pre>
+<p>
+    建议对 <code>context</code> 中的用户输入进行验证和过滤，确保其不包含恶意代码。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SSTI 漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Template_Injection">OWASP: Server-Side Template Injection</a></li>
+    <li><a href="https://jinjava.com/">Jinjava 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

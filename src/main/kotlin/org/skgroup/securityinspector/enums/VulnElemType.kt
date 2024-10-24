@@ -1,4 +1,7 @@
 package org.skgroup.securityinspector.enums
 
-class VulnElemType {
+enum class VulnElemType {
+    ASSIGNMENT_EXPRESSION,
+    LOCAL_VARIABLE,
+    CLASS_FIELD
 }

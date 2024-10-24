@@ -1,28 +1,50 @@
 <html>
+<head>
+    <title>Jackson Databind Default Typing Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Jackson Databind Default Typing Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Improper Use of Jackson Databind Default Typing</strong> is a potential deserialization vulnerability. By enabling <code>enableDefaultTyping</code> or using the <code>@JsonTypeInfo</code> annotation improperly, attackers may inject malicious data during deserialization, potentially leading to Remote Code Execution (RCE).
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for the use of the <code>enableDefaultTyping</code> method on <code>com.fasterxml.jackson.databind.ObjectMapper</code> and improper configurations of the <code>@JsonTypeInfo</code> annotation. It detects insecure configurations such as using <code>JsonTypeInfo.Id.CLASS</code> or <code>JsonTypeInfo.Id.MINIMAL_CLASS</code>, which may pose security risks during deserialization.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>If it detects a call to <code>ObjectMapper</code>'s <code>enableDefaultTyping</code> with unsafe settings, it flags the code as potentially risky.</li>
+    <li>If it finds that the <code>@JsonTypeInfo</code> annotation's <code>use</code> attribute is set to <code>JsonTypeInfo.Id.CLASS</code> or <code>JsonTypeInfo.Id.MINIMAL_CLASS</code>, it also raises a security warning.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To mitigate deserialization vulnerabilities, it is recommended to avoid using the default typing feature (<code>enableDefaultTyping</code>) and insecure configurations of <code>@JsonTypeInfo</code> when working with Jackson. Use safer type identifiers, such as <code>JsonTypeInfo.Id.NAME</code>, instead.
 </p>
-
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item provides a quick fix to automatically replace unsafe annotation configurations (e.g., <code>JsonTypeInfo.Id.CLASS</code>) with more secure options like <code>JsonTypeInfo.Id.NAME</code>.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe usage:
+</p>
+<pre>
+<code>
+objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);  // Unsafe
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to change these to safer configurations, avoiding default typing and class-level type identifiers.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about Jackson deserialization vulnerabilities and how to fix them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Deserialization_of_untrusted_data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://github.com/FasterXML/jackson-databind">Jackson Databind Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

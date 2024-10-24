@@ -1,27 +1,54 @@
 <html>
+<head>
+    <title>Castor Unserialize 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Castor Unserialize 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>不安全的反序列化（Insecure Deserialization）</strong> 是一种严重的安全漏洞。通过不安全的反序列化操作，攻击者可以构造特制的序列化对象，从而在目标系统上执行任意代码（RCE, Remote Code Execution）。这种攻击方式可能导致系统被完全控制，带来严重的安全隐患。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对 <code>org.exolab.castor.xml.Unmarshaller</code> 类的 <code>unmarshal</code> 方法的调用。<code>unmarshal</code> 方法如果处理外部输入的 XML 数据且未进行适当的校验和过滤，可能会引发不安全的反序列化漏洞。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>遍历 <code>checkedMethods</code> 中定义的类和方法映射，查找对 <code>org.exolab.castor.xml.Unmarshaller</code> 类中 <code>unmarshal</code> 方法的调用。</li>
+    <li>如果检测到不安全的调用，会在代码中标记出问题的位置，并提醒开发者进行修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免不安全的反序列化漏洞，建议开发者：
+<ul>
+    <li>在反序列化外部输入的数据前，严格校验输入数据的合法性。</li>
+    <li>避免直接反序列化不受信任的输入数据，使用安全的序列化框架和库。</li>
+    <li>考虑使用替代的 JSON 序列化/反序列化方法来替代 XML 序列化。</li>
+</ul>
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提醒开发者检查反序列化逻辑，特别是针对 <code>unmarshal</code> 方法的使用，确保没有直接处理外部不可信的输入。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的反序列化调用：
+</p>
+<pre>
+<code>
+Unmarshaller.unmarshal(xmlInput);  // 可能不安全
+</code>
+    </pre>
+<p>
+    建议开发者在调用前，增加对 <code>xmlInput</code> 的严格校验，或使用更安全的序列化方式。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于不安全的反序列化漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data">OWASP: Insecure Deserialization</a></li>
+    <li><a href="https://castor-data-binding.github.io/castor/reference-guide.html">Castor 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

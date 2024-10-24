@@ -1,27 +1,56 @@
 <html>
+<head>
+    <title>占位符字符串 SQL 注入检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>占位符字符串 SQL 注入检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>SQL 注入（SQL Injection，SQLi）</strong> 是一种严重的安全漏洞，攻击者可以通过构造恶意的输入，修改原本预期的 SQL 查询，从而读取、修改数据库中的数据或执行管理操作。利用字符串格式化方法构造 SQL 查询时，若处理不当，可能导致 SQL 注入。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了使用 <code>java.lang.String</code> 类的 <code>format</code> 方法时，是否存在潜在的 SQL 注入风险。特别是当格式化字符串中包含 SQL 语句片段，并且与用户输入进行拼接时，容易造成注入风险。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到 <code>String.format</code> 的使用，并且格式化字符串中包含 SQL 语句模式（如占位符 <code>%s</code>），则会进一步分析是否存在与 SQL 相关的内容。</li>
+    <li>如果拼接操作包含不安全的用户输入，并且没有对输入进行适当的处理，则认为存在 SQL 注入风险。</li>
+    <li>在这种情况下，会标记出潜在问题的位置，并提示开发者进行修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    建议使用 <strong>PreparedStatement</strong> 或类似的参数化查询方式来替代字符串拼接方式构造 SQL 查询。参数化查询能够将 SQL 逻辑与用户输入严格区分，从而有效防止 SQL 注入风险。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提醒开发者重新审视其 SQL 查询构造方式，并建议使用更安全的 API 进行替换。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的字符串格式化操作：
+</p>
+<pre>
+<code>
+String query = String.format("SELECT * FROM users WHERE name = '%s'", userInput);  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是使用参数化查询，如：
+</p>
+<pre>
+<code>
+PreparedStatement stmt = connection.prepareStatement("SELECT * FROM users WHERE name = ?");
+stmt.setString(1, userInput);  // 安全
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SQL 注入漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/SQL_Injection">OWASP: SQL Injection</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html">Java PreparedStatement 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

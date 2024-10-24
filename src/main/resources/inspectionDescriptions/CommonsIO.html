@@ -1,25 +1,50 @@
 <html>
+<head>
+    <title>Commons IO 文件写入检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Commons IO 文件写入检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the description easier to read.
-Make sure the description doesn’t just repeat the inspection title.
-</p>  
-<p>
-See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    <strong>不安全的文件写入操作</strong> 可能导致文件覆盖、路径遍历攻击（Path Traversal）以及本地文件系统的未授权访问。攻击者可以通过控制文件路径或文件内容，从而在不该写入的位置创建或修改文件，影响系统安全性。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-Embed code snippets:
+    该条目检查了代码中使用 <code>org.apache.commons.io</code> 库进行文件写入操作的方法调用，包括但不限于 <code>FileUtils.write</code>、<code>IOUtils.copy</code>、<code>PathUtils.copyFile</code> 等方法。这些方法在不安全的输入下可能会导致文件写入漏洞。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to pre-select a UI element.</p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到调用了 <code>commons-io</code> 中的文件操作方法，并且这些方法是列表中的潜在危险方法，则会在代码中标记为可能存在风险的文件写入操作。</li>
+    <li>这包括例如使用 <code>FileUtils.copyFile</code> 和 <code>writeStringToFile</code> 方法时未对路径或输入内容进行充分的校验。</li>
+</ul>
+<h2>修复建议</h2>
+<p>
+    建议开发者在使用文件写入操作时，确保路径是可信的，并对用户输入进行严格校验，避免路径遍历和不必要的文件覆盖。可以通过使用更安全的文件操作方式或限制输入的范围来降低风险。
+</p>
+<h3>快速修复</h3>
+<p>
+    该条目建议开发者重新评估文件路径和内容来源，并确保这些输入不会导致未授权的文件操作，进而避免安全漏洞。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的文件操作：
+</p>
+<pre>
+<code>
+FileUtils.writeStringToFile(new File("/tmp/userdata.txt"), userInput);  // 不安全
+IOUtils.copy(inputStream, new FileOutputStream("/etc/config"));  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是对文件路径进行校验，或者使用安全的路径生成方式。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于不安全文件写入的风险及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Path_Traversal">OWASP: Path Traversal</a></li>
+    <li><a href="https://commons.apache.org/proper/commons-io/">Apache Commons IO 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

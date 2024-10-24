@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Thymeleaf SSTI Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Thymeleaf SSTI Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Server-Side Template Injection (SSTI)</strong> is a critical type of vulnerability. An attacker can inject malicious input into the template engine's parsing process, leading to arbitrary code execution and potentially taking over the server. SSTI is particularly likely when unsafe template engine calls are made.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for calls to the <code>process</code> and <code>processThrottled</code> methods of the <code>org.thymeleaf.ITemplateEngine</code> interface. These methods can be vulnerable to SSTI if user inputs are not properly validated or sanitized before being processed.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>Iterates through method calls to identify the use of <code>ITemplateEngine</code>'s <code>process</code> or <code>processThrottled</code> methods.</li>
+    <li>If these method calls are detected, it flags the code as potentially risky and prompts the developer to review for SSTI vulnerabilities.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To prevent SSTI vulnerabilities, it is recommended that developers strictly validate and sanitize all inputs before passing them to the template engine. Additionally, using the latest version of Thymeleaf may include better security protections.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item suggests that developers review how the template engine is being used, ensuring the safety of input sources and adding necessary validations where needed.
+</p>
+<h2>Example</h2>
+<p>
+    For example, if the code contains the following unsafe calls:
+</p>
+<pre>
+<code>
+templateEngine.process(template, context);  // Potentially unsafe
+templateEngine.processThrottled(template, context);  // Potentially unsafe
+</code>
+    </pre>
+<p>
+    It is recommended to thoroughly validate the template content and avoid directly using unfiltered user inputs for template rendering.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about SSTI vulnerabilities and how to protect against them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Template_Injection">OWASP: Server-Side Template Injection</a></li>
+    <li><a href="https://www.thymeleaf.org/documentation.html">Thymeleaf Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

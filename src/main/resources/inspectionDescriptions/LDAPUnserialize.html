@@ -1,27 +1,61 @@
 <html>
+<head>
+    <title>LDAP 反序列化检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>LDAP 反序列化检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>LDAP 反序列化漏洞</strong> 是一种危险的漏洞，当使用 LDAP 查询时，如果启用了对象反序列化（如 `SearchControls` 构造函数中的参数或通过 `setReturningObjFlag()` 方法），攻击者可能通过恶意输入控制反序列化过程，从而导致任意代码执行的风险。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了 `javax.naming.directory.SearchControls` 对象的创建和配置，特别是：
 </p>
+<ul>
+    <li>在 `SearchControls` 构造函数中，第 5 个参数是否设置为 <code>true</code>，这意味着启用了对象反序列化。</li>
+    <li>调用了 <code>SearchControls.setReturningObjFlag(true)</code> 方法，这也会启用对象反序列化。</li>
+</ul>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果 `SearchControls` 的构造函数中传入了第 5 个参数为 <code>true</code>，则认为存在潜在风险。</li>
+    <li>如果调用了 <code>setReturningObjFlag()</code> 方法并且传递了 <code>true</code>，也会被标记为不安全。</li>
+    <li>在代码中会标出这些潜在问题，并提供修复建议。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 LDAP 反序列化的安全风险，建议将对象反序列化选项设置为 <code>false</code>，从而避免在 LDAP 查询中解析返回的对象。通过确保 `SearchControls` 的配置不启用反序列化，可以降低任意代码执行的风险。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复功能，可以将不安全的 <code>true</code> 参数替换为 <code>false</code>，确保查询操作更加安全。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的设置：
+</p>
+<pre>
+<code>
+new SearchControls(..., true, ...);  // 不安全
+searchControls.setReturningObjFlag(true);  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是将它们修改为：
+</p>
+<pre>
+<code>
+new SearchControls(..., false, ...);  // 安全
+searchControls.setReturningObjFlag(false);  // 安全
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 LDAP 反序列化漏洞的风险和防护措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Deserialization_of_Untrusted_Data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://docs.oracle.com/javase/tutorial/jndi/">Java Naming and Directory Interface (JNDI) 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

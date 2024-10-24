@@ -1,4 +1,14 @@
 package org.skgroup.securityinspector.enums
 
-class XmlFactory {
+enum class XmlFactory {
+    DOCUMENT_BUILDER_FACTORY,
+    SAX_PARSER_FACTORY,
+    SAX_TRANSFORMER_FACTORY,
+    SAX_BUILDER,
+    SAX_READER,
+    XML_READER_FACTORY,
+    SCHEMA_FACTORY,
+    XML_INPUT_FACTORY,
+    TRANSFORMER_FACTORY,
+    VALIDATOR_OF_SCHEMA
 }

@@ -1,27 +1,51 @@
 <html>
+<head>
+    <title>Compilable RCE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Compilable RCE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（RCE，Remote Code Execution）</strong> 是一种严重的安全漏洞，攻击者可以通过构造恶意输入，直接在目标系统上执行任意代码。在 Java 环境中，使用脚本引擎的 <code>javax.script.Compilable</code> 和 <code>javax.script.CompiledScript</code> 类可能带来这种风险，如果输入未经过适当的验证和过滤，攻击者可能利用这些方法执行恶意代码。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对 <code>javax.script.Compilable</code> 的 <code>compile</code> 方法和 <code>javax.script.CompiledScript</code> 的 <code>eval</code> 方法的调用，判断是否存在潜在的远程代码执行风险。这些方法在处理未验证的用户输入时，可能会带来 RCE 风险。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到对 <code>javax.script.Compilable.compile</code> 或 <code>javax.script.CompiledScript.eval</code> 方法的调用，无论是显式还是隐式地使用未经过滤的输入，都会认为存在潜在的安全问题。</li>
+    <li>在发现问题的代码处，会标记并提示开发者注意此风险。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了防止 RCE 漏洞，建议开发者在使用这些方法前，确保对所有用户输入进行严格的验证和过滤，避免执行未经过滤的代码。此外，可以考虑使用更安全的脚本执行方法，或限制脚本引擎的功能范围。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提醒开发者重新检查对脚本编译和执行相关方法的调用，并确保相关输入的安全性。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+Compilable compilable = scriptEngine.getCompilable();
+CompiledScript script = compilable.compile(userInput);  // 不安全
+script.eval();  // 不安全
+</code>
+    </pre>
+<p>
+    建议在调用 <code>compile</code> 和 <code>eval</code> 方法前，对 <code>userInput</code> 进行严格的输入验证，确保其内容安全。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 RCE 漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Remote_Code_Execution">OWASP: Remote Code Execution</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/api/javax/script/package-summary.html">Java Scripting API 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

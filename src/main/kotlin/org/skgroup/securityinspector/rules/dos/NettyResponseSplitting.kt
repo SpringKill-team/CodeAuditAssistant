@@ -1,32 +1,21 @@
-package com.skgroup.securityinspector.rules.dos
+package org.skgroup.securityinspector.rules.dos
 
-import com.intellij.codeInsight.completion.ml.JavaCompletionFeatures
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
-import com.skgroup.securityinspector.inspectors.BaseLocalInspectionTool
-import com.skgroup.securityinspector.utils.InspectionBundle
-import com.skgroup.securityinspector.utils.SecExpressionUtils
-import org.jetbrains.annotations.Nls
+import org.skgroup.securityinspector.inspectors.BaseLocalInspectionTool
+import org.skgroup.securityinspector.utils.InspectionBundle
+import org.skgroup.securityinspector.utils.SecExpressionUtils
+import org.skgroup.securityinspector.inspectors.InspectionTool
 
-/**
- * 1051: Netty响应拆分攻击
- *
- * ref:
- * (1) https://github.com/github/codeql/blob/main/java/ql/src/Security/CWE/CWE-113/NettyResponseSplitting.java
- * (2) http://www.infosecwriters.com/Papers/DCrab_HTTP_Response.pdf
- */
-const val NETTY_RESPONSE_MESSAGE = "netty.response.splitting.msg"
-const val NETTY_RESPONSE_FIX = "netty.response.splitting.fix"
-
-class NettyResponseSplitting : BaseLocalInspectionTool() {
+class NettyResponseSplitting : BaseLocalInspectionTool(), InspectionTool {
 
     companion object {
-        private val MESSAGE = InspectionBundle.message(NETTY_RESPONSE_MESSAGE)
-        private val QUICK_FIX_NAME = InspectionBundle.message(NETTY_RESPONSE_FIX)
+        private val MESSAGE = InspectionBundle.message("vuln.massage.NettyResponseSplittingRisk")
+        private val QUICK_FIX_NAME = InspectionBundle.message("vuln.fix.NettyResponseSplittingRisk")
     }
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
@@ -48,9 +37,6 @@ class NettyResponseSplitting : BaseLocalInspectionTool() {
         }
     }
 
-    /**
-     * 通用方法：检查表达式是否有问题，并注册问题
-     */
     private fun checkForProblem(
         expression: PsiNewExpression,
         qualifiedName: String,
@@ -60,7 +46,7 @@ class NettyResponseSplitting : BaseLocalInspectionTool() {
         if (SecExpressionUtils.hasFullQualifiedName(expression, qualifiedName)) {
             expression.argumentList?.expressions?.let { args ->
                 if (args.size > argIndex && args[argIndex] is PsiLiteralExpression &&
-                    JavaCompletionFeatures.JavaKeyword.FALSE == (args[argIndex] as PsiLiteralExpression).value
+                    (args[argIndex] as PsiLiteralExpression).value == false
                 ) {
                     holder.registerProblem(
                         expression,
@@ -73,9 +59,7 @@ class NettyResponseSplitting : BaseLocalInspectionTool() {
         }
     }
 
-    /**
-     * 快速修复类
-     */
+
     class NettyResponseSplittingQuickFix(private val fixArgIndex: Int) : LocalQuickFix {
 
         override fun getFamilyName(): String {
@@ -91,5 +75,9 @@ class NettyResponseSplitting : BaseLocalInspectionTool() {
                 problemExpression.replace(factory.createExpressionFromText("true", null))
             }
         }
+    }
+
+    override fun inspectFile(psiFile: PsiFile, problemsHolder: ProblemsHolder) {
+        psiFile.accept(buildVisitor(problemsHolder, false))
     }
 }

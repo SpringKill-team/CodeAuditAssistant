@@ -1,27 +1,51 @@
 <html>
+<head>
+    <title>JNDI 注入检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>JNDI 注入检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>JNDI 注入</strong> 是一种常见的安全漏洞，攻击者可以通过向 JNDI 服务传递恶意输入，劫持或操控远程对象的查找过程。这可能会导致恶意代码执行或敏感信息泄露，尤其是在 RMI、LDAP 等协议中尤为危险。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对一些高风险的类和方法的调用，如 <code>javax.naming.InitialContext</code> 的 <code>lookup</code>、<code>rename</code> 方法，或者创建 <code>javax.management.remote.JMXServiceURL</code> 实例的操作。目的是识别潜在的 JNDI 注入风险点。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到创建 <code>JMXServiceURL</code> 的操作，会提示该实例化可能存在安全风险。</li>
+    <li>如果检测到调用了敏感的 JNDI 方法（如 <code>lookup</code>、<code>list</code>、<code>search</code>），则会提示这些方法调用可能存在安全隐患。</li>
+    <li>提示信息会在代码中标记出问题位置，帮助开发者意识到潜在风险。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 JNDI 注入漏洞的风险，建议开发者在使用 JNDI 接口时严格过滤和验证传入的用户输入，确保传入的 JNDI 名称是安全的。考虑使用白名单策略来限制可访问的远程对象，避免使用未经信任的数据进行查找操作。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提醒开发者重新审视 JNDI 的使用，确保没有未验证或不安全的输入被传递给 JNDI 接口。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的操作：
+</p>
+<pre>
+<code>
+new JMXServiceURL("rmi://untrusted-url");  // 不安全
+context.lookup("ldap://untrusted-url");  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是对传入的 URL 进行严格验证或替换为安全的固定值。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 JNDI 注入漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Java_Naming_and_Directory_Interface_(JNDI)_Injection">OWASP: JNDI Injection</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/jndi/">Java JNDI Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

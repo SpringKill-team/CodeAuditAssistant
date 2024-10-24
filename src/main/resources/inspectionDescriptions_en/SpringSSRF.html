@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Spring SSRF Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Spring SSRF Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Server-Side Request Forgery (SSRF)</strong> is a vulnerability where an attacker can exploit a server to send arbitrary HTTP requests. This often involves accessing internal network resources or retrieving sensitive data. The risk lies in the possibility that the server might access internal systems that it shouldn't, leading to data leakage, privilege escalation, or other security issues.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for potentially SSRF-prone API calls within the Spring framework and related libraries, such as <code>RestTemplate</code>, <code>WebClient</code>, and <code>HttpClient</code>. It focuses on HTTP request methods that could be influenced by user input, such as <code>getForEntity</code>, <code>postForObject</code>, <code>execute</code>, and the use of <code>java.net.URL</code>.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>Flags code where methods that could result in SSRF are called (e.g., <code>WebClient.create()</code> or <code>RestTemplate.getForEntity()</code>).</li>
+    <li>If these methods take unvalidated user input as a target URL, they are considered at risk for SSRF.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To prevent SSRF risks, it is recommended to perform strict validation and sanitization of user inputs when constructing external requests, restricting accessible domain names and IP ranges. Additionally, implementing a whitelist of allowed target addresses can help ensure only trusted endpoints are accessible.
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item prompts developers to review the data sources used in API calls, ensuring all external requests are made with validated inputs.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following potentially unsafe call:
+</p>
+<pre>
+<code>
+RestTemplate restTemplate = new RestTemplate();
+restTemplate.getForObject(userInputUrl, String.class);  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to validate <code>userInputUrl</code>, ensuring that it points only to expected safe domains.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about SSRF vulnerabilities and how to defend against them, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Request_Forgery">OWASP: Server-Side Request Forgery</a></li>
+    <li><a href="https://spring.io/">Spring Official Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

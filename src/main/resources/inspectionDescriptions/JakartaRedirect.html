@@ -1,27 +1,49 @@
 <html>
+<head>
+    <title>Jakarta 重定向检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Jakarta 重定向检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>开放重定向（Open Redirect）</strong> 是一种常见的漏洞，当应用程序根据用户输入的 URL 进行重定向时，攻击者可能利用这一点将用户引导到恶意网站。此类漏洞可能导致钓鱼攻击和用户信息泄露。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了 Jakarta RESTful Web Services 中 <code>Response.seeOther()</code> 和 <code>Response.temporaryRedirect()</code> 方法的调用，尤其是传入的 URL 参数是否来自未经验证的用户输入。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到这些方法的 URL 参数使用了未经验证的用户输入，则认为存在潜在的开放重定向风险。</li>
+    <li>工具会在不安全的代码位置显示警告，并提供修复建议。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    建议开发者在处理重定向目标 URL 时，对用户输入进行严格的验证，确保只允许合法的重定向目标，避免用户被重定向到恶意网站。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复建议，帮助开发者替换不安全的 URL 处理方式，并提醒进行输入验证。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的重定向调用：
+</p>
+<pre>
+<code>
+Response.seeOther(URI.create(userProvidedUrl));  // 不安全
+</code>
+    </pre>
+<p>
+    建议对 <code>userProvidedUrl</code> 进行验证，确保仅允许可信的 URL。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于开放重定向漏洞的风险和防护措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Open_redirect">OWASP: Open Redirect</a></li>
+    <li><a href="https://jakarta.ee/specifications/restful-ws/">Jakarta RESTful Web Services 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

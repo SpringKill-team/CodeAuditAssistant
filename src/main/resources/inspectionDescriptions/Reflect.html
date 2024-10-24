@@ -1,27 +1,54 @@
 <html>
+<head>
+    <title>反射调用检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>反射调用检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>反射调用风险</strong> 是指当使用 Java 反射 API（如 <code>Method.invoke()</code>、<code>ClassLoader.loadClass()</code>）时，攻击者可能通过操控传入的参数来执行未预期的类和方法，从而造成远程代码执行（RCE）或其他安全问题。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对以下方法的调用：
 </p>
+<ul>
+    <li><code>java.lang.reflect.Method.invoke()</code></li>
+    <li><code>java.lang.ClassLoader.loadClass()</code></li>
+    <li><code>java.net.URLClassLoader.newInstance()</code></li>
+    <li><code>org.codehaus.groovy.runtime.InvokerHelper.invokeMethod()</code></li>
+</ul>
 <p>
-    Embed code snippets:
+    如果这些方法的参数包含未经验证的用户输入，可能导致攻击者通过反射机制调用任意方法，从而引发安全风险。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>修复建议</h2>
+<p>
+    建议开发者在使用反射调用时，对传入的参数进行严格的验证，避免直接使用用户输入来调用方法或加载类。尽可能使用预定义的方法调用或限制可访问的类范围，以降低安全风险。
+</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复建议，帮助开发者识别不安全的反射调用，并提醒进行输入验证。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的反射调用：
+</p>
+<pre>
+<code>
+Method method = someClass.getMethod(methodName, parameterTypes);
+method.invoke(instance, userProvidedArgs);  // 不安全
+</code>
+    </pre>
+<p>
+    建议对 <code>methodName</code> 和 <code>userProvidedArgs</code> 进行验证，确保仅允许可信的输入。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于反射调用风险和防护措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Reflection_Attack">OWASP: Reflection Attack</a></li>
+    <li><a href="https://docs.oracle.com/javase/tutorial/reflect/">Java Reflection Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

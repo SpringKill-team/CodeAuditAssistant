@@ -1,26 +1,49 @@
 <html>
+<head>
+    <title>JsonIO 反序列化检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>JsonIO 反序列化检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the description easier to read.
-Make sure the description doesn’t just repeat the inspection title.
-</p>  
-<p>
-See https://plu
-    gins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    <strong>不安全的反序列化（Insecure Deserialization）</strong> 是一种常见的安全漏洞。当应用程序使用反序列化方法从不可信数据源加载对象时，攻击者可能会构造特制的输入，导致任意代码执行（RCE）或其他未预期的行为。这种风险在处理 JSON 数据时尤为突出，特别是在不安全的反序列化操作中。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-Embed code snippets:
+    该条目检查了代码中对 <code>com.cedarsoftware.util.io.JsonReader</code> 类中的 <code>readObject</code> 方法的调用，判断是否存在潜在的不安全反序列化操作。这种调用可能会在反序列化未受信任的 JSON 数据时带来安全风险。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to pre-select a UI element.</p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>遍历所有被检测的方法，如果检测到使用了 <code>JsonReader.readObject</code> 方法，则认为存在潜在的安全风险。</li>
+    <li>此时，会在代码中标记出问题的位置，并提示开发者进行修复。</li>
+</ul>
+<h2>修复建议</h2>
+<p>
+    为了避免不安全反序列化的风险，建议开发者在反序列化 JSON 数据时，使用经过验证的安全库或严格的输入校验。避免直接反序列化未经验证的外部数据，并在可能的情况下使用白名单机制限制反序列化的类。
+</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提示开发者重新检查代码中的反序列化逻辑，确保在使用 <code>JsonReader.readObject</code> 时，输入数据来源是可信的。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+JsonReader.readObject(jsonString);  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是使用更加安全的方式进行解析，例如手动解析 JSON 数据或对数据进行严格的校验。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于不安全反序列化及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://github.com/jdereg/json-io">json-io 库文档</a></li>
+</ul>
+</p>
 </body>
 </html>

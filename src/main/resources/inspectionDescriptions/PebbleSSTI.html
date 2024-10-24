@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Pebble SSTI 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Pebble SSTI 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>服务器端模板注入（SSTI, Server-Side Template Injection）</strong> 是一种在模板渲染过程中引入的安全漏洞。当不受信任的输入直接或间接地传入模板引擎并进行渲染时，攻击者可以在模板中注入恶意代码，从而执行任意服务器端代码。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了对 <code>com.mitchellbosecke.pebble.PebbleEngine</code> 类中的 <code>getLiteralTemplate</code> 和 <code>getTemplate</code> 方法的调用。通过识别这些方法的使用情况，判断是否存在潜在的服务器端模板注入风险。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到对 <code>getLiteralTemplate</code> 或 <code>getTemplate</code> 方法的调用，并且调用过程可能涉及未经过滤的用户输入，则会标记为潜在的 SSTI 风险。</li>
+    <li>此时，会在代码中标记出问题的位置，并提示开发者进行修复。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 SSTI 漏洞，建议在传递给模板引擎的输入之前，对所有输入进行严格的校验和过滤。避免将未经处理的用户输入直接传递给 <code>getLiteralTemplate</code> 和 <code>getTemplate</code> 方法。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提示开发者重新评估模板输入的来源，并建议在必要时添加输入验证和过滤，以确保模板渲染过程的安全性。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的模板调用：
+</p>
+<pre>
+<code>
+PebbleEngine engine = new PebbleEngine.Builder().build();
+engine.getTemplate(userInput);  // 不安全，可能导致 SSTI
+</code>
+    </pre>
+<p>
+    修复建议是对 <code>userInput</code> 进行验证，确保其值符合预期并且不会导致模板注入风险。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SSTI 漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Server_Side_Template_Injection">OWASP: Server-Side Template Injection</a></li>
+    <li><a href="https://pebbletemplates.io/">Pebble 模板引擎文档</a></li>
+</ul>
+</p>
 </body>
 </html>

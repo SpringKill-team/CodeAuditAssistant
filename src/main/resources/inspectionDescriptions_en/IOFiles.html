@@ -1,27 +1,55 @@
 <html>
+<head>
+    <title>File Write Operations Inspection Item</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>File Write Operations Inspection Item</h1>
+<h2>Vulnerability Type</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>Unsafe file write operations</strong> can lead to vulnerabilities such as sensitive data exposure, unauthorized file overwriting, or arbitrary file write. When an application handles file write operations insecurely, attackers may exploit these flaws to create, overwrite, or modify files in the system, leading to data tampering or leakage.
 </p>
+<h2>What This Item Checks</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    This item checks for the use of various file writing methods in the code to ensure that they do not pose potential security risks. It identifies common file write classes like <code>java.io.FileOutputStream</code>, <code>java.nio.file.Files</code>, <code>java.io.Writer</code>, and checks whether their write methods are being used in a potentially unsafe manner.
 </p>
+<h3>Inspection Logic</h3>
+<ul>
+    <li>It scans the code for method calls that match known file write classes and methods, such as <code>write</code>, <code>append</code>, <code>transferTo</code>, and more.</li>
+    <li>If it detects a call to these methods that could pose a security risk, it flags the code at the problematic location and prompts the developer to review it.</li>
+</ul>
+<h2>Fix Recommendation</h2>
 <p>
-    Embed code snippets:
+    To avoid unsafe file write operations, developers are advised to:
+<ul>
+    <li>Validate file paths and names to ensure that write operations do not overwrite sensitive files or directories.</li>
+    <li>Use secure path concatenation methods to prevent path traversal vulnerabilities.</li>
+    <li>Implement permission control mechanisms to restrict write permissions.</li>
+</ul>
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>Quick Fix</h3>
+<p>
+    This item alerts developers to re-evaluate their file write logic, ensuring no potentially dangerous write methods are used and that appropriate security measures are in place.
+</p>
+<h2>Example</h2>
+<p>
+    For instance, if the code contains the following unsafe file write operation:
+</p>
+<pre>
+<code>
+FileOutputStream fos = new FileOutputStream("/tmp/test.txt");
+fos.write(data);  // Unsafe
+</code>
+    </pre>
+<p>
+    The recommended fix is to apply proper file path validation and restriction mechanisms, or to limit the writable directories.
+</p>
+<h2>References</h2>
+<p>
+    To learn more about the security of file write operations, you can refer to the following resources:
+<ul>
+    <li><a href="https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload">OWASP: Unrestricted File Upload</a></li>
+    <li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/package-summary.html">Java IO Documentation</a></li>
+</ul>
+</p>
 </body>
 </html>

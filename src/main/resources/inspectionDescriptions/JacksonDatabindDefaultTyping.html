@@ -1,26 +1,50 @@
 <html>
+<head>
+    <title>Jackson Databind Default Typing 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Jackson Databind Default Typing 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the description easier to read.
-Make sure the description doesn’t just repeat the inspection title.
-</p>  
-<p>
-See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    <strong>Jackson Databind Default Typing 使用不当</strong> 是一种潜在的反序列化漏洞。通过启用 <code>enableDefaultTyping</code> 或不当使用 <code>@JsonTypeInfo</code> 注解，攻击者可能在反序列化过程中注入恶意数据，从而实现远程代码执行（RCE）。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-Embed code snippets:
+    该条目检查了代码中对 <code>com.fasterxml.jackson.databind.ObjectMapper</code> 的 <code>enableDefaultTyping</code> 方法调用，以及 <code>@JsonTypeInfo</code> 注解的使用情况。它会检测是否存在不安全的配置，例如使用 <code>JsonTypeInfo.Id.CLASS</code> 或 <code>JsonTypeInfo.Id.MINIMAL_CLASS</code>，这些配置可能会导致反序列化时的安全隐患。
 </p>
-
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to pre-select a UI element.</p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到 <code>ObjectMapper</code> 调用了 <code>enableDefaultTyping</code>，且相关配置不安全，则会标记为潜在风险。</li>
+    <li>如果检测到 <code>@JsonTypeInfo</code> 注解的 <code>use</code> 属性被设置为 <code>JsonTypeInfo.Id.CLASS</code> 或 <code>JsonTypeInfo.Id.MINIMAL_CLASS</code>，则同样会提示安全警告。</li>
+</ul>
+<h2>修复建议</h2>
+<p>
+    为了避免反序列化漏洞的风险，建议开发者在使用 Jackson 序列化/反序列化时，避免使用默认类型启用功能（<code>enableDefaultTyping</code>）以及不安全的 <code>@JsonTypeInfo</code> 配置。建议改为使用更安全的类型标识符，如 <code>JsonTypeInfo.Id.NAME</code>。
+</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复功能，可以自动将不安全的注解配置（如 <code>JsonTypeInfo.Id.CLASS</code>）替换为更安全的配置（如 <code>JsonTypeInfo.Id.NAME</code>）。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的用法：
+</p>
+<pre>
+<code>
+objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);  // 不安全
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是将其修改为更安全的配置，避免使用默认类型和类级别的类型标识符。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 Jackson 反序列化漏洞及其修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Deserialization_of_untrusted_data">OWASP: Deserialization of Untrusted Data</a></li>
+    <li><a href="https://github.com/FasterXML/jackson-databind">Jackson Databind 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

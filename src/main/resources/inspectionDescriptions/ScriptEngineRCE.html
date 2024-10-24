@@ -1,27 +1,50 @@
 <html>
+<head>
+    <title>Script Engine RCE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>Script Engine RCE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（Remote Code Execution, RCE）</strong> 是一种严重的安全漏洞。攻击者通过输入恶意代码，使应用程序在未进行适当校验的情况下执行这些代码，从而控制服务器或应用程序。RCE 漏洞可能导致数据泄露、系统被入侵、甚至完全控制服务器。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对 <code>javax.script.ScriptEngine</code> 类的 <code>eval</code> 方法的调用。这种方法可以执行动态的脚本，如果输入的脚本内容未经过严格的校验和过滤，可能会导致 RCE 漏洞。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>检测到 <code>javax.script.ScriptEngine</code> 类的 <code>eval</code> 方法调用时，认为其具有潜在的 RCE 风险。</li>
+    <li>在存在问题的代码处，会标记出安全警告，提醒开发者注意可能的风险。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 RCE 漏洞的风险，建议开发者避免直接执行用户输入的脚本内容。可以通过限制可执行的脚本来源或在脚本执行前进行严格的输入验证和清理。对于需要动态执行的脚本，建议使用沙箱技术或安全隔离机制。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目会提示开发者对使用 <code>eval</code> 方法的代码进行检查，并确保输入内容经过严格验证，以避免潜在的安全问题。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的调用：
+</p>
+<pre>
+<code>
+ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
+engine.eval(userInput);  // 不安全，可能导致 RCE
+</code>
+    </pre>
+<p>
+    修复建议是避免直接使用用户输入，或在执行前对输入进行验证和过滤。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 RCE 漏洞的风险和修复方法，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Code_Injection">OWASP: Code Injection</a></li>
+    <li><a href="https://docs.oracle.com/javase/8/docs/api/javax/script/ScriptEngine.html">Java ScriptEngine 文档</a></li>
+</ul>
+</p>
 </body>
 </html>

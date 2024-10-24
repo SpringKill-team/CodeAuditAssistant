@@ -1,4 +1,39 @@
 package org.skgroup.securityinspector.rules.rce
 
-class KryoUnserialize {
+import com.intellij.codeInspection.ProblemHighlightType
+import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.psi.JavaElementVisitor
+import com.intellij.psi.PsiElementVisitor
+import com.intellij.psi.PsiMethodCallExpression
+import org.skgroup.securityinspector.inspectors.BaseLocalInspectionTool
+import org.skgroup.securityinspector.utils.InspectionBundle
+import org.skgroup.securityinspector.utils.SecExpressionUtils
+
+class KryoUnserialize : BaseLocalInspectionTool() {
+
+    companion object {
+        private val MESSAGE = InspectionBundle.message("vuln.massage.KryoUnserialize")
+
+        private val KRYO_METHOD_SINKS = mapOf(
+            "com.esotericsoftware.kryo.Kryo" to listOf(
+                "readObject",
+                "readObjectOrNull",
+                "readClassAndObject"
+            )
+        )
+    }
+
+    override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
+        return object : JavaElementVisitor() {
+            override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
+                if (SecExpressionUtils.isMethodSink(expression, KRYO_METHOD_SINKS)) {
+                    holder.registerProblem(
+                        expression,
+                        MESSAGE,
+                        ProblemHighlightType.GENERIC_ERROR_OR_WARNING
+                    )
+                }
+            }
+        }
+    }
 }

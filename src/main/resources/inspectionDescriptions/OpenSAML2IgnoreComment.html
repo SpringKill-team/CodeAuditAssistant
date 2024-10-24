@@ -1,27 +1,54 @@
 <html>
+<head>
+    <title>OpenSAML2 忽略注释检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>OpenSAML2 忽略注释检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>SAML 注释绕过漏洞</strong> 是指在解析 SAML 消息时，如果未正确配置忽略 XML 注释，攻击者可以利用注释在 SAML 消息中插入恶意内容，进而绕过 SAML 断言的验证。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了使用 OpenSAML2 库解析 SAML 消息时，是否正确设置了忽略 XML 注释的选项。如果解析器允许 XML 注释而未进行适当的验证，则存在被利用的风险。
 </p>
+<h3>检查逻辑</h3>
+<ul>
+    <li>如果检测到解析 SAML 消息时未设置忽略注释的标志，则认为存在安全隐患。</li>
+    <li>工具会在不安全的代码位置显示警告，并提供修复建议。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    建议开发者在使用 OpenSAML2 解析 SAML 消息时，启用忽略注释的配置，以确保解析器不处理 XML 注释内容，避免潜在的安全风险。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复建议，帮助开发者启用忽略注释的配置，以确保 SAML 消息的安全性。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的 SAML 解析配置：
+</p>
+<pre>
+<code>
+parser.setIgnoringComments(false);  // 不安全
+</code>
+    </pre>
+<p>
+    建议将其修改为：
+</p>
+<pre>
+<code>
+parser.setIgnoringComments(true);  // 安全
+</code>
+    </pre>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 SAML 安全配置的风险和防护措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-project-top-ten/">OWASP 官方文档</a></li>
+    <li><a href="https://shibboleth.net/products/opensaml-java/">OpenSAML 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

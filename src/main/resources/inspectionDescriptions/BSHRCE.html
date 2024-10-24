@@ -1,27 +1,52 @@
 <html>
+<head>
+    <title>BSH RCE 检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>BSH RCE 检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>远程代码执行（RCE）</strong> 是一种高危漏洞，攻击者可以通过执行应用程序中的脚本或代码来控制系统。如果 BeanShell 脚本（如 `bsh.Interpreter.eval()`）的执行中传入了未经验证的输入，可能导致 RCE 风险。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中对 BeanShell 和 Spring 脚本执行方法的调用，包括：
 </p>
+<ul>
+    <li><code>bsh.Interpreter.eval()</code></li>
+    <li><code>org.springframework.scripting.bsh.BshScriptEvaluator.evaluate()</code></li>
+</ul>
 <p>
-    Embed code snippets:
+    如果检测到这些方法的调用中包含了未经验证的用户输入，则认为存在潜在的远程代码执行风险。
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<h2>修复建议</h2>
+<p>
+    建议开发者在执行脚本前，确保对用户输入进行了严格的验证和过滤，避免直接将未经验证的输入传递给脚本执行引擎。使用预定义的脚本或限制允许执行的代码片段也是有效的防御措施。
+</p>
+<h3>快速修复</h3>
+<p>
+    该条目提供了快速修复建议，帮助开发者识别不安全的脚本执行操作，并提醒进行输入验证。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的脚本执行：
+</p>
+<pre>
+<code>
+bsh.Interpreter interpreter = new bsh.Interpreter();
+interpreter.eval(userInputScript);  // 不安全
+</code>
+    </pre>
+<p>
+    建议将其修改为对 <code>userInputScript</code> 进行严格验证后再执行。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于远程代码执行漏洞的风险和防护措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/Code_Injection">OWASP: Code Injection</a></li>
+    <li><a href="https://www.beanshell.org/">BeanShell 官方文档</a></li>
+</ul>
+</p>
 </body>
 </html>

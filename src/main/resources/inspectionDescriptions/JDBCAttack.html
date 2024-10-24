@@ -1,27 +1,54 @@
 <html>
+<head>
+    <title>JDBC 注入攻击检查项</title>
+</head>
 <body>
-Write your description here.
-Start the description with a verb in 3rd person singular, like reports, detects, highlights.
-In the first sentence, briefly explain what exactly the inspection helps you detect.
-Make sure the sentence is not very long and complicated.
+<h1>JDBC 注入攻击检查项</h1>
+<h2>漏洞类型</h2>
 <p>
-    The first sentence must be in a dedicated paragraph separated from the rest of the text. This will make the
-    description easier to read.
-    Make sure the description doesn’t just repeat the inspection title.
+    <strong>JDBC 注入攻击</strong> 是一种常见的安全漏洞。攻击者可以通过不安全的数据库连接配置或直接在代码中注入恶意输入，控制数据库连接的行为，从而执行未授权的操作，甚至访问或修改敏感数据。
 </p>
+<h2>检查了什么内容</h2>
 <p>
-    See https://plugins.jetbrains.com/docs/intellij/inspections.html#descriptions for more information.
+    该条目检查了代码中与 JDBC 相关的方法调用和类实例化，以识别潜在的数据库连接不安全使用场景。主要关注以下方面：
 </p>
+<ul>
+    <li>调用了常见的 JDBC 方法，例如 <code>getConnection</code>、<code>setJdbcUrl</code>、<code>connect</code> 等。</li>
+    <li>实例化了可能导致数据库连接配置不当的类，例如 <code>DriverManagerDataSource</code>、<code>HikariConfig</code>、<code>BasicDataSource</code> 等。</li>
+</ul>
+<h2>修复建议</h2>
 <p>
-    Embed code snippets:
+    为了避免 JDBC 注入攻击的风险，建议开发者采取以下措施：
 </p>
-<pre><code>
-// automatically highlighted according to inspection registration 'language' attribute
-</code></pre>
-<!-- tooltip end -->
-<p>Text after this comment will only be shown in the settings of the inspection.</p>
-
-<p>To open related settings directly from the description, add a link with `settings://$` optionally followed by `?$` to
-    pre-select a UI element.</p>
+<ul>
+    <li>在使用数据库连接时，始终使用参数化查询或预编译语句，避免在 SQL 中直接拼接用户输入。</li>
+    <li>使用经过验证的数据库连接池配置，例如 HikariCP，并确保连接 URL 的安全性。</li>
+    <li>检查和限制数据库用户的权限，确保连接使用最低权限的用户进行数据库操作。</li>
+</ul>
+<h3>快速修复</h3>
+<p>
+    该条目会提醒开发者注意代码中潜在的数据库连接不安全使用场景，并建议调整连接配置或使用更安全的方法。
+</p>
+<h2>相关示例</h2>
+<p>
+    例如，如果代码中存在以下不安全的 JDBC 使用方式：
+</p>
+<pre>
+<code>
+DriverManager.getConnection("jdbc:mysql://localhost:3306/db?user=admin&password=123");  // 不安全
+new HikariConfig("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");  // 不安全
+</code>
+    </pre>
+<p>
+    修复建议是使用环境变量或配置文件来存储数据库 URL，并确保不在代码中直接使用敏感信息。
+</p>
+<h2>参考资料</h2>
+<p>
+    了解更多关于 JDBC 注入攻击及其防护措施，可以参考以下资源：
+<ul>
+    <li><a href="https://owasp.org/www-community/attacks/SQL_Injection">OWASP: SQL Injection</a></li>
+    <li><a href="https://github.com/brettwooldridge/HikariCP">HikariCP 文档</a></li>
+</ul>
+</p>
 </body>
 </html>
