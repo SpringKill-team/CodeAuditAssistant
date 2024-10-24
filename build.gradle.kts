@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.skgroup"
-version = "1.0"
+version = "Preview-v1.0"
 
 repositories {
     mavenCentral()
