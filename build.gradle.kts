@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "1.9.25"
     id("org.jetbrains.intellij") version "1.17.4"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.skgroup"
@@ -18,7 +19,6 @@ dependencies {
     implementation("org.apache.maven:maven-model:3.6.3")
     implementation("org.apache.maven:maven-model-builder:3.6.3")
 }
-
 
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
@@ -52,5 +52,16 @@ tasks {
 
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
+    }
+
+    shadowJar {
+        archiveClassifier.set("")
+        dependencies {
+            include(dependency("me.gosimple:nbvcxz:1.5.1"))
+        }
+    }
+
+    buildPlugin {
+        dependsOn(shadowJar)
     }
 }
