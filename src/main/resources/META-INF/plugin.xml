@@ -320,7 +320,7 @@
                 implementationClass="org.skgroup.securityinspector.rules.sqli.MybatisAnnotationSQLi"
         />
         <localInspection
-                language="JAVA" groupPath="Security"
+                language="XML" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.MybatisXmlSQLi"
                 implementationClass="org.skgroup.securityinspector.rules.sqli.MybatisXmlSQLi"
