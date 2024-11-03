@@ -32,12 +32,18 @@ class Decompiler(private val project: Project) {
 
         val dependencies2 = model.dependencyManagement.dependencies
 
-        val dependencies = dependencies1 + dependencies2
+        var dependencies = dependencies1 + dependencies2
+
+        //需要考虑moudle嵌套的情况
+        dependencies = resolveModules(projectBaseDir, model, dependencies as ArrayList<Dependency>)
 
         dependencies.forEach { dependency ->
-            if(dependency.version != null) {
+            if (dependency.version != null) {
                 //直接用version的时候拼接的是${}，解析实际的值替换才能获取真正的jar
-                dependency.version = model.properties.getProperty(dependency.version.replace("\${", "").replace("}", ""))
+                var properties = model.properties
+                dependency.version =
+                    model.properties.getProperty(dependency.version.replace("\${", "").replace("}", ""))
+                        ?: dependency.version
                 val jarFile = resolveJarFileFromDependency(dependency)
                 if (jarFile != null && jarFile.exists()) {
                     mavenJars.add(jarFile)
@@ -51,15 +57,17 @@ class Decompiler(private val project: Project) {
     fun getAllJars(): List<File> {
         val projectBaseDir = project.basePath ?: return emptyList()
         val libDir = File("$projectBaseDir/lib")
+        val libsDir = File("$projectBaseDir/libs")
 
         val libJars = libDir.listFiles { _, name -> name.endsWith(".jar") }?.toList() ?: emptyList()
+        val libsJars = libsDir.listFiles { _, name -> name.endsWith(".jar") }?.toList() ?: emptyList()
 
         val mavenJars = getMavenDependencies()
 
         println("JAR files in lib directory: ${libJars.map { it.name }}")
         println("Maven JAR files: ${mavenJars.map { it.name }}")
 
-        return libJars + mavenJars
+        return libJars + libsJars + mavenJars
     }
 
     fun decompileJar(jarFile: File) {
@@ -93,6 +101,34 @@ class Decompiler(private val project: Project) {
         val jarPath = "$groupPath/$artifactId/$version/$artifactId-$version.jar"
 
         return File(mavenRepo, jarPath)
+    }
+
+    //递归解析module的依赖
+    fun resolveModules(basePath: String, model: Model, dependencies: ArrayList<Dependency>): ArrayList<Dependency> {
+        val modules = model.modules
+        val mavenReader = MavenXpp3Reader()
+        modules.forEach { module ->
+            val modulePath = "$basePath/$module"
+            val modulePomFile = File("$modulePath/pom.xml")
+            if (modulePomFile.exists()) {
+                val moduleModel: Model = FileReader(modulePomFile).use { reader ->
+                    mavenReader.read(reader)
+                }
+                dependencies += moduleModel.dependencies
+                dependencies.forEach { dependency ->
+                    if (dependency.version != null) {
+                        //直接用version的时候拼接的是${}，解析实际的值替换才能获取真正的jar
+                        dependency.version =
+                            moduleModel.properties.getProperty(dependency.version.replace("\${", "").replace("}", ""))
+                                ?: dependency.version
+                    }
+                }
+                if (moduleModel.modules.isNotEmpty()) {
+                    resolveModules(modulePath, moduleModel, dependencies)
+                }
+            }
+        }
+        return dependencies
     }
 
     fun extractJarFile(jarFile: File, outputDir: File) {
