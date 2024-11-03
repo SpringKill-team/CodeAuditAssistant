@@ -82,6 +82,12 @@
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
+                bundle="InspectionBundle" key="vuln.name.InjectionFilter"
+                implementationClass="org.skgroup.securityinspector.rules.filters.InjectionFilter"
+        />
+        <localInspection
+                language="JAVA" groupPath="Security"
+                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.JDBCAttack"
                 implementationClass="org.skgroup.securityinspector.rules.jdbc.JDBCAttack"
         />

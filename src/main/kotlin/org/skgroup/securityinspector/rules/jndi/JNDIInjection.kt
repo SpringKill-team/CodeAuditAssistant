@@ -13,7 +13,6 @@ class JNDIInjection : BaseLocalInspectionTool() {
         private val MESSAGE = InspectionBundle.message("vuln.massage.JNDIInjection")
 
         private val JNDIINJECTION_METHOS_SINKS = mapOf(
-            "javax.management.remote.JMXServiceURL" to emptyList(),
             "java.rmi.registry.Registry" to listOf("lookup"),
             "javax.naming.Context" to listOf("lookup", "list", "listBindings", "lookupLink", "rename"),
             "javax.naming.InitialContext" to listOf("doLookup", "lookup", "rename", "list", "listBindings"),

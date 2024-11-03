@@ -14,13 +14,13 @@ object SecExpressionUtils {
 
     private val SQLiCareTypeStr = mutableSetOf("java.lang.String", "java.lang.StringBuilder", "java.lang.StringBuffer")
 
-    fun resolveField( expression: PsiExpression?): PsiField? {
+    fun resolveField(expression: PsiExpression?): PsiField? {
         var expression = PsiUtil.skipParenthesizedExprDown(expression)
         val referenceExpression = ObjectUtils.tryCast(expression, PsiReferenceExpression::class.java)
         return referenceExpression?.let { ObjectUtils.tryCast(it.resolve(), PsiField::class.java) }
     }
 
-    fun getLiteralInnerText( expression: PsiExpression?): String? {
+    fun getLiteralInnerText(expression: PsiExpression?): String? {
         val literal = ExpressionUtils.getLiteral(expression)
         return literal?.value?.toString()
     }
@@ -29,7 +29,7 @@ object SecExpressionUtils {
         return getText(expression, false)
     }
 
-    fun getText( expression: PsiExpression?, force: Boolean): String? {
+    fun getText(expression: PsiExpression?, force: Boolean): String? {
         if (expression == null) return null
 
         var value = getLiteralInnerText(expression)
@@ -69,7 +69,7 @@ object SecExpressionUtils {
         return value
     }
 
-    fun isText( expression: PsiExpression): Boolean {
+    fun isText(expression: PsiExpression): Boolean {
         return getText(expression) != null
     }
 
@@ -359,10 +359,18 @@ object SecExpressionUtils {
         }
     }
 
-    fun isNewExpressionSink(expression: PsiNewExpression,newExpressionSinks:List<String>): Boolean {
+    fun isNewExpressionSink(expression: PsiNewExpression, newExpressionSinks: List<String>): Boolean {
         return newExpressionSinks.any { className ->
             hasFullQualifiedName(expression, className)
         }
+    }
+
+    fun matchesClassName(psiClass: PsiClass, pattern: String): Boolean {
+        return psiClass.name?.contains(pattern, true) == true
+    }
+
+    fun matchesMethodName(psiMethod: PsiMethod, pattern: String): Boolean {
+        return psiMethod.name.contains(pattern, true)
     }
 
 }
