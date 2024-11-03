@@ -27,13 +27,41 @@ jobs:
       - name: Build Plugin with Gradle
         run: ./gradlew buildPlugin
 
+      - name: Get Previous Tag
+        id: previous_tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: tags } = await github.rest.repos.listTags({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 2,
+            });
+            if (tags.length < 2) {
+              core.setFailed("Not enough tags to generate release notes.");
+            } else {
+              core.setOutput("previous_tag", tags[1].name);
+            }
+
       - name: Generate Release Notes
         id: generate_notes
-        uses: actions/generate-release-notes@v2
+        uses: actions/github-script@v6
         with:
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.event.repository.name }}
-          tag_name: ${{ github.event.release.tag_name }}
+          script: |
+            const previousTag = "${{ steps.previous_tag.outputs.previous_tag }}";
+            const currentTag = "${{ github.event.release.tag_name }}";
+            const { data: commits } = await github.rest.repos.compareCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: previousTag,
+              head: currentTag,
+            });
+            
+            let releaseNotes = '### Changelog\n\n';
+            commits.commits.forEach(commit => {
+              releaseNotes += `- ${commit.commit.message}\n`;
+            });
+            core.setOutput("notes", releaseNotes);
 
       - name: Update Release with Notes
         uses: actions/github-script@v6
