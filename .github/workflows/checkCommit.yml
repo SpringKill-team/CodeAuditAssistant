@@ -32,3 +32,11 @@ jobs:
 
       - name: Build Plugin
         run: ./gradlew buildPlugin
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.4.3
+        with:
+          name: SecurityInspector
+          path: ./build/libs/
+          compression-level: 0
+
