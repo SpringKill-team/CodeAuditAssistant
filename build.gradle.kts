@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.skgroup"
-version = "Preview-v1.0"
+version = "Preview-v1.1"
 
 repositories {
     mavenCentral()
@@ -64,4 +64,14 @@ tasks {
     buildPlugin {
         dependsOn(shadowJar)
     }
+
+    runIde {
+        jvmArgs = listOf(
+            "-Dsun.java2d.opengl=true",
+            "-Dsun.java2d.d3d=false",
+            "-Dsun.java2d.noddraw=true"
+        )
+    }
+
+
 }
