@@ -6,7 +6,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,6 +26,30 @@ jobs:
 
       - name: Build Plugin with Gradle
         run: ./gradlew buildPlugin
+
+      - name: Generate Release Notes
+        id: generate_notes
+        uses: actions/generate-release-notes@v2
+        with:
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          tag_name: ${{ github.event.release.tag_name }}
+
+      - name: Update Release with Notes
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: release } = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: context.payload.release.tag_name,
+            });
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              body: `${{ steps.generate_notes.outputs.notes }}`,
+            });
 
       - name: Upload Plugin to GitHub Release
         uses: actions/upload-release-asset@v1
