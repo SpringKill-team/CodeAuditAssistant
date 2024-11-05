@@ -28,11 +28,19 @@ class Decompiler(private val project: Project) {
             mavenReader.read(reader)
         }
 
-        val dependencies1 = model.dependencies
+        var dependencies: MutableList<Dependency> = mutableListOf()
 
-        val dependencies2 = model.dependencyManagement.dependencies
+        try {
+            dependencies += model.dependencies
+        } catch (e: Exception) {
+            println("Dependencies from pom.xml not found")
+        }
 
-        var dependencies = dependencies1 + dependencies2
+        try {
+            dependencies += model.dependencyManagement.dependencies
+        } catch (e: Exception) {
+            println("DependencyManagement dependencies of pom.xml not found")
+        }
 
         //需要考虑moudle嵌套的情况
         dependencies = resolveModules(projectBaseDir, model, dependencies as ArrayList<Dependency>)
