@@ -359,6 +359,14 @@ object SecExpressionUtils {
         }
     }
 
+    fun isSuperMethodSink(expression: PsiMethodCallExpression, methodSinks: Map<String, List<String>>): Boolean {
+        return methodSinks.any { (className, methodNames) ->
+            methodNames.any { methodName ->
+                hasFullQualifiedName(expression, className, methodName)
+            }
+        }
+    }
+
     fun isNewExpressionSink(expression: PsiNewExpression, newExpressionSinks: List<String>): Boolean {
         return newExpressionSinks.any { className ->
             hasFullQualifiedName(expression, className)

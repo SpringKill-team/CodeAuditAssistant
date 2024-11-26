@@ -67,6 +67,7 @@ class MybatisAnnotationSQLi : BaseLocalInspectionTool() {
     }
 
     private fun hasSQLi(content: String): Boolean {
+        if(content.contains("$")) return true
         var modifiedContent = content
         if (modifiedContent.startsWith("<script>") && modifiedContent.endsWith("</script>")) {
             modifiedContent = modifiedContent.substring(8, modifiedContent.length - 9)
