@@ -2,7 +2,7 @@ name: Gradle Plugin Release
 
 on:
   release:
-    types: [created]
+    types: [ created ]
 
 jobs:
   build:
@@ -64,20 +64,26 @@ jobs:
             core.setOutput("notes", releaseNotes);
 
       - name: Update Release with Notes
+        env:
+          RELEASE_NOTES: ${{ steps.generate_notes.outputs.notes }}
         uses: actions/github-script@v6
         with:
           script: |
+            const releaseNotes = process.env.RELEASE_NOTES;
+
             const { data: release } = await github.rest.repos.getReleaseByTag({
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag: context.payload.release.tag_name,
             });
+
             await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: release.id,
-              body: `${{ steps.generate_notes.outputs.notes }}`,
+              body: releaseNotes,
             });
+      
 
       - name: Upload Plugin to GitHub Release
         uses: actions/upload-release-asset@v1
