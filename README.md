@@ -2,7 +2,7 @@
 
 **Author**：SpringKill、Unam4
 
-**插件支持版本**：`IDEA >= 2023.2.6`
+**插件支持版本**：`IDEA >= 2022.3`
 
 **Kotlin**：JDK17+
 
