@@ -1,0 +1,256 @@
+package org.skgroup.securityinspector.analysis.graphs.callgraph
+
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
+import com.intellij.psi.*
+import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.psi.util.PsiTreeUtil
+import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
+import org.skgroup.securityinspector.analysis.di.DIProcessor
+import org.skgroup.securityinspector.utils.GraphUtils
+import java.util.ArrayDeque
+
+/**
+ * Call graph builder 是一个用于构建调用图的类
+ * 通过访问 Java PSI 树，可以构建出方法之间的调用关系
+ *
+ * 处理Lambda表达式 (visitLambdaExpression)
+ * 处理方法引用 (visitMethodReferenceExpression)
+ * 识别常见依赖注入注解 (visitMethod / visitClass / visitField 等处辅助识别)
+ * 识别常见 IoC 容器的 getBean 调用 (visitMethodCallExpression 时做特殊处理)
+ *
+ * @author springkill
+ */
+class CallGraphBuilder : JavaRecursiveElementVisitor() {
+
+    // 用于存储最终的调用图，全局唯一
+    private val callGraph = CallGraph()
+
+    // 用于记录当前访问的方法调用栈
+    private val currentMethodStack = ArrayDeque<MethodNode>()
+
+//    private val diProcessor = DIProcessor(callGraph)
+
+
+    /**
+     * Visit method 方法用于访问一个Java方法并将其加入调用图
+     * 用栈处理递归方法调用
+     *
+     * @param method
+     */
+    override fun visitMethod(method: PsiMethod) {
+
+        val callerMethodNode = GraphUtils.getMethodNode(method)
+
+        // 将此方法节点加入 callGraph
+        callGraph.nodes.add(callerMethodNode)
+        currentMethodStack.push(callerMethodNode)
+
+        // 查找对该方法的所有引用，建立反向调用关系
+        ReferencesSearch.search(method, method.useScope).forEach { reference ->
+            val callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
+                ?: return@forEach
+
+            val callerNode = GraphUtils.getMethodNode(callerMethod)
+            // 建立反向调用关系
+            callGraph.nodes.add(callerNode)
+            callGraph.edges.getOrPut(callerNode) { mutableSetOf() }.add(callerMethodNode)
+        }
+
+        handleDependencyInjectionAnnotations(method, callerMethodNode)
+//        diProcessor.processMethodForDI(method, callerMethodNode)
+
+        super.visitMethod(method)
+
+        currentMethodStack.pop()
+    }
+
+    /**
+     * 访问方法调用表达式
+     *
+     * @param expression    方法调用表达式
+     */
+    override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
+        super.visitMethodCallExpression(expression)
+        if (currentMethodStack.isEmpty()) {
+            return
+        }
+
+        val caller = currentMethodStack.peek()
+
+        // 解析被调用的方法
+        val resolvedMethod = expression.resolveMethod() ?: return
+        val calleeMethodNode = GraphUtils.getMethodNode(resolvedMethod)
+
+        // 将 callee 加入节点集合
+        callGraph.nodes.add(calleeMethodNode)
+
+        // 在 callGraph 中记录调用关系 (caller -> callee)
+        callGraph.edges
+            .getOrPut(caller) { mutableSetOf() }
+            .add(calleeMethodNode)
+
+        handleIoCContainerCall(expression, caller, calleeMethodNode)
+    }
+
+    /**
+     * 访问 new 表达式
+     *
+     * @param expression
+     */
+    override fun visitNewExpression(expression: PsiNewExpression) {
+        super.visitNewExpression(expression)
+        if (currentMethodStack.isEmpty()) {
+            return
+        }
+        val callerMethodNode = currentMethodStack.peek()
+
+        // 解析构造方法
+        val constructor = expression.resolveConstructor() ?: return
+        val calleeMethodNode = GraphUtils.getMethodNode(constructor)
+
+        // 将 callee 加入节点集合
+        callGraph.nodes.add(calleeMethodNode)
+
+        // 在 callGraph 中记录 (caller -> callee构造方法)
+        callGraph
+            .edges
+            .getOrPut(callerMethodNode) { mutableSetOf() }
+            .add(calleeMethodNode)
+    }
+
+    /**
+     * 访问 lambda 表达式
+     *
+     * @param expression
+     */
+    override fun visitLambdaExpression(expression: PsiLambdaExpression) {
+        super.visitLambdaExpression(expression)
+
+        // TODO 如果需要将 Lambda 表达式本身视为一个“方法节点”，可以考虑建模为内部匿名类的形式
+        if (currentMethodStack.isEmpty()) {
+            return
+        }
+
+        // 在 Lambda 内部继续递归访问，比如对 Lambda 体内的方法调用进行追踪
+        expression.body?.accept(object : JavaRecursiveElementVisitor() {
+            override fun visitMethodCallExpression(lambdaCall: PsiMethodCallExpression) {
+                super.visitMethodCallExpression(lambdaCall)
+                val caller = currentMethodStack.peek()
+                val resolvedMethod = lambdaCall.resolveMethod() ?: return
+                val calleeMethodNode = GraphUtils.getLambdaMethodNode(resolvedMethod)
+
+                // 将 callee 加入图
+                callGraph.nodes.add(calleeMethodNode)
+
+                // 在 callGraph 中记录调用关系 (caller -> callee)
+                callGraph.edges
+                    .getOrPut(caller) { mutableSetOf() }
+                    .add(calleeMethodNode)
+            }
+
+            override fun visitMethodReferenceExpression(expression: PsiMethodReferenceExpression) {
+                super.visitMethodReferenceExpression(expression)
+                // 对 Lambda 中的 method reference 也进行处理
+                handleMethodReference(expression)
+            }
+        })
+    }
+
+    /**
+     * 访问方法引用 (Foo::bar)
+     */
+    override fun visitMethodReferenceExpression(expression: PsiMethodReferenceExpression) {
+        super.visitMethodReferenceExpression(expression)
+        if (currentMethodStack.isEmpty()) {
+            return
+        }
+        handleMethodReference(expression)
+    }
+
+    /**
+     * 处理方法引用的逻辑，提取所引用的方法并加入调用图
+     */
+    private fun handleMethodReference(expression: PsiMethodReferenceExpression) {
+        val caller = currentMethodStack.peek()
+        val resolvedElement = expression.resolve() ?: return
+        if (resolvedElement is PsiMethod) {
+            val calleeMethodNode = GraphUtils.getMethodNode(resolvedElement)
+            callGraph.nodes.add(calleeMethodNode)
+            callGraph.edges
+                .getOrPut(caller) { mutableSetOf() }
+                .add(calleeMethodNode)
+        }
+    }
+
+    /**
+     * Handle dependency injection annotations
+     * 对常见依赖注入注解(如 @Autowired / @Inject 等)进行检测和处理
+     * @param method
+     * @param methodNode
+     */
+    private fun handleDependencyInjectionAnnotations(method: PsiMethod, methodNode: MethodNode) {
+        val modifierList = method.modifierList
+        val annotations = modifierList.annotations
+        annotations.forEach { annotation ->
+            val qualifiedName = annotation.qualifiedName ?: return@forEach
+            if (qualifiedName == "org.springframework.beans.factory.annotation.Autowired"
+                || qualifiedName == "javax.inject.Inject"
+            // 其他的慢慢加吧
+            ) {
+                // 如果是构造方法或者带有此注解的方法，可能被框架在运行时调用
+                val containerMethodNode = MethodNode("Container","Container", "Framework", emptyList(), emptyList())
+                callGraph.nodes.add(containerMethodNode)
+
+                callGraph.edges
+                    .getOrPut(containerMethodNode) { mutableSetOf() }
+                    .add(methodNode)
+            }
+        }
+    }
+
+    /**
+     * 对 IoC 容器调用（如 getBean）进行处理
+     * 如果调用了容器方法来获取某个类实例，可以在调用图中做额外标记
+     */
+    private fun handleIoCContainerCall(
+        expression: PsiMethodCallExpression,
+        caller: MethodNode,
+        callee: MethodNode
+    ) {
+        val methodExpression = expression.methodExpression
+        val qualifierExpression = methodExpression.qualifierExpression
+        val methodName = methodExpression.referenceName
+
+        // 测试下能不能行
+        if (qualifierExpression != null && methodName == "getBean") {
+            // 将容器节点与被调用方法或类做额外的链接
+            val containerMethodNode = MethodNode("ApplicationContext","ApplicationContext", "Spring", emptyList(), emptyList())
+            callGraph.nodes.add(containerMethodNode)
+            // caller -> container
+            callGraph.edges
+                .getOrPut(caller) { mutableSetOf() }
+                .add(containerMethodNode)
+            // container -> callee
+            callGraph.edges
+                .getOrPut(containerMethodNode) { mutableSetOf() }
+                .add(callee)
+        }
+    }
+
+    /**
+     * Get call graph 方法用于获取调用图并最后处理一下
+     *
+     * @param project
+     * @return
+     */
+    fun getCallGraph(project : Project): CallGraph {
+        val diProcessor = DIProcessor(project ,callGraph)
+        ApplicationManager.getApplication().runReadAction {
+            diProcessor.process()
+            // 如果 process() 内部依赖 PSI 的方法，也就安全了
+        }
+        return callGraph
+    }
+
+}
