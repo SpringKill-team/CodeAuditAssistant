@@ -58,7 +58,7 @@ object GraphUtils {
     }
 
     /**
-     * Get method node 方法用来获取方法节点
+     * Get method node 方法用来获取方法节点，位置为方法本身
      * @param method 传入一个 PsiMethod 对象
      * @return 返回一个 MethodNode 对象
      */
@@ -72,6 +72,50 @@ object GraphUtils {
 
         val className = getClassName(method)
         val sourceSpan = getSourceSpan(method)
+        val methodNode = MethodNode(className, method.name, returnType, parameters, sourceSpan = sourceSpan)
+        val signature = getMethodSignature(methodNode)
+
+        return methodNodeCache.getOrPut(signature) { methodNode }
+    }
+
+    /**
+     * Get method node 方法用来获取方法节点，带引用位置
+     * @param method 传入一个 PsiMethod 对象
+     * @param reference 方法引用
+     * @return 返回一个 MethodNode 对象
+     */
+    fun getMethodNode(method: PsiMethod, reference: PsiReference): MethodNode {
+        val returnType = method.returnType?.canonicalText ?: "void"
+        val parameters = method.parameterList.parameters.map { param ->
+            val name = param.name ?: "Unknown"
+            val type = param.type.canonicalText
+            ParameterNode(name, type)
+        }
+
+        val className = getClassName(method)
+        val sourceSpan = getReferenceSourceSpan(reference)
+        val methodNode = MethodNode(className, method.name, returnType, parameters, sourceSpan = sourceSpan)
+        val signature = getMethodSignature(methodNode)
+
+        return methodNodeCache.getOrPut(signature) { methodNode }
+    }
+
+    /**
+     * Get method node 方法用来获取方法节点，引用位置通过表达式获取
+     * @param method 传入一个 PsiMethod 对象
+     * @param expression 表达式用于获取位置
+     * @return 返回一个 MethodNode 对象
+     */
+    fun getMethodNode(method: PsiMethod, expression: PsiExpression): MethodNode {
+        val returnType = method.returnType?.canonicalText ?: "void"
+        val parameters = method.parameterList.parameters.map { param ->
+            val name = param.name ?: "Unknown"
+            val type = param.type.canonicalText
+            ParameterNode(name, type)
+        }
+
+        val className = getClassName(method)
+        val sourceSpan = getSourceSpan(expression)
         val methodNode = MethodNode(className, method.name, returnType, parameters, sourceSpan = sourceSpan)
         val signature = getMethodSignature(methodNode)
 
@@ -104,7 +148,12 @@ object GraphUtils {
 //        val endLine = document?.getLineNumber(textRange.endOffset) ?: 0
 //        val startColumn = textRange.startOffset - (document?.getLineStartOffset(startLine) ?: 0)
 //        val endColumn = textRange.endOffset - (document?.getLineStartOffset(endLine) ?: 0)
-        return SourceSpan(containingFile,virtualFile,offset)
+        return SourceSpan(containingFile, virtualFile, offset)
+    }
+
+    private fun getReferenceSourceSpan(reference: PsiReference): SourceSpan {
+        val element = reference.element
+        return getSourceSpan(element)
     }
 
     /**
