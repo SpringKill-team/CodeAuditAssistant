@@ -31,7 +31,6 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
 
 //    private val diProcessor = DIProcessor(callGraph)
 
-
     /**
      * Visit method 方法用于访问一个Java方法并将其加入调用图
      * 用栈处理递归方法调用
@@ -40,25 +39,29 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
      */
     override fun visitMethod(method: PsiMethod) {
 
-        val callerMethodNode = GraphUtils.getMethodNode(method)
-
-        // 将此方法节点加入 callGraph
-        callGraph.nodes.add(callerMethodNode)
-        currentMethodStack.push(callerMethodNode)
+        //堆栈用节点，在压栈前会被替换
+        var calleeStackNode = GraphUtils.getMethodNode(method)
 
         // 查找对该方法的所有引用，建立反向调用关系
+        // TODO 这里的逻辑我自己也混乱了，可能会有问题，后面再看
         ReferencesSearch.search(method, method.useScope).forEach { reference ->
             val callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
                 ?: return@forEach
 
-            val callerNode = GraphUtils.getMethodNode(callerMethod)
+            val calleeMethodNode = GraphUtils.getMethodNode(method, reference)
+            calleeStackNode = calleeMethodNode
+            callGraph.nodes.add(calleeMethodNode)
+
+            val callerMethodNode = GraphUtils.getMethodNode(callerMethod, reference)
             // 建立反向调用关系
-            callGraph.nodes.add(callerNode)
-            callGraph.edges.getOrPut(callerNode) { mutableSetOf() }.add(callerMethodNode)
+            callGraph.nodes.add(callerMethodNode)
+            callGraph.edges.getOrPut(callerMethodNode) { mutableSetOf() }.add(calleeMethodNode)
+
+            handleDependencyInjectionAnnotations(method, calleeMethodNode)
         }
 
-        handleDependencyInjectionAnnotations(method, callerMethodNode)
-//        diProcessor.processMethodForDI(method, callerMethodNode)
+        // 将此方法节点加入 callGraph
+        currentMethodStack.push(calleeStackNode)
 
         super.visitMethod(method)
 
@@ -80,7 +83,7 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
 
         // 解析被调用的方法
         val resolvedMethod = expression.resolveMethod() ?: return
-        val calleeMethodNode = GraphUtils.getMethodNode(resolvedMethod)
+        val calleeMethodNode = GraphUtils.getMethodNode(resolvedMethod, expression)
 
         // 将 callee 加入节点集合
         callGraph.nodes.add(calleeMethodNode)
@@ -107,7 +110,7 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
 
         // 解析构造方法
         val constructor = expression.resolveConstructor() ?: return
-        val calleeMethodNode = GraphUtils.getMethodNode(constructor)
+        val calleeMethodNode = GraphUtils.getMethodNode(constructor, expression)
 
         // 将 callee 加入节点集合
         callGraph.nodes.add(calleeMethodNode)
@@ -175,11 +178,14 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
         val caller = currentMethodStack.peek()
         val resolvedElement = expression.resolve() ?: return
         if (resolvedElement is PsiMethod) {
-            val calleeMethodNode = GraphUtils.getMethodNode(resolvedElement)
-            callGraph.nodes.add(calleeMethodNode)
-            callGraph.edges
-                .getOrPut(caller) { mutableSetOf() }
-                .add(calleeMethodNode)
+            // TODO 还有一个地方处理了reference,要记得合并一下
+            val calleeMethodNode = expression.reference?.let { GraphUtils.getMethodNode(resolvedElement, it) }
+            calleeMethodNode?.let {
+                callGraph.nodes.add(it)
+                callGraph.edges
+                    .getOrPut(caller) { mutableSetOf() }
+                    .add(it)
+            }
         }
     }
 
@@ -199,7 +205,7 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
             // 其他的慢慢加吧
             ) {
                 // 如果是构造方法或者带有此注解的方法，可能被框架在运行时调用
-                val containerMethodNode = MethodNode("Container","Container", "Framework", emptyList(), emptyList())
+                val containerMethodNode = MethodNode("Container", "Container", "Framework", emptyList(), emptyList())
                 callGraph.nodes.add(containerMethodNode)
 
                 callGraph.edges
@@ -225,7 +231,8 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
         // 测试下能不能行
         if (qualifierExpression != null && methodName == "getBean") {
             // 将容器节点与被调用方法或类做额外的链接
-            val containerMethodNode = MethodNode("ApplicationContext","ApplicationContext", "Spring", emptyList(), emptyList())
+            val containerMethodNode =
+                MethodNode("ApplicationContext", "ApplicationContext", "Spring", emptyList(), emptyList())
             callGraph.nodes.add(containerMethodNode)
             // caller -> container
             callGraph.edges
@@ -244,8 +251,8 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
      * @param project
      * @return
      */
-    fun getCallGraph(project : Project): CallGraph {
-        val diProcessor = DIProcessor(project ,callGraph)
+    fun getCallGraph(project: Project): CallGraph {
+        val diProcessor = DIProcessor(project, callGraph)
         ApplicationManager.getApplication().runReadAction {
             diProcessor.process()
             // 如果 process() 内部依赖 PSI 的方法，也就安全了
