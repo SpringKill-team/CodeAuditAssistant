@@ -7,6 +7,7 @@ import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.*
 import com.intellij.ui.treeStructure.Tree
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
+import org.skgroup.securityinspector.enums.AnalysisScope
 import org.skgroup.securityinspector.enums.MainVulnerabilityType
 import org.skgroup.securityinspector.enums.SubVulnerabilityType
 import org.skgroup.securityinspector.sinkrules.SinkList
@@ -26,6 +27,7 @@ class CallGraphUIComponents(val project: Project) {
     val rootList = JBList(rootListModel)
     val sinkListModel = DefaultListModel<MethodNode>()
     val sinkList = JBList(sinkListModel)
+    val searchComboBox = ComboBox<AnalysisScope>(AnalysisScope.values())
 
     val searchResultRootNode = DefaultMutableTreeNode("Search Results")
     val searchResultTreeModel = DefaultTreeModel(searchResultRootNode)
@@ -69,6 +71,7 @@ class CallGraphUIComponents(val project: Project) {
     private fun createNorthContainer(): JBPanel<JBPanel<*>> {
         val topPanel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT)).apply {
             add(runAnalysisButton)
+            add(searchComboBox)
             add(progressBar)
         }
         val searchPanel = createSearchPanel()
@@ -303,7 +306,7 @@ class CallGraphUIComponents(val project: Project) {
     }
 
     private fun createTitledPanel(title: String, component: JComponent): JPanel {
-        return JPanel(BorderLayout()).apply {
+        return JBPanel<JBPanel<*>>(BorderLayout()).apply {
             border = BorderFactory.createTitledBorder(title)
             add(component, BorderLayout.CENTER)
         }

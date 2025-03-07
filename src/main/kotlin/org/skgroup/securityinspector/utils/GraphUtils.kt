@@ -223,10 +223,14 @@ object GraphUtils {
         val visited = mutableSetOf<MethodNode>()
         val path = mutableListOf<MethodNode>()
 
+        fun isMatch(n1: MethodNode, n2: MethodNode): Boolean {
+            return n1.className == n2.className && n1.name == n2.name
+        }
+
         fun dfs(cur: MethodNode): Boolean {
             visited.add(cur)
             path.add(cur)
-            if (cur == target) return true
+            if (isMatch(cur,target)) return true
 
             val nexts = graph.edges[cur].orEmpty()
             for (n in nexts) {
@@ -250,6 +254,29 @@ object GraphUtils {
         return ApplicationManager.getApplication().runReadAction<List<PsiFile>> {
             val result = mutableListOf<PsiFile>()
             val scope = GlobalSearchScope.projectScope(project)
+            val vFiles = FileTypeIndex.getFiles(JavaFileType.INSTANCE, scope)
+
+            val psiManager = PsiManager.getInstance(project)
+            for (vf: VirtualFile in vFiles) {
+                val psiFile = psiManager.findFile(vf)
+                if (psiFile != null && psiFile.language == JavaLanguage.INSTANCE) {
+                    result.add(psiFile)
+                }
+            }
+            result
+        }
+    }
+
+    /**
+     * Find scope java files 方法查找指定范围内的Java文件
+     *
+     * @param project
+     * @param scope
+     * @return
+     */
+    fun findScopeJavaFiles(project: Project, scope: GlobalSearchScope): List<PsiFile> {
+        return ApplicationManager.getApplication().runReadAction<List<PsiFile>> {
+            val result = mutableListOf<PsiFile>()
             val vFiles = FileTypeIndex.getFiles(JavaFileType.INSTANCE, scope)
 
             val psiManager = PsiManager.getInstance(project)
