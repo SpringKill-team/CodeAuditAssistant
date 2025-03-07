@@ -32,7 +32,8 @@ class CallGraphToolWindowPanel(private val project: Project) {
                 uiComponents.progressBar,
                 uiComponents.infoArea,
                 uiComponents.rootListModel,
-                uiComponents.sinkListModel
+                uiComponents.sinkListModel,
+                uiComponents.searchComboBox
             )
             uiComponents.runAnalysisButton.isEnabled = true
         }
