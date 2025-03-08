@@ -14,7 +14,7 @@ import org.skgroup.securityinspector.ui.service.CallGraphSearcher
  * @constructor Create Call graph tool window panel
  */
 class CallGraphToolWindowPanel(private val project: Project) {
-    private val uiComponents = CallGraphUIComponents(project)
+    val uiComponents = CallGraphUIComponents(project)
     val mainPanel = uiComponents.createMainPanel()
 
     private val service = CallGraphMemoryService.getInstance(project)
