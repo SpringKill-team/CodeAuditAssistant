@@ -9,8 +9,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiMethod
 import com.intellij.psi.search.ProjectScope
 import com.intellij.ui.Gray
+import com.intellij.ui.components.JBTextArea
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraphBuilder
@@ -106,6 +108,81 @@ object CallGraphGenerator {
                     ApplicationManager.getApplication().invokeLater {
                         CallGraphMemoryService.getInstance(project).setCallGraph(graph)
                         infoArea.append("Rebuilt CallGraph with ${graph.nodes.size} methods.\n")
+                        updateRootAndSinkLists(graph, rootListModel)
+                    }
+                }
+            }
+
+            override fun onFinished() {
+                SwingUtilities.invokeLater {
+                    progressBar.isVisible = false
+                    progressBar.isIndeterminate = false
+                }
+            }
+
+            override fun onCancel() {
+                SwingUtilities.invokeLater {
+                    infoArea.append("[Cancelled] Call graph generation was cancelled.\n")
+                }
+            }
+        })
+    }
+
+    /**
+     * Generate 方法重载，为单个Method生成调用图
+     *
+     * @param project
+     * @param method
+     * @param progressBar
+     * @param infoArea
+     * @param rootListModel
+     * @param sinkListModel
+     */
+    fun generate(
+        project: Project,
+        method: PsiMethod,
+        progressBar: JProgressBar,
+        infoArea: JBTextArea,
+        rootListModel: DefaultListModel<MethodNode>,
+        sinkListModel: DefaultListModel<MethodNode>
+    ) {
+        progressBar.apply {
+            isVisible = true
+            isIndeterminate = true
+            background = Gray._240
+            font = Font("SansSerif", Font.BOLD, 12)
+            string = "Initializing..."
+        }
+
+        // TODO 现在的调用图只有一个方法的上下文，非常残缺，需要拓展
+        // TODO 现在每次生成会覆盖原有调用图（因为方法从完整调用图得来），对于单个方法，需要考虑增量
+        ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Generating CallGraph", true) {
+            private var newGraph: CallGraph? = null
+
+            override fun run(indicator: ProgressIndicator) {
+
+                if (indicator.isCanceled) {
+                    return
+                }
+
+                indicator.isIndeterminate = false
+                indicator.fraction = 0.0
+                indicator.text = "Analyzing ${method.name}"
+
+                val builder = CallGraphBuilder()
+                ApplicationManager.getApplication().runReadAction {
+                    method.accept(builder)
+                }
+                progressBar.string = "Building CallGraph for method ${method.name}"
+
+                newGraph = builder.getCallGraph(project)
+            }
+
+            override fun onSuccess() {
+                newGraph?.let { graph ->
+                    ApplicationManager.getApplication().invokeLater {
+                        CallGraphMemoryService.getInstance(project).setCallGraph(graph)
+                        infoArea.append("Build CallGraph for method ${method.name} with ${graph.nodes.size} methods.\n")
                         updateRootAndSinkLists(graph, rootListModel)
                     }
                 }
