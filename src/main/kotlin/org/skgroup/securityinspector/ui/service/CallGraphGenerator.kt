@@ -7,10 +7,11 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiJavaFile
-import com.intellij.psi.PsiMethod
+import com.intellij.psi.*
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
+import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.ui.Gray
 import com.intellij.ui.components.JBTextArea
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
@@ -151,7 +152,6 @@ object CallGraphGenerator {
             string = "Initializing..."
         }
 
-        // TODO 现在的调用图只有一个方法的上下文，非常残缺，需要拓展
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Generating CallGraph", true) {
             private var tempGraph: CallGraph? = null
 
@@ -166,6 +166,16 @@ object CallGraphGenerator {
                 indicator.text = "Analyzing ${method.name}"
 
                 val builder = CallGraphBuilder()
+                ReferencesSearch.search(method, GlobalSearchScope.projectScope(project)).forEach { reference ->
+                    var callerMethod: PsiMethod = method
+                    ApplicationManager.getApplication().runReadAction {
+                        callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
+                            ?: return@runReadAction
+                    }
+                    if (callerMethod != method) {
+                        generate(project, callerMethod, progressBar, infoArea, rootListModel)
+                    }
+                }
                 ApplicationManager.getApplication().runReadAction {
                     method.accept(builder)
                 }
@@ -194,7 +204,7 @@ object CallGraphGenerator {
                         currentGraph.merge(delta)
                         memoryService.setCallGraph(currentGraph)
 
-                        infoArea.append("Added ${delta.nodes.size} nodes for Call graph")
+                        infoArea.append("Added ${delta.nodes.size} nodes for Call graph\n")
                         updateRootAndSinkLists(currentGraph, rootListModel)
                     }
                 }
