@@ -32,7 +32,6 @@ class CallGraphToolWindowPanel(private val project: Project) {
                 uiComponents.progressBar,
                 uiComponents.infoArea,
                 uiComponents.rootListModel,
-                uiComponents.sinkListModel,
                 uiComponents.searchComboBox
             )
             uiComponents.runAnalysisButton.isEnabled = true
@@ -63,10 +62,8 @@ class CallGraphToolWindowPanel(private val project: Project) {
 
     private fun updateRootAndSinkLists(callGraph: CallGraph) {
         uiComponents.rootListModel.clear()
-//        uiComponents.sinkListModel.clear()
 
         val (roots, sinks) = CallGraphSearcher.calculateRootsAndSinks(callGraph)
         roots.forEach(uiComponents.rootListModel::addElement)
-//        sinks.forEach(uiComponents.sinkListModel::addElement)
     }
 }
