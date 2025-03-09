@@ -7,10 +7,11 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiJavaFile
-import com.intellij.psi.PsiMethod
+import com.intellij.psi.*
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
+import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.ui.Gray
 import com.intellij.ui.components.JBTextArea
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
@@ -29,7 +30,6 @@ object CallGraphGenerator {
         progressBar: JProgressBar,
         infoArea: JTextArea,
         rootListModel: DefaultListModel<MethodNode>,
-        sinkListModel: DefaultListModel<MethodNode>,
         searchComboBox: ComboBox<AnalysisScope>
     ) {
         progressBar.apply {
@@ -136,7 +136,6 @@ object CallGraphGenerator {
      * @param progressBar
      * @param infoArea
      * @param rootListModel
-     * @param sinkListModel
      */
     fun generate(
         project: Project,
@@ -144,7 +143,6 @@ object CallGraphGenerator {
         progressBar: JProgressBar,
         infoArea: JBTextArea,
         rootListModel: DefaultListModel<MethodNode>,
-        sinkListModel: DefaultListModel<MethodNode>
     ) {
         progressBar.apply {
             isVisible = true
@@ -154,10 +152,8 @@ object CallGraphGenerator {
             string = "Initializing..."
         }
 
-        // TODO 现在的调用图只有一个方法的上下文，非常残缺，需要拓展
-        // TODO 现在每次生成会覆盖原有调用图（因为方法从完整调用图得来），对于单个方法，需要考虑增量
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Generating CallGraph", true) {
-            private var newGraph: CallGraph? = null
+            private var tempGraph: CallGraph? = null
 
             override fun run(indicator: ProgressIndicator) {
 
@@ -170,20 +166,46 @@ object CallGraphGenerator {
                 indicator.text = "Analyzing ${method.name}"
 
                 val builder = CallGraphBuilder()
+                ReferencesSearch.search(method, GlobalSearchScope.projectScope(project)).forEach { reference ->
+                    var callerMethod: PsiMethod = method
+                    ApplicationManager.getApplication().runReadAction {
+                        callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
+                            ?: return@runReadAction
+                    }
+                    if (callerMethod != method) {
+                        generate(project, callerMethod, progressBar, infoArea, rootListModel)
+                    }
+                }
                 ApplicationManager.getApplication().runReadAction {
                     method.accept(builder)
                 }
                 progressBar.string = "Building CallGraph for method ${method.name}"
 
-                newGraph = builder.getCallGraph(project)
+                tempGraph = builder.getCallGraph(project)
             }
 
+            //            override fun onSuccess() {
+//                newGraph?.let { graph ->
+//                    ApplicationManager.getApplication().invokeLater {
+//                        CallGraphMemoryService.getInstance(project).setCallGraph(graph)
+//                        infoArea.append("Build CallGraph for method ${method.name} with ${graph.nodes.size} methods.\n")
+//                        updateRootAndSinkLists(graph, rootListModel)
+//                    }
+//                }
+//            }
+            //注释原有图生成，采用增量方式替换
             override fun onSuccess() {
-                newGraph?.let { graph ->
+                tempGraph?.let { delta ->
                     ApplicationManager.getApplication().invokeLater {
-                        CallGraphMemoryService.getInstance(project).setCallGraph(graph)
-                        infoArea.append("Build CallGraph for method ${method.name} with ${graph.nodes.size} methods.\n")
-                        updateRootAndSinkLists(graph, rootListModel)
+                        val memoryService = CallGraphMemoryService.getInstance(project)
+                        val currentGraph = memoryService.getCallGraph() ?: CallGraph()
+
+                        // 合并
+                        currentGraph.merge(delta)
+                        memoryService.setCallGraph(currentGraph)
+
+                        infoArea.append("Added ${delta.nodes.size} nodes for Call graph\n")
+                        updateRootAndSinkLists(currentGraph, rootListModel)
                     }
                 }
             }
@@ -206,21 +228,13 @@ object CallGraphGenerator {
     private fun updateRootAndSinkLists(
         callGraph: CallGraph,
         rootListModel: DefaultListModel<MethodNode>,
-//        sinkListModel: DefaultListModel<MethodNode>
     ) {
         rootListModel.clear()
-//        sinkListModel.clear()
 
         val allCallees = callGraph.edges.values.flatten().toSet()
         val roots = callGraph.nodes.filter { it !in allCallees }.sortedBy { it.name }
 
-        val sinks = callGraph.nodes.filter { node ->
-            val callees = callGraph.edges[node]
-            callees.isNullOrEmpty()
-        }.sortedBy { it.name }
-
         roots.forEach(rootListModel::addElement)
-//        sinks.forEach(sinkListModel::addElement)
     }
 
     private fun showModuleSelectorDialog(project: Project): Module {

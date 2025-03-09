@@ -43,7 +43,6 @@ class BuildCallGraphAction : AnAction() {
             uiComponents.progressBar,
             uiComponents.infoArea,
             uiComponents.rootListModel,
-            uiComponents.sinkListModel
         )
 
     }
