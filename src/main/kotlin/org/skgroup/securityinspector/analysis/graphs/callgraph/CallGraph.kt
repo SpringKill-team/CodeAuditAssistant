@@ -27,4 +27,19 @@ data class CallGraph(
     fun addSpecialNode(node: MethodNode, type: NodeType) {
         nodeTypes[node] = type
     }
+
+    fun merge(other: CallGraph) {
+        // 合并节点
+        this.nodes.addAll(other.nodes)
+
+        // 合并边
+        other.edges.forEach { (from, toSet) ->
+            val existingSet = this.edges.getOrPut(from) { mutableSetOf() }
+            existingSet.addAll(toSet)
+        }
+
+        this.edgeTypes.putAll(other.edgeTypes)
+        this.nodeTypes.putAll(other.nodeTypes)
+    }
+
 }

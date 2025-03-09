@@ -14,7 +14,7 @@ import org.skgroup.securityinspector.ui.service.CallGraphSearcher
  * @constructor Create Call graph tool window panel
  */
 class CallGraphToolWindowPanel(private val project: Project) {
-    private val uiComponents = CallGraphUIComponents(project)
+    val uiComponents = CallGraphUIComponents(project)
     val mainPanel = uiComponents.createMainPanel()
 
     private val service = CallGraphMemoryService.getInstance(project)
@@ -32,7 +32,6 @@ class CallGraphToolWindowPanel(private val project: Project) {
                 uiComponents.progressBar,
                 uiComponents.infoArea,
                 uiComponents.rootListModel,
-                uiComponents.sinkListModel,
                 uiComponents.searchComboBox
             )
             uiComponents.runAnalysisButton.isEnabled = true
@@ -63,10 +62,8 @@ class CallGraphToolWindowPanel(private val project: Project) {
 
     private fun updateRootAndSinkLists(callGraph: CallGraph) {
         uiComponents.rootListModel.clear()
-//        uiComponents.sinkListModel.clear()
 
         val (roots, sinks) = CallGraphSearcher.calculateRootsAndSinks(callGraph)
         roots.forEach(uiComponents.rootListModel::addElement)
-//        sinks.forEach(uiComponents.sinkListModel::addElement)
     }
 }

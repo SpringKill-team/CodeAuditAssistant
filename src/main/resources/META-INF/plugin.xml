@@ -435,6 +435,11 @@
                 implementationClass="org.skgroup.securityinspector.sinkrules.xxe.XXEInspector"
         />
 
-
     </extensions>
+
+    <actions>
+        <action id="BuildCallGraphForMethod" class="org.skgroup.securityinspector.actions.BuildCallGraphAction" text="Build Call Graph">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>
