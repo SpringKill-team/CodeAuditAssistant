@@ -3,15 +3,28 @@ package org.skgroup.securityinspector.utils
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
+import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.search.ProjectScope
+import com.intellij.psi.search.searches.ReferencesSearch
+import org.skgroup.securityinspector.analysis.ast.ProjectIssue
 import org.skgroup.securityinspector.analysis.ast.SourceSpan
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.ast.nodes.ParameterNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
+import org.skgroup.securityinspector.enums.SinkCallMode
+import org.skgroup.securityinspector.sinkrules.SinkList
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * Graph utils 是一些用于处理图的工具方法
@@ -65,7 +78,7 @@ object GraphUtils {
     fun getMethodNode(method: PsiMethod): MethodNode {
         val returnType = method.returnType?.canonicalText ?: "void"
         val parameters = method.parameterList.parameters.map { param ->
-            val name = param.name ?: "Unknown"
+            val name = param.name
             val type = param.type.canonicalText
             ParameterNode(name, type)
         }
@@ -87,7 +100,7 @@ object GraphUtils {
     fun getMethodNode(method: PsiMethod, reference: PsiReference): MethodNode {
         val returnType = method.returnType?.canonicalText ?: "void"
         val parameters = method.parameterList.parameters.map { param ->
-            val name = param.name ?: "Unknown"
+            val name = param.name
             val type = param.type.canonicalText
             ParameterNode(name, type)
         }
@@ -109,7 +122,7 @@ object GraphUtils {
     fun getMethodNode(method: PsiMethod, expression: PsiExpression): MethodNode {
         val returnType = method.returnType?.canonicalText ?: "void"
         val parameters = method.parameterList.parameters.map { param ->
-            val name = param.name ?: "Unknown"
+            val name = param.name
             val type = param.type.canonicalText
             ParameterNode(name, type)
         }
@@ -142,12 +155,6 @@ object GraphUtils {
         val containingFile = element.containingFile
         val virtualFile = containingFile.virtualFile
         val offset = element.textOffset
-//        val textRange = element.textRange?:return SourceSpan(containingFile,virtualFile,0,0,0,0)
-//        val document = containingFile.viewProvider.document
-//        val startLine = document?.getLineNumber(textRange.startOffset) ?: 0
-//        val endLine = document?.getLineNumber(textRange.endOffset) ?: 0
-//        val startColumn = textRange.startOffset - (document?.getLineStartOffset(startLine) ?: 0)
-//        val endColumn = textRange.endOffset - (document?.getLineStartOffset(endLine) ?: 0)
         return SourceSpan(containingFile, virtualFile, offset)
     }
 
@@ -230,7 +237,7 @@ object GraphUtils {
         fun dfs(cur: MethodNode): Boolean {
             visited.add(cur)
             path.add(cur)
-            if (isMatch(cur,target)) return true
+            if (isMatch(cur, target)) return true
 
             val nexts = graph.edges[cur].orEmpty()
             for (n in nexts) {
@@ -245,6 +252,21 @@ object GraphUtils {
         return if (dfs(node)) path.toList() else null
     }
 
+    fun findLibsJars(project: Project): List<VirtualFile> {
+        val libsDir = project.basePath?.let { Paths.get(it, "libs") } ?: return emptyList()
+        if (!Files.exists(libsDir)) return emptyList()
+
+        return Files.walk(libsDir)
+            .filter { it.toString().endsWith(".jar") }
+            .map { LocalFileSystem.getInstance().findFileByNioFile(it) }
+            .toList() as List<VirtualFile>
+    }
+
+    fun createLibsSearchScope(project: Project): GlobalSearchScope {
+        val jars = findLibsJars(project)
+        return GlobalSearchScope.filesScope(project, jars)
+    }
+
     /**
      * Find all java files 方法用来查找项目中的所有 Java 文件
      * @param project 传入一个 Project 对象
@@ -254,12 +276,13 @@ object GraphUtils {
         return ApplicationManager.getApplication().runReadAction<List<PsiFile>> {
             val result = mutableListOf<PsiFile>()
             val scope = GlobalSearchScope.projectScope(project)
+//            val scope = GlobalSearchScope.allScope(project)
             val vFiles = FileTypeIndex.getFiles(JavaFileType.INSTANCE, scope)
 
             val psiManager = PsiManager.getInstance(project)
             for (vf: VirtualFile in vFiles) {
                 val psiFile = psiManager.findFile(vf)
-                if (psiFile != null && psiFile.language == JavaLanguage.INSTANCE) {
+                if (psiFile != null && psiFile.language == JavaLanguage.INSTANCE && !vf.path.contains("jdks")) {
                     result.add(psiFile)
                 }
             }
@@ -289,5 +312,105 @@ object GraphUtils {
             result
         }
     }
+
+    /**
+     * Collect project issues  收集项目sink点，代替原始sink注册
+     *
+     * @param project
+     * @param chunkSize
+     * @param callback
+     * @receiver
+     */
+    fun collectProjectIssues(
+        project: Project,
+        chunkSize: Int = 50,
+        callback: (List<ProjectIssue>) -> Unit,
+    ) {
+        DumbService.getInstance(project).runWhenSmart {
+            ProgressManager.getInstance().runProcessWithProgressAsynchronously(
+                object : Task.Backgroundable(project, "Analyzing sink methods", true) {
+                    private val issues = mutableListOf<ProjectIssue>()
+
+                    override fun run(indicator: ProgressIndicator) {
+                        ApplicationManager.getApplication().runReadAction {
+                            val javaFiles = FileTypeIndex.getFiles(
+                                JavaFileType.INSTANCE,
+                                GlobalSearchScope.projectScope(project)
+                            ).asSequence()
+                            javaFiles.chunked(chunkSize).forEachIndexed { index, chunk ->
+                                if (indicator.isCanceled) return@runReadAction
+
+                                indicator.text = "Processing files ${index * chunkSize + 1}~${(index + 1) * chunkSize}"
+                                indicator.fraction = index.toDouble() / (javaFiles.count() / chunkSize)
+
+                                processFileChunk(project, chunk, indicator)
+
+                                ApplicationManager.getApplication().invokeLater {
+                                    callback(issues.toList())
+                                }
+
+                            }
+                        }
+
+                    }
+
+                    private fun processFileChunk(
+                        project: Project,
+                        files: List<VirtualFile>,
+                        indicator: ProgressIndicator
+                    ) {
+                        ApplicationManager.getApplication().runReadAction {
+                            val manager = PsiManager.getInstance(project)
+                            files.forEach { virtualFile ->
+                                if (indicator.isCanceled) return@runReadAction
+                                if (virtualFile.path.contains("src/test")) return@forEach
+
+                                if (!virtualFile.isValid) return@forEach
+
+                                val psiFile = manager.findFile(virtualFile) as? PsiJavaFile ?: return@forEach
+                                psiFile.accept(object : JavaRecursiveElementWalkingVisitor() {
+                                    override fun visitMethodCallExpression(call: PsiMethodCallExpression) {
+                                        if (!call.isValid || indicator.isCanceled) return
+
+                                        val methodName = call.methodExpression.referenceName ?: return
+                                        val className = call.resolveMethod()?.containingClass?.qualifiedName ?: return
+
+                                        val sinkMatch = SinkList.ALL_SUB_VUL_DEFINITIONS.firstOrNull { sink ->
+                                            sink.methodSinks[className]?.contains(methodName) == true
+                                        } ?: return
+
+                                        val document = PsiDocumentManager.getInstance(project).getDocument(psiFile)
+                                        val line = document?.getLineNumber(call.textRange.startOffset)?.plus(1) ?: -1
+
+                                        var callMode = SinkCallMode.SINGLE_SINK
+                                        val method = call.resolveMethod()
+                                        val hasCall = method?.let {
+                                            ReferencesSearch.search(it, ProjectScope.getProjectScope(project))
+                                                .findFirst()
+                                        } != null
+                                        synchronized(issues) {
+                                            if (hasCall) {
+                                                callMode = SinkCallMode.HAS_CALL
+                                            }
+                                            issues.add(
+                                                ProjectIssue(
+                                                    virtualFile,
+                                                    line,
+                                                    sinkMatch.subType.parent.name,
+                                                    sinkMatch.subType.name,
+                                                    callMode
+                                                )
+                                            )
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                    }
+                }, EmptyProgressIndicator()
+            )
+        }
+    }
+
 
 }

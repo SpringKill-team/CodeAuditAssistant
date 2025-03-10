@@ -10,22 +10,23 @@ import com.intellij.psi.PsiMethod
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.skgroup.securityinspector.ui.service.CallGraphGenerator
+import org.skgroup.securityinspector.ui.service.CallGraphSearcher
 import org.skgroup.securityinspector.ui.service.SecurityInspectorProjectService
 
 /**
- * 类描述：BuildCallGraphAction 类用于为单个方法构建调用图。
+ * 类描述：SearchAsSinkAction 类用于增加一个右键菜单，直接显示调用链。
  *
  * @author springkill
  * @version 1.0
+ * @since 2025/3/9
  */
-class BuildCallGraphAction : AnAction() {
+class SearchAsSinkAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.getData(CommonDataKeys.PROJECT)
         val psiElement = e.getData(CommonDataKeys.PSI_ELEMENT)
 
         if (psiElement is PsiMethod) {
-            buildCallGraphForMethod(project, psiElement)
+            searchAsSink(project, psiElement)
         }
     }
 
@@ -34,6 +35,7 @@ class BuildCallGraphAction : AnAction() {
 //        val psiElement = e.getData(CommonDataKeys.PSI_ELEMENT)
 
         CoroutineScope(Dispatchers.Default).launch {
+
             val isMethod = readAction {
                 val psiElement = e.getData(CommonDataKeys.PSI_ELEMENT)
                 psiElement is PsiMethod
@@ -45,20 +47,20 @@ class BuildCallGraphAction : AnAction() {
         }
     }
 
-    private fun buildCallGraphForMethod(project: Project?, method: PsiMethod) {
+    private fun searchAsSink(project: Project?, method: PsiMethod) {
         val service = project?.getService(SecurityInspectorProjectService::class.java)
 
         val mainToolWindow = service?.mainToolWindow ?: return
         val callGraphPanel = mainToolWindow.analysisPanel
         val uiComponents = callGraphPanel.uiComponents
-
-        CallGraphGenerator.generate(
-            project,
-            method,
-            uiComponents.progressBar,
+        uiComponents.sinkField.text = method.name
+        CallGraphSearcher.search(
+            uiComponents.sourceField,
+            uiComponents.sinkField,
             uiComponents.infoArea,
-            uiComponents.rootListModel,
+            uiComponents.searchResultRootNode,
+            uiComponents.searchResultTreeModel,
+            project
         )
-
     }
 }

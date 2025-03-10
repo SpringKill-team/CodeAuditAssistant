@@ -43,8 +43,10 @@
                     anchor="left"
                     icon="/icons/pluginIcon.svg"
         />
+        <toolWindow id="Sink Finder" anchor="bottom"
+                    factoryClass="org.skgroup.securityinspector.ui.IssueViewWindow"/>
 
-        <localInspection
+        <!--<localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.SystemEXITDOS"
@@ -254,12 +256,12 @@
                 bundle="InspectionBundle" key="vuln.name.RhinoRCE"
                 implementationClass="org.skgroup.securityinspector.sinkrules.rce.RhinoRCE"
         />
-<!--        <localInspection-->
-<!--                language="JAVA" groupPath="Security"-->
-<!--                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"-->
-<!--                bundle="InspectionBundle" key="vuln.name.RuntimeRCE"-->
-<!--                implementationClass="org.skgroup.securityinspector.sinkrules.rce.RuntimeRCE"-->
-<!--        />-->
+&lt;!&ndash;        <localInspection&ndash;&gt;
+&lt;!&ndash;                language="JAVA" groupPath="Security"&ndash;&gt;
+&lt;!&ndash;                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"&ndash;&gt;
+&lt;!&ndash;                bundle="InspectionBundle" key="vuln.name.RuntimeRCE"&ndash;&gt;
+&lt;!&ndash;                implementationClass="org.skgroup.securityinspector.sinkrules.rce.RuntimeRCE"&ndash;&gt;
+&lt;!&ndash;        />&ndash;&gt;
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
@@ -433,12 +435,17 @@
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.XXE"
                 implementationClass="org.skgroup.securityinspector.sinkrules.xxe.XXEInspector"
-        />
+        />-->
 
+        <annotator language="JAVA" implementationClass="org.skgroup.securityinspector.utils.ProblemAnnotator"/>
     </extensions>
 
     <actions>
         <action id="BuildCallGraphForMethod" class="org.skgroup.securityinspector.actions.BuildCallGraphAction" text="Build Call Graph">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
+        <action id="SearchAsSink" class="org.skgroup.securityinspector.actions.SearchAsSinkAction" text="Search As Sink">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
     </actions>

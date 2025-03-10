@@ -3,6 +3,7 @@ package org.skgroup.securityinspector.ui.component
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.ui.Gray
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.*
 import com.intellij.ui.treeStructure.Tree
@@ -52,7 +53,7 @@ class CallGraphUIComponents(val project: Project) {
 
     private fun createProgressBar() = JProgressBar().apply {
         isStringPainted = true
-        background = Color(240, 240, 240)
+        background = Gray._240
         font = Font("SansSerif", Font.BOLD, 12)
         border = BorderFactory.createEmptyBorder(2, 10, 2, 10)
         preferredSize = Dimension(300, 20)
@@ -187,14 +188,6 @@ class CallGraphUIComponents(val project: Project) {
                     // 假设这里存了一个 MethodNode或字符串
                     val userObject = node.userObject
 
-                    // 如果 userObject 是个 MethodNode，就取 node.name
-                    // 如果只是字符串，就直接复制它
-                    val textToCopy = when (userObject) {
-                        is MethodNode -> userObject.name
-                        is String -> userObject
-                        else -> return
-                    }
-
                     if(userObject is MethodNode){
                         val offset = userObject.sourceSpan
                         // TODO 优化跳转到源码/Class的位置
@@ -204,14 +197,6 @@ class CallGraphUIComponents(val project: Project) {
                         }
                     }
 
-                    // 把 textToCopy 写进剪贴板
-                    val clipboard = Toolkit.getDefaultToolkit().systemClipboard
-                    val selection = java.awt.datatransfer.StringSelection(textToCopy)
-                    clipboard.setContents(selection, selection)
-
-                    // 如果想给个提示，可以在这里加日志或弹窗
-                    infoArea.append("Copied $textToCopy\n")
-//                     Messages.showInfoMessage("Copied $textToCopy", "Clipboard")
                 }
             }
         })
