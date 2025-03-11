@@ -375,8 +375,8 @@ object GraphUtils {
                                         val methodName = call.methodExpression.referenceName ?: return
                                         val className = call.resolveMethod()?.containingClass?.qualifiedName ?: return
 
-                                        val sinkMatch = SinkList.ALL_SUB_VUL_DEFINITIONS.firstOrNull { sink ->
-                                            sink.methodSinks[className]?.contains(methodName) == true
+                                        val sinkMatch = SinkList.ALL_SUB_VUL_DEFINITIONS.firstOrNull { callSink ->
+                                            callSink.methodSinks[className]?.contains(methodName) == true
                                         } ?: return
 
                                         val document = PsiDocumentManager.getInstance(project).getDocument(psiFile)
@@ -396,6 +396,46 @@ object GraphUtils {
                                                 ProjectIssue(
                                                     virtualFile,
                                                     line,
+                                                    className,
+                                                    methodName,
+                                                    sinkMatch.subType.parent.name,
+                                                    sinkMatch.subType.name,
+                                                    callMode
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                    override fun visitNewExpression(new: PsiNewExpression) {
+                                        if (!new.isValid || indicator.isCanceled) return
+
+
+                                        val methodName = "<init>"
+                                        val className = new.classReference?.qualifiedName ?: return
+
+                                        val sinkMatch = SinkList.ALL_SUB_VUL_DEFINITIONS.firstOrNull { conSink ->
+                                            conSink.constructorSinks.contains(className)
+                                        } ?: return
+
+                                        val document = PsiDocumentManager.getInstance(project).getDocument(psiFile)
+                                        val line = document?.getLineNumber(new.textRange.startOffset)?.plus(1) ?: -1
+
+                                        var callMode = SinkCallMode.SINGLE_SINK
+                                        val method = new.resolveMethod()
+                                        val hasCall = method?.let {
+                                            ReferencesSearch.search(it, ProjectScope.getProjectScope(project))
+                                                .findFirst()
+                                        } != null
+                                        synchronized(issues) {
+                                            if (hasCall) {
+                                                callMode = SinkCallMode.HAS_CALL
+                                            }
+                                            issues.add(
+                                                ProjectIssue(
+                                                    virtualFile,
+                                                    line,
+                                                    className,
+                                                    methodName,
                                                     sinkMatch.subType.parent.name,
                                                     sinkMatch.subType.name,
                                                     callMode
@@ -411,6 +451,5 @@ object GraphUtils {
             )
         }
     }
-
 
 }
