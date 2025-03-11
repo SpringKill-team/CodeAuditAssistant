@@ -12,6 +12,8 @@ import org.skgroup.securityinspector.enums.SinkCallMode
 data class ProjectIssue(
     val file: VirtualFile,
     val line: Int,
+    val sinkClass: String,
+    val sinkMethod: String,
     val type: String,
     val subType: String,
     val callMode: SinkCallMode

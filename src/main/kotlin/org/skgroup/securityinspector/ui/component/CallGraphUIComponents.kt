@@ -278,7 +278,7 @@ class CallGraphUIComponents(val project: Project) {
         }
 
         // 组合底部信息面板
-        return JPanel(BorderLayout()).apply {
+        return JBPanel<JBPanel<*>>(BorderLayout()).apply {
             add(verticalSplit, BorderLayout.CENTER)
             add(infoPanel, BorderLayout.SOUTH)
 
@@ -290,7 +290,7 @@ class CallGraphUIComponents(val project: Project) {
         }
     }
 
-    private fun createTitledPanel(title: String, component: JComponent): JPanel {
+    private fun createTitledPanel(title: String, component: JComponent): JBPanel<JBPanel<*>> {
         return JBPanel<JBPanel<*>>(BorderLayout()).apply {
             border = BorderFactory.createTitledBorder(title)
             add(component, BorderLayout.CENTER)
