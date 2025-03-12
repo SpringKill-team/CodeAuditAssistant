@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
+import org.skgroup.securityinspector.ui.component.CallGraphUIComponents
 
 class SecurityInspectorToolWindowFactory : ToolWindowFactory {
 
@@ -17,5 +18,7 @@ class SecurityInspectorToolWindowFactory : ToolWindowFactory {
 
         // 把 Content 添加到 ToolWindow
         toolWindow.contentManager.addContent(content)
+
+        CallGraphUIComponents(project).addIssueProblemsTabToProblemsView()
     }
 }
