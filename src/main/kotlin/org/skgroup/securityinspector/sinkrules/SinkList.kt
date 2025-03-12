@@ -22,7 +22,9 @@ object SinkList {
     private val systemDosDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.SYSTEM_DOS,
         methodSinks = mapOf(
-            "java.lang.System" to setOf()
+            "java.lang.System" to setOf("exit"),
+            "java.lang.Shutdown" to setOf("exit"),
+            "java.lang.Runtime" to setOf("exit")
         ),
         constructorSinks = emptySet(),
         isCall = true
@@ -226,9 +228,8 @@ object SinkList {
     private val elRceDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.ELRCE,
         methodSinks = mapOf(
-            "javax.el.ExpressionFactory" to setOf("createMethodExpression"),
+            "javax.el.ExpressionFactory" to setOf("createMethodExpression","createValueExpression"),
             "javax.el.ELProcessor" to setOf("eval", "getValue"),
-            "javax.el.ExpressionFactory" to setOf("createValueExpression")
         ),
         constructorSinks = emptySet(),
         isCall = true
@@ -236,10 +237,8 @@ object SinkList {
 
     private val expressionRceDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.EXPRESSION_RCE,
-        methodSinks = mapOf(
-            "java.beans.Expression" to emptySet()
-        ),
-        constructorSinks = emptySet(),
+        methodSinks = emptyMap(),
+        constructorSinks = setOf("java.beans.Expression"),
         isCall = true
     )
 
@@ -604,7 +603,7 @@ object SinkList {
         subType = SubVulnerabilityType.JSOUP_SSRF,
         methodSinks = mapOf(
             "org.jsoup.Jsoup" to setOf("connect"),
-            "org.jsoup.Connection" to setOf("get", "post", "put", "delete", "options", "trace", "patch")
+            "org.jsoup.Connection" to setOf("get", "post", "put", "delete", "options", "trace", "patch","execute")
         ),
         constructorSinks = emptySet(),
         isCall = true
