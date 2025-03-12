@@ -43,8 +43,6 @@
                     anchor="left"
                     icon="/icons/pluginIcon.svg"
         />
-        <toolWindow id="Sink Finder" anchor="bottom"
-                    factoryClass="org.skgroup.securityinspector.ui.IssueViewWindow"/>
 
         <!--<localInspection
                 language="JAVA" groupPath="Security"
