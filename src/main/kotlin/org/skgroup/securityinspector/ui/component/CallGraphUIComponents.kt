@@ -1,11 +1,14 @@
 package org.skgroup.securityinspector.ui.component
 
+import com.intellij.analysis.problemsView.toolWindow.ProblemsView
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.Gray
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.*
+import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.treeStructure.Tree
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.enums.AnalysisScope
@@ -295,6 +298,23 @@ class CallGraphUIComponents(val project: Project) {
             border = BorderFactory.createTitledBorder(title)
             add(component, BorderLayout.CENTER)
         }
+    }
+
+    fun addIssueProblemsTabToProblemsView() {
+
+        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(ProblemsView.ID) ?: return
+        val contentManager = toolWindow.contentManager
+
+        val issueTab = IssueProblemsTab(project)
+        val content = ContentFactory.getInstance().createContent(issueTab.getComponent(), "Sink Finder", false)
+
+        contentManager.addContent(content)
+
+        if (!toolWindow.isVisible) {
+            toolWindow.show()
+        }
+
+        contentManager.setSelectedContent(content)
     }
 
 }

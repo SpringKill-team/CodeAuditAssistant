@@ -1,5 +1,6 @@
-package org.skgroup.securityinspector.ui
+package org.skgroup.securityinspector.ui.component
 
+import com.intellij.analysis.problemsView.toolWindow.ProblemsViewTab
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.progress.ProgressIndicator
@@ -7,14 +8,9 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.wm.ToolWindow
-import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.table.JBTable
-import org.skgroup.securityinspector.ui.component.FirstColumnRenderer
-import org.skgroup.securityinspector.ui.component.HighlightRenderer
 import org.skgroup.securityinspector.utils.GraphUtils.collectProjectIssues
 import java.awt.BorderLayout
 import java.awt.event.MouseAdapter
@@ -23,28 +19,21 @@ import javax.swing.JButton
 import javax.swing.table.DefaultTableModel
 import javax.swing.table.TableRowSorter
 
-/**
- * 类描述：IssueViewWindow 类用于创建SinkFinder。
- *
- * @author springkill
- * @version 1.0
- */
-class IssueViewWindow : ToolWindowFactory {
+class IssueProblemsTab(project: Project) : ProblemsViewTab {
 
-    override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val panel = JBPanel<JBPanel<*>>(BorderLayout())
-        val tableModel =
-            DefaultTableModel(arrayOf("File", "Line", "SinkClass", "SinkMethod", "Type", "SubType", "CallMode"), 0)
-        val refreshButton = JButton("Init Sink")
-        val table = object : JBTable(tableModel) {
-            override fun isCellEditable(row: Int, column: Int): Boolean {
-                return false
-            }
-        }
+    private val panel = JBPanel<JBPanel<*>>(BorderLayout())
 
-        val sorter = TableRowSorter(tableModel)
+    private val tableModel =
+        DefaultTableModel(arrayOf("File", "Line", "SinkClass", "SinkMethod", "Type", "SubType", "CallMode"), 0)
+    private val refreshButton = JButton("Init Sink")
+    private val table = object : JBTable(tableModel) {
+        override fun isCellEditable(row: Int, column: Int): Boolean = false
+    }
+
+    private val sorter = TableRowSorter(tableModel)
+
+    init {
         table.rowSorter = sorter
-
         table.apply {
             columnModel.getColumn(0).cellRenderer = FirstColumnRenderer()
             columnModel.getColumn(4).cellRenderer = HighlightRenderer()
@@ -96,10 +85,13 @@ class IssueViewWindow : ToolWindowFactory {
 
         panel.add(JBScrollPane(table), BorderLayout.CENTER)
         panel.add(refreshButton, BorderLayout.SOUTH)
-
-        val contentFactory = ContentFactory.getInstance()
-        val content = contentFactory.createContent(panel, "", false)
-        toolWindow.contentManager.addContent(content)
     }
 
+    fun getComponent() = panel
+
+    override fun getName(count: Int): String {
+        return "Sink Finder"
+    }
+
+    override fun getTabId() = "Issue Problems Tab"
 }
