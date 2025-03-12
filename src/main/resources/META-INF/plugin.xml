@@ -44,66 +44,20 @@
                     icon="/icons/pluginIcon.svg"
         />
 
-        <!--<localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.SystemEXITDOS"
-                implementationClass="org.skgroup.securityinspector.sinkrules.dos.SystemDOS"
-        />
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.PatternMatchesDOS"
                 implementationClass="org.skgroup.securityinspector.sinkrules.dos.PatternDOS"
         />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.NettyResponseSplittingRisk"
-                implementationClass="org.skgroup.securityinspector.sinkrules.dos.NettyResponseSplitting"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.ReadFile"
-                implementationClass="org.skgroup.securityinspector.sinkrules.files.read.ReadFile"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.CommonIOFileWrite"
-                implementationClass="org.skgroup.securityinspector.sinkrules.files.write.CommonsIO"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.IOFilesWrite"
-                implementationClass="org.skgroup.securityinspector.sinkrules.files.write.IOFiles"
-        />
+
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.InjectionFilter"
                 implementationClass="org.skgroup.securityinspector.sinkrules.filters.InjectionFilter"
         />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JDBCAttack"
-                implementationClass="org.skgroup.securityinspector.sinkrules.jdbc.JDBCAttack"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JNDIInjection"
-                implementationClass="org.skgroup.securityinspector.sinkrules.jndi.JNDIInjection"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.LDAPUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.jndi.LDAPUnserialize"
-        />
+
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
@@ -116,210 +70,14 @@
                 bundle="InspectionBundle" key="vuln.name.HardCodedCredential"
                 implementationClass="org.skgroup.securityinspector.sinkrules.misc.HardcodedCredentials"
         />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.OpenSAML2IgnoreComments"
-                implementationClass="org.skgroup.securityinspector.sinkrules.openSAML2.OpenSAML2IgnoreComment"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.BSHRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.BSHRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.BurlapUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.BurlapUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.CastorUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.CastorUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.CompilableRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.CompilableRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.ELRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.ELRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.ExpressionRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.ExpressionRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.FastjsonAutoType"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.FastjsonAutoType"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.FastjsonUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.FastjsonUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.GroovyRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.GroovyRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.HessianUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.HessianUnserialize"
-        />
+
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.JacksonDatabindDefaultTyping"
                 implementationClass="org.skgroup.securityinspector.sinkrules.rce.JacksonDatabindDefaultTyping"
         />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JEXLRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.JEXLRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JSchOSRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.JSchOSRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JsonIOUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.JsonIOUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JYamlUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.JYamlUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JythonRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.JythonRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.KryoUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.KryoUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.MVELRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.MVELRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.NashornScriptEngineRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.NashornScriptEngineRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.ObjectInputStreamUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.ObjectInputStreamUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.OGNLInjectionRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.OGNLInjectionRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.RhinoRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.RhinoRCE"
-        />
-&lt;!&ndash;        <localInspection&ndash;&gt;
-&lt;!&ndash;                language="JAVA" groupPath="Security"&ndash;&gt;
-&lt;!&ndash;                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"&ndash;&gt;
-&lt;!&ndash;                bundle="InspectionBundle" key="vuln.name.RuntimeRCE"&ndash;&gt;
-&lt;!&ndash;                implementationClass="org.skgroup.securityinspector.sinkrules.rce.RuntimeRCE"&ndash;&gt;
-&lt;!&ndash;        />&ndash;&gt;
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.ScriptEngineRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.ScriptEngineRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.SnakeYamlUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.SnakeYamlUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.SPELRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.SPELRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.XMLDecoderUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.XMLDecoderUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.XSLTRCE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.XSLTRCE"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.XStreamUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.XStreamUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.YamlBeansUnserialize"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.YamlBeansUnserialize"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JakartaRedirect"
-                implementationClass="org.skgroup.securityinspector.sinkrules.redirect.JakartaRedirect"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JavaxRedirect"
-                implementationClass="org.skgroup.securityinspector.sinkrules.redirect.JavaxRedirect"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.Reflect"
-                implementationClass="org.skgroup.securityinspector.sinkrules.reflect.Reflect"
-        />
+
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
@@ -350,90 +108,13 @@
                 bundle="InspectionBundle" key="vuln.name.SQLi"
                 implementationClass="org.skgroup.securityinspector.sinkrules.sqli.SQLi"
         />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.ApacheSSRF"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssrf.ApacheSSRF"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.GoogleIOSSRF"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssrf.GoogleIOSSRF"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JavaURLSSRF"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssrf.JavaURLSSRF"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JsoupSSRF"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssrf.JsoupSSRF"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.OkhttpSSRF"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssrf.OkhttpSSRF"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.SpringSSRF"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssrf.SpringSSRF"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.BeetlSSTI"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssti.BeetlSSTI"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.FreemarkeraSSTI"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssti.FreemarkerSSTI"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JinjavaSSTI"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssti.JinjavaSSTI"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.PebbleSSTI"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssti.PebbleSSTI"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.ThymeleafSSTI"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssti.ThymeleafSSTI"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.ValidationSSTI"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssti.ValidationSSTI"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.VelocitySSTI"
-                implementationClass="org.skgroup.securityinspector.sinkrules.ssti.VelocitySSTI"
-        />
+
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.XXE"
                 implementationClass="org.skgroup.securityinspector.sinkrules.xxe.XXEInspector"
-        />-->
+        />
 
         <annotator language="JAVA" implementationClass="org.skgroup.securityinspector.utils.ProblemAnnotator"/>
     </extensions>
