@@ -47,28 +47,8 @@
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.PatternMatchesDOS"
-                implementationClass="org.skgroup.securityinspector.sinkrules.dos.PatternDOS"
-        />
-
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.InjectionFilter"
                 implementationClass="org.skgroup.securityinspector.sinkrules.filters.InjectionFilter"
-        />
-
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.BroadCORSAllowOrigin"
-                implementationClass="org.skgroup.securityinspector.sinkrules.misc.BroadCORSAllowOrigin"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.HardCodedCredential"
-                implementationClass="org.skgroup.securityinspector.sinkrules.misc.HardcodedCredentials"
         />
 
         <localInspection
