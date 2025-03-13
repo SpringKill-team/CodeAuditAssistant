@@ -47,20 +47,6 @@
         <localInspection
                 language="JAVA" groupPath="Security"
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.InjectionFilter"
-                implementationClass="org.skgroup.securityinspector.sinkrules.filters.InjectionFilter"
-        />
-
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JacksonDatabindDefaultTyping"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.JacksonDatabindDefaultTyping"
-        />
-
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.MybatisAnnotationSQLi"
                 implementationClass="org.skgroup.securityinspector.sinkrules.sqli.MybatisAnnotationSQLi"
         />
@@ -81,12 +67,6 @@
                 groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
                 bundle="InspectionBundle" key="vuln.name.PolyadicExpressionSQLi"
                 implementationClass="org.skgroup.securityinspector.sinkrules.sqli.PolyadicExpressionSQLi"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.SQLi"
-                implementationClass="org.skgroup.securityinspector.sinkrules.sqli.SQLi"
         />
 
         <localInspection
