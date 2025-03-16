@@ -73,28 +73,6 @@ object SecExpressionUtils {
         return getText(expression) != null
     }
 
-    fun getParentOfStatement(element: PsiElement?): PsiStatement? {
-        var element = element
-        while (element !is PsiStatement) {
-            if (element == null || element is PsiMethod) {
-                return null
-            }
-            element = element.parent
-        }
-        return element
-    }
-
-    fun getParentOfField(element: PsiElement?): PsiField? {
-        var element = element
-        while (element !is PsiField) {
-            if (element == null || element is PsiClass) {
-                return null
-            }
-            element = element.parent
-        }
-        return element
-    }
-
     fun getParentOfMethod(element: PsiElement?): PsiMethod? {
         var element = element
         while (element !is PsiMethod) {
@@ -126,10 +104,6 @@ object SecExpressionUtils {
             element = element.parent
         }
         return element
-    }
-
-    private fun getPlaceholder(project: Project): PsiLiteralExpression {
-        return JavaPsiFacade.getElementFactory(project).createExpressionFromText("\"?\"", null) as PsiLiteralExpression
     }
 
     private fun getCustomLiteral(s: String, project: Project): PsiLiteralExpression {
@@ -350,35 +324,4 @@ object SecExpressionUtils {
             aClass?.qualifiedName ?: "null"
         }
     }
-
-    fun isMethodSink(expression: PsiMethodCallExpression, methodSinks: Map<String, List<String>>): Boolean {
-        return methodSinks.any { (className, methodNames) ->
-            methodNames.any { methodName ->
-                hasFullQualifiedName(expression, className, methodName)
-            }
-        }
-    }
-
-    fun isSuperMethodSink(expression: PsiMethodCallExpression, methodSinks: Map<String, List<String>>): Boolean {
-        return methodSinks.any { (className, methodNames) ->
-            methodNames.any { methodName ->
-                hasFullQualifiedName(expression, className, methodName)
-            }
-        }
-    }
-
-    fun isNewExpressionSink(expression: PsiNewExpression, newExpressionSinks: List<String>): Boolean {
-        return newExpressionSinks.any { className ->
-            hasFullQualifiedName(expression, className)
-        }
-    }
-
-    fun matchesClassName(psiClass: PsiClass, pattern: String): Boolean {
-        return psiClass.name?.contains(pattern, true) == true
-    }
-
-    fun matchesMethodName(psiMethod: PsiMethod, pattern: String): Boolean {
-        return psiMethod.name.contains(pattern, true)
-    }
-
 }
