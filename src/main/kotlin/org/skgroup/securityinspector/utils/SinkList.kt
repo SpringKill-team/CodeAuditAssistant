@@ -531,6 +531,25 @@ object SinkList {
         isCall = true
     )
 
+    private val xxe = SubVulnerabilityDefinition(
+        subType = SubVulnerabilityType.XXE,
+        methodSinks = mapOf(
+            "javax.xml.parsers.DocumentBuilderFactory" to setOf("newInstance"),
+            "javax.xml.parsers.SAXParserFactory" to setOf("newInstance"),
+            "javax.xml.transform.sax.SAXTransformerFactory" to setOf("newInstance"),
+            "org.xml.sax.helpers.XMLReaderFactory" to setOf("createXMLReader"),
+            "javax.xml.validation.SchemaFactory" to setOf("newInstance"),
+            "javax.xml.stream.XMLInputFactory" to setOf("newFactory"),
+            "javax.xml.transform.TransformerFactory" to setOf("newInstance"),
+            "javax.xml.validation.Schema" to setOf("newValidator"),
+            "org.apache.commons.digester3.Digester" to setOf("parse"),
+            "org.dom4j.io.SAXReader" to setOf("read", "readDocument","setFeature"),
+            "org.jdom.input.SAXBuilder" to setOf("build", "setFeature"),
+        ),
+        constructorSinks = emptySet(),
+        isCall = true
+    )
+
     private val javaSQLi = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.JAVA_SQLI,
         methodSinks = mapOf(

@@ -14,13 +14,6 @@ import org.skgroup.securityinspector.utils.SinkList
 import org.skgroup.securityinspector.utils.SinkUtil.checkHardcodedCredentials
 import org.skgroup.securityinspector.utils.SinkUtil.patternDosMatcher
 
-/**
- * 类描述：SinkAnalysisVisitor 类用于创建sink点访问者。
- *
- * @author springkill
- * @version 1.0
- * @since 2025/3/13
- */
 class SinkAnalysisJavaVisitor(
     val project: Project,
     val virtualFile: VirtualFile,
@@ -28,6 +21,15 @@ class SinkAnalysisJavaVisitor(
     val issues: MutableList<ProjectIssue>,
     val indicator: ProgressIndicator
 ) : JavaRecursiveElementWalkingVisitor() {
+
+    // 定义需要检查的MyBatis注解及其属性
+    private val mybatisAnnotations = mapOf(
+        "org.apache.ibatis.annotations.Select" to listOf("value"),
+        "org.apache.ibatis.annotations.Delete" to listOf("value"),
+        "org.apache.ibatis.annotations.Update" to listOf("value"),
+        "org.apache.ibatis.annotations.Insert" to listOf("value")
+    )
+
     override fun visitMethodCallExpression(call: PsiMethodCallExpression) {
         if (!call.isValid || indicator.isCanceled) return
 
@@ -58,6 +60,38 @@ class SinkAnalysisJavaVisitor(
         } ?: return
 
         addIssue(new, className, methodName, sinkMatch)
+    }
+
+    override fun visitMethod(method: PsiMethod) {
+        super.visitMethod(method)
+        if (indicator.isCanceled) return
+
+        // 检查方法上的MyBatis注解
+        method.annotations.forEach { annotation ->
+            val annotationFqn = annotation.qualifiedName ?: return@forEach
+            val attributes = mybatisAnnotations[annotationFqn] ?: return@forEach
+
+            attributes.forEach { attrName ->
+                val attrValue = annotation.findAttributeValue(attrName)
+                if (attrValue != null && containsDollarBrace(attrValue)) {
+                    val className = method.containingClass?.qualifiedName ?: "UnknownClass"
+                    val sinkMatch = SinkList.ALL_SUB_VUL_DEFINITIONS.firstOrNull {
+                        it.subType == SubVulnerabilityType.MYBATIS_XML_SQLI
+                    } ?: return@forEach
+                    addIssue(annotation, className, method.name, sinkMatch)
+                }
+            }
+        }
+    }
+
+    private fun containsDollarBrace(value: PsiAnnotationMemberValue): Boolean {
+        return when (value) {
+            is PsiLiteralExpression -> (value.value as? String)?.contains("\${") == true
+            is PsiArrayInitializerMemberValue -> value.initializers.any { expr ->
+                expr is PsiLiteralExpression && (expr.value as? String)?.contains("\${") == true
+            }
+            else -> false
+        }
     }
 
     override fun visitLocalVariable(variable: PsiLocalVariable) {
