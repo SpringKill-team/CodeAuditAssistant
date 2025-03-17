@@ -14,7 +14,7 @@ import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.enums.AnalysisScope
 import org.skgroup.securityinspector.enums.MainVulnerabilityType
 import org.skgroup.securityinspector.enums.SubVulnerabilityType
-import org.skgroup.securityinspector.sinkrules.SinkList
+import org.skgroup.securityinspector.utils.SinkList
 import java.awt.*
 import java.awt.event.ItemEvent
 import java.awt.event.MouseAdapter

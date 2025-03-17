@@ -22,7 +22,6 @@ import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.ast.nodes.ParameterNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.enums.SinkCallMode
-import org.skgroup.securityinspector.sinkrules.SinkList
 import java.nio.file.Files
 import java.nio.file.Paths
 

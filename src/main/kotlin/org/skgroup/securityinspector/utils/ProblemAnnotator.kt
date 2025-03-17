@@ -5,7 +5,6 @@ import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethodCallExpression
-import org.skgroup.securityinspector.sinkrules.SinkList
 
 /**
  * 类描述：ProblemAnnotator 类用于 替换原本的问题告警注册。
