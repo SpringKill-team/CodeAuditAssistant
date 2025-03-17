@@ -9,6 +9,8 @@ import com.intellij.psi.util.PsiUtil
 import com.intellij.psi.util.TypeConversionUtil
 import com.siyeh.ig.psiutils.ExpressionUtils
 import me.gosimple.nbvcxz.Nbvcxz
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
 import org.skgroup.securityinspector.analysis.ast.ProjectIssue
 import org.skgroup.securityinspector.enums.SubVulnerabilityDefinition
 import org.skgroup.securityinspector.enums.SubVulnerabilityType
@@ -36,6 +38,7 @@ object SinkUtil {
     val connPwdPattern = Regex("password=(.*?)($|&)", RegexOption.IGNORE_CASE)
     const val entropyThreshold = 50.0
     const val truncate = 16
+    internal val dollarVarPattern = Pattern.compile("\\$\\{(\\S+?)\\}")
 
     fun collectProjectIssues(
         project: Project,
@@ -200,6 +203,53 @@ object SinkUtil {
             value = expression.text
         }
         return value
+    }
+
+    /**
+     * 判断单个SQL拼接点是否有注入风险
+     * @param prefix String
+     * @param sqlVariable String
+     * @param suffix String
+     * @return Boolean
+     */
+    fun hasVulOnSQLJoinStr(@NotNull prefix: String, @Nullable sqlVariable: String?, @Nullable suffix: String?): Boolean {
+        val fragments = prefix.split(Regex("[\\s|(]+"))
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+
+        // 检查常见的 SQL 关键字及其上下文
+        if (fragments.isEmpty() || endsWithComparisonOperator(fragments.last())) {
+            return true
+        }
+
+        return fragments.reversed().any { frag ->
+            when (frag.lowercase()) {
+                "where", "set" -> suffixHasComparisonOperator(suffix)
+                "values" -> true
+                "from", "into", "join", "select", "update" -> return false
+                else -> false
+            }
+        }
+    }
+
+    /**
+     * 检查片段是否以比较运算符（=, >=, <=）结尾
+     * @param fragment String
+     * @return Boolean
+     */
+    private fun endsWithComparisonOperator(fragment: String): Boolean {
+        return fragment.endsWith("=") || fragment.endsWith(">=") || fragment.endsWith("<=")
+    }
+
+    /**
+     * 检查后缀是否包含比较运算符
+     * @param suffix String?
+     * @return Boolean
+     */
+    private fun suffixHasComparisonOperator(suffix: String?): Boolean {
+        return suffix?.trim()?.let {
+            it.startsWith("=") || it.startsWith(">") || it.startsWith("<")
+        } == true
     }
 
 }
