@@ -100,8 +100,8 @@ class SinkAnalysisXMLVisitor(
             )
         }
     }
-}
 
-fun SinkList.getSQLiDefinition(): SubVulnerabilityDefinition {
-    return ALL_SUB_VUL_DEFINITIONS.first { it.subType == SubVulnerabilityType.MYBATIS_XML_SQLI }
+    fun SinkList.getSQLiDefinition(): SubVulnerabilityDefinition {
+        return ALL_SUB_VUL_DEFINITIONS.first { it.subType == SubVulnerabilityType.MYBATIS_XML_SQLI }
+    }
 }

@@ -47,6 +47,7 @@ class SinkAnalysisJavaVisitor(
         }
 
         addIssue(call, className, methodName, sinkMatch)
+        super.visitMethodCallExpression(call)
     }
 
     override fun visitNewExpression(new: PsiNewExpression) {
@@ -60,10 +61,10 @@ class SinkAnalysisJavaVisitor(
         } ?: return
 
         addIssue(new, className, methodName, sinkMatch)
+        super.visitNewExpression(new)
     }
 
     override fun visitMethod(method: PsiMethod) {
-        super.visitMethod(method)
         if (indicator.isCanceled) return
 
         // 检查方法上的MyBatis注解
@@ -82,6 +83,7 @@ class SinkAnalysisJavaVisitor(
                 }
             }
         }
+        super.visitMethod(method)
     }
 
     private fun containsDollarBrace(value: PsiAnnotationMemberValue): Boolean {
@@ -96,15 +98,18 @@ class SinkAnalysisJavaVisitor(
 
     override fun visitLocalVariable(variable: PsiLocalVariable) {
         checkHardcodedCredentials(variable.name, variable.initializer)
+        super.visitLocalVariable(variable)
     }
 
     override fun visitAssignmentExpression(expression: PsiAssignmentExpression) {
         val varName = (expression.lExpression as? PsiReferenceExpression)?.qualifiedName
         checkHardcodedCredentials(varName, expression.rExpression)
+        super.visitAssignmentExpression(expression)
     }
 
     override fun visitField(field: PsiField) {
         checkHardcodedCredentials(field.name, field.initializer)
+        super.visitField(field)
     }
 
     private fun addIssue(
