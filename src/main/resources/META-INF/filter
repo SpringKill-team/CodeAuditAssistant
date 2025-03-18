@@ -1,0 +1,12 @@
+private val MAYBE_SQL_FILTER_NAME = listOf(
+            "SQLFilter", "SQLInjectionFilter", "SQLInjection"
+        )
+        private val MAYBE_XSS_FILTER_NAME = listOf(
+            "XSSFilter", "XSSClear", "ClearXSS"
+        )
+        private val MAYBE_SQL_FILTER_METHODS = listOf(
+            "ClearSQL", "SQLClear"
+        )
+        private val MAYBE_XSS_FILTER_METHODS = listOf(
+            "ClearXSS", "XSSClear"
+        )

@@ -39,72 +39,24 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
 
-        <toolWindow id="SecurityInspector" factoryClass="org.skgroup.securityinspector.ui.SecurityInspectorToolWindowFactory"
+        <toolWindow id="SecurityInspector"
+                    factoryClass="org.skgroup.securityinspector.ui.SecurityInspectorToolWindowFactory"
                     anchor="left"
                     icon="/icons/pluginIcon.svg"
         />
 
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.InjectionFilter"
-                implementationClass="org.skgroup.securityinspector.sinkrules.filters.InjectionFilter"
-        />
-
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.JacksonDatabindDefaultTyping"
-                implementationClass="org.skgroup.securityinspector.sinkrules.rce.JacksonDatabindDefaultTyping"
-        />
-
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.MybatisAnnotationSQLi"
-                implementationClass="org.skgroup.securityinspector.sinkrules.sqli.MybatisAnnotationSQLi"
-        />
-        <localInspection
-                language="XML" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.MybatisXmlSQLi"
-                implementationClass="org.skgroup.securityinspector.sinkrules.sqli.MybatisXmlSQLi"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.PlaceholderStringSQLi"
-                implementationClass="org.skgroup.securityinspector.sinkrules.sqli.PlaceholderStringSQLi"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.PolyadicExpressionSQLi"
-                implementationClass="org.skgroup.securityinspector.sinkrules.sqli.PolyadicExpressionSQLi"
-        />
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.SQLi"
-                implementationClass="org.skgroup.securityinspector.sinkrules.sqli.SQLi"
-        />
-
-        <localInspection
-                language="JAVA" groupPath="Security"
-                groupName="SecurityInspector" enabledByDefault="true" level="WARNING"
-                bundle="InspectionBundle" key="vuln.name.XXE"
-                implementationClass="org.skgroup.securityinspector.sinkrules.xxe.XXEInspector"
-        />
-
         <annotator language="JAVA" implementationClass="org.skgroup.securityinspector.utils.ProblemAnnotator"/>
+
     </extensions>
 
     <actions>
-        <action id="BuildCallGraphForMethod" class="org.skgroup.securityinspector.actions.BuildCallGraphAction" text="Build Call Graph">
+        <action id="BuildCallGraphForMethod" class="org.skgroup.securityinspector.actions.BuildCallGraphAction"
+                text="Build Call Graph">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
 
-        <action id="SearchAsSink" class="org.skgroup.securityinspector.actions.SearchAsSinkAction" text="Search As Sink">
+        <action id="SearchAsSink" class="org.skgroup.securityinspector.actions.SearchAsSinkAction"
+                text="Search As Sink">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
     </actions>

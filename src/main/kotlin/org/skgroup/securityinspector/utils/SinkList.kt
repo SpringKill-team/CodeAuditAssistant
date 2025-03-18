@@ -1,4 +1,4 @@
-package org.skgroup.securityinspector.sinkrules
+package org.skgroup.securityinspector.utils
 
 import org.skgroup.securityinspector.enums.SubVulnerabilityDefinition
 import org.skgroup.securityinspector.enums.SubVulnerabilityType
@@ -25,6 +25,15 @@ object SinkList {
             "java.lang.System" to setOf("exit"),
             "java.lang.Shutdown" to setOf("exit"),
             "java.lang.Runtime" to setOf("exit")
+        ),
+        constructorSinks = emptySet(),
+        isCall = true
+    )
+
+    private val pattenDosDefinition = SubVulnerabilityDefinition(
+        subType = SubVulnerabilityType.PATTERN_DOS,
+        methodSinks = mapOf(
+            "java.util.regex.Pattern" to setOf("compile", "matches")
         ),
         constructorSinks = emptySet(),
         isCall = true
@@ -176,6 +185,16 @@ object SinkList {
         isCall = false
     )
 
+    private val hardcodesAllowOriginDefinition = SubVulnerabilityDefinition(
+        subType = SubVulnerabilityType.HARDCODED_CREDENTIALS,
+        methodSinks = mapOf(
+            "java.util.Hashtable" to setOf("put"),
+            "java.sql.DriverManager" to setOf("getConnection")
+        ),
+        constructorSinks = emptySet(),
+        isCall = false
+    )
+
     private val openSAML2IgnoreCommentDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.OPEN_SAML2_IGNORE_COMMENT,
         methodSinks = mapOf(
@@ -228,7 +247,7 @@ object SinkList {
     private val elRceDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.ELRCE,
         methodSinks = mapOf(
-            "javax.el.ExpressionFactory" to setOf("createMethodExpression","createValueExpression"),
+            "javax.el.ExpressionFactory" to setOf("createMethodExpression", "createValueExpression"),
             "javax.el.ELProcessor" to setOf("eval", "getValue"),
         ),
         constructorSinks = emptySet(),
@@ -285,7 +304,7 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val jacksonRceDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.JACKSON_DATABIND_DEFAULT_TYPING,
         methodSinks = mapOf(
@@ -340,7 +359,7 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val jyamlUnserializeDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.JYAML_UNSERIALIZE,
         methodSinks = mapOf(
@@ -350,7 +369,7 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val jythonRceDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.JYTHON_RCE,
         methodSinks = mapOf(
@@ -392,7 +411,7 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val nashornScriptEngineRceDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.NASHORN_SCRIPT_ENGINE_RCE,
         methodSinks = mapOf(
@@ -434,7 +453,7 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val runtimeRceDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.RUNTIME_EXEC_RCE,
         methodSinks = mapOf(
@@ -462,10 +481,10 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val spelRceDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.SPEL_RCE,
-        methodSinks =mapOf(
+        methodSinks = mapOf(
             "org.springframework.expression.ExpressionParser" to setOf("parseExpression"),
             "org.springframework.expression.spel.standard.SpelExpressionParser" to setOf(
                 "parseExpression",
@@ -502,11 +521,41 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val yamlBeansUnserializeDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.YAML_BEANS_UNSERIALIZE,
         methodSinks = mapOf(
             "com.esotericsoftware.yamlbeans.YamlReader" to setOf("read")
+        ),
+        constructorSinks = emptySet(),
+        isCall = true
+    )
+
+    private val xxe = SubVulnerabilityDefinition(
+        subType = SubVulnerabilityType.XXE,
+        methodSinks = mapOf(
+            "javax.xml.parsers.DocumentBuilderFactory" to setOf("newInstance"),
+            "javax.xml.parsers.SAXParserFactory" to setOf("newInstance"),
+            "javax.xml.transform.sax.SAXTransformerFactory" to setOf("newInstance"),
+            "org.xml.sax.helpers.XMLReaderFactory" to setOf("createXMLReader"),
+            "javax.xml.validation.SchemaFactory" to setOf("newInstance"),
+            "javax.xml.stream.XMLInputFactory" to setOf("newFactory"),
+            "javax.xml.transform.TransformerFactory" to setOf("newInstance"),
+            "javax.xml.validation.Schema" to setOf("newValidator"),
+            "org.apache.commons.digester3.Digester" to setOf("parse"),
+            "org.dom4j.io.SAXReader" to setOf("read", "readDocument","setFeature"),
+            "org.jdom.input.SAXBuilder" to setOf("build", "setFeature"),
+        ),
+        constructorSinks = emptySet(),
+        isCall = true
+    )
+
+    private val javaSQLi = SubVulnerabilityDefinition(
+        subType = SubVulnerabilityType.JAVA_SQLI,
+        methodSinks = mapOf(
+            "java.sql.Statement" to setOf("executeQuery"),
+            "org.springframework.jdbc.core.JdbcTemplate" to setOf("query"),
+            "java.sql.Connection" to setOf("prepareStatement")
         ),
         constructorSinks = emptySet(),
         isCall = true
@@ -520,7 +569,7 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val javaxRedirectDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.JAVAX_REDIRECT,
         methodSinks = mapOf(
@@ -552,7 +601,16 @@ object SinkList {
         methodSinks = mapOf(
             "org.apache.http.client.fluent.Request" to setOf("Get", "Post"),
             "org.apache.http.client.methods.HttpRequestBase" to setOf("setURI"),
-            "org.apache.http.client.methods.RequestBuilder" to setOf("get", "post", "put", "delete", "options", "head", "trace", "patch")
+            "org.apache.http.client.methods.RequestBuilder" to setOf(
+                "get",
+                "post",
+                "put",
+                "delete",
+                "options",
+                "head",
+                "trace",
+                "patch"
+            )
         ),
         constructorSinks = setOf(
             "org.apache.commons.httpclient.methods.GetMethod",
@@ -571,10 +629,10 @@ object SinkList {
         ),
         isCall = true
     )
-    
+
     private val googleIoSSRFDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.GOOGLE_IO_SSRF,
-        methodSinks =mapOf(
+        methodSinks = mapOf(
             "com.google.common.io.Resources" to setOf(
                 "asByteSource", "asCharSource", "copy", "readLines", "toByteArray", "toString"
             )
@@ -582,7 +640,7 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val javaUrlSSRFDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.JAVA_URL_SSRF,
         methodSinks = mapOf(
@@ -595,20 +653,19 @@ object SinkList {
         constructorSinks = setOf(
             "java.net.URL",
             "java.net.Socket"
-        )
-        ,isCall = true
+        ), isCall = true
     )
-    
+
     private val jsoupSSRFDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.JSOUP_SSRF,
         methodSinks = mapOf(
             "org.jsoup.Jsoup" to setOf("connect"),
-            "org.jsoup.Connection" to setOf("get", "post", "put", "delete", "options", "trace", "patch","execute")
+            "org.jsoup.Connection" to setOf("get", "post", "put", "delete", "options", "trace", "patch", "execute")
         ),
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val okHttpSSRFDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.OKHTTP_SSRF,
         methodSinks = mapOf(
@@ -620,11 +677,11 @@ object SinkList {
             "okhttp3.OkHttpClient" to setOf("newCall"),
             "com.squareup.okhttp.Request" to setOf("get", "post", "put", "delete"),
             "okhttp3.Request" to setOf("get", "post", "put", "delete", "head", "patch")
-        ), 
-        constructorSinks = emptySet(), 
+        ),
+        constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val springSSRFDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.SPRING_SSRF,
         methodSinks = mapOf(
@@ -666,7 +723,7 @@ object SinkList {
         constructorSinks = setOf("freemarker.template.Template"),
         isCall = true
     )
-    
+
     private val jinjavaSSTIDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.JINJAVA_SSTI,
         methodSinks = mapOf(
@@ -675,7 +732,7 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val pebbleSSTIDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.PEBBLE_SSTI,
         methodSinks = mapOf(
@@ -703,7 +760,7 @@ object SinkList {
         constructorSinks = emptySet(),
         isCall = true
     )
-    
+
     private val velocitySSTIDefinition = SubVulnerabilityDefinition(
         subType = SubVulnerabilityType.VELOCITY_SSTI,
         methodSinks = mapOf(
@@ -720,6 +777,7 @@ object SinkList {
     val ALL_SUB_VUL_DEFINITIONS = setOf(
         nettyResponseSplittingDefinition,
         systemDosDefinition,
+        pattenDosDefinition,
         readFileDefinition,
         commonsIODefinition,
         ioFiles,
@@ -727,6 +785,7 @@ object SinkList {
         jndiInjectionDefinition,
         ldapUnserializeDefinition,
         broadCORSAllowOriginDefinition,
+        hardcodesAllowOriginDefinition,
         openSAML2IgnoreCommentDefinition,
         bshRceDefinition,
         bURLAPIDefinition,
