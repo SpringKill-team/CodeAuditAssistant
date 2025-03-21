@@ -3,6 +3,7 @@ package org.skgroup.securityinspector.analysis.graphs.callgraph
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
@@ -44,7 +45,8 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
 
         // 查找对该方法的所有引用，建立反向调用关系
         // TODO 这里的逻辑我自己也混乱了，可能会有问题，后面再看
-        ReferencesSearch.search(method, method.useScope).forEach { reference ->
+        val scope = GlobalSearchScope.projectScope(method.project)
+        ReferencesSearch.search(method, scope).forEach { reference ->
             val callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
                 ?: return@forEach
 
@@ -74,26 +76,50 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
      * @param expression    方法调用表达式
      */
     override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
-        super.visitMethodCallExpression(expression)
-        if (currentMethodStack.isEmpty()) {
-            return
-        }
+        if (currentMethodStack.isEmpty()) return
 
         val caller = currentMethodStack.peek()
-
         // 解析被调用的方法
-        val resolvedMethod = expression.resolveMethod() ?: return
-        val calleeMethodNode = GraphUtils.getMethodNode(resolvedMethod, expression)
-
-        // 将 callee 加入节点集合
-        callGraph.nodes.add(calleeMethodNode)
-
-        // 在 callGraph 中记录调用关系 (caller -> callee)
-        callGraph.edges
-            .getOrPut(caller) { mutableSetOf() }
-            .add(calleeMethodNode)
-
-        handleIoCContainerCall(expression, caller, calleeMethodNode)
+        val resolvedMethod = expression.resolveMethod()
+        // 调试日志
+        if (resolvedMethod == null) {
+            println("method call expression $expression can not be resolve.")
+            return
+        }
+        val clazz: PsiClass? = resolvedMethod.containingClass
+        expression.reference?.let {
+            val calleeMethodNode = GraphUtils.getMethodNode(resolvedMethod, it)
+            // 将 callee 加入节点集合
+            callGraph.nodes.add(calleeMethodNode)
+            // 在 callGraph 中记录调用关系 (caller -> callee)
+            callGraph.edges
+                .getOrPut(caller) { mutableSetOf() }
+                .add(calleeMethodNode)
+            handleIoCContainerCall(expression, caller, calleeMethodNode)
+        } ?: run {
+//            val calleeMethodNode = GraphUtils.getMethodNode(resolvedMethod)
+//            callGraph.nodes.add(calleeMethodNode)
+//            callGraph.edge
+//                .getOrPut(caller) { mutableSetOf() }
+//                .add(calleeMethodNode)
+//            handleIoCContainerCall(expression, caller, calleeMethodNode)
+            if (clazz != null) {
+                if (clazz.isInterface) {
+                    println("$clazz is an interface")
+                    println("and the method call expression $expression can not be resolve.")
+                }
+                if (clazz.hasModifierProperty(PsiModifier.ABSTRACT)) {
+                    println("$clazz is an abstract class")
+                    println("and the method call expression $expression can not be resolve.")
+                }
+            }
+            if (PsiTreeUtil.getParentOfType(expression, PsiLambdaExpression::class.java) != null) {
+                println("in lambda method call expression $expression can not be resolve.")
+            } else {
+                println("unknown method call expression $expression can not be resolve.")
+            }
+        }
+        super.visitMethodCallExpression(expression)
     }
 
     /**
@@ -102,24 +128,48 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
      * @param expression
      */
     override fun visitNewExpression(expression: PsiNewExpression) {
-        super.visitNewExpression(expression)
-        if (currentMethodStack.isEmpty()) {
+        if (currentMethodStack.isEmpty()) return
+
+        val callerMethodNode = currentMethodStack.peek()
+        // 解析构造方法
+        val constructor = expression.resolveConstructor()
+        // 调试日志
+        if (constructor == null) {
+            println("new expression $constructor can not be resolve.")
             return
         }
-        val callerMethodNode = currentMethodStack.peek()
-
-        // 解析构造方法
-        val constructor = expression.resolveConstructor() ?: return
-        val calleeMethodNode = GraphUtils.getMethodNode(constructor, expression)
-
-        // 将 callee 加入节点集合
-        callGraph.nodes.add(calleeMethodNode)
-
-        // 在 callGraph 中记录 (caller -> callee构造方法)
-        callGraph
-            .edges
-            .getOrPut(callerMethodNode) { mutableSetOf() }
-            .add(calleeMethodNode)
+        val clazz: PsiClass? = constructor.containingClass
+        expression.reference?.let {
+            val calleeMethodNode = GraphUtils.getMethodNode(constructor, it)
+            // 将 callee 加入节点集合
+            callGraph.nodes.add(calleeMethodNode)
+            // 在 callGraph 中记录 (caller -> callee构造方法)
+            callGraph.edges
+                .getOrPut(callerMethodNode) { mutableSetOf() }
+                .add(calleeMethodNode)
+        } ?: run {
+//            val calleeMethodNode = GraphUtils.getMethodNode(constructor)
+//            callGraph.nodes.add(calleeMethodNode)
+//            callGraph.edges
+//                .getOrPut(callerMethodNode) { mutableSetOf() }
+//                .add(calleeMethodNode)
+            if (clazz != null) {
+                if (clazz.isInterface) {
+                    println("$clazz is an interface")
+                    println("and the method call expression $expression can not be resolve.")
+                }
+                if (clazz.hasModifierProperty(PsiModifier.ABSTRACT)) {
+                    println("$clazz is an abstract class")
+                    println("and the method call expression $expression can not be resolve.")
+                }
+            }
+            if (PsiTreeUtil.getParentOfType(expression, PsiLambdaExpression::class.java) != null) {
+                println("in lambda method call expression $expression can not be resolve.")
+            } else {
+                println("unknown new expression $constructor can not be resolve.")
+            }
+        }
+        super.visitNewExpression(expression)
     }
 
     /**
