@@ -1,4 +1,4 @@
-package org.skgroup.securityinspector.ui.component
+package org.skgroup.securityinspector.ui.renderer
 
 import com.intellij.ui.JBColor
 import org.skgroup.securityinspector.enums.SinkCallMode

@@ -4,10 +4,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.AnnotatedElementsSearch
-import com.intellij.psi.search.searches.ClassInheritorsSearch
 import com.intellij.psi.util.PsiUtil
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
+import org.skgroup.securityinspector.enums.RefMode
 import org.skgroup.securityinspector.utils.GraphUtils
 import java.util.*
 
@@ -123,7 +123,7 @@ class DIProcessor(
                     if (injectionAnnotations.contains(annotation.qualifiedName)) {
                         // 将容器 -> constructor 关系入图
                         val constructorNode = GraphUtils.getMethodNode(constructor)
-                        val containerMethodNode = MethodNode("Container","Container", "Framework", emptyList(), emptyList())
+                        val containerMethodNode = MethodNode("Container","Container", "Framework", emptyList(), emptyList(), RefMode.CALL)
                         callGraph.nodes.add(constructorNode)
                         callGraph.nodes.add(containerMethodNode)
 
@@ -217,7 +217,7 @@ class DIProcessor(
             GraphUtils.getMethodNode(psiClass)
         } else {
             // 找不到对应类，做一个兜底处理
-            MethodNode(type.canonicalText ?: "UnknownType",type.canonicalText ?: "UnknownType", "DI", emptyList(), emptyList())
+            MethodNode(type.canonicalText ?: "UnknownType",type.canonicalText ?: "UnknownType", "DI", emptyList(), emptyList(),RefMode.CALL)
         }
     }
 

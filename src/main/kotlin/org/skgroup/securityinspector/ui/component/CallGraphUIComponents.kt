@@ -6,17 +6,21 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.Gray
+import com.intellij.ui.JBColor
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.*
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.treeStructure.Tree
+import com.intellij.util.ui.JBUI
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
+import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.enums.AnalysisScope
-import org.skgroup.securityinspector.enums.MainVulnerabilityType
-import org.skgroup.securityinspector.enums.SubVulnerabilityType
+import org.skgroup.securityinspector.ui.renderer.MethodListRenderer
+import org.skgroup.securityinspector.ui.renderer.ResultTreeRenderer
+import org.skgroup.securityinspector.utils.IconUtil
 import org.skgroup.securityinspector.utils.SinkList
 import java.awt.*
-import java.awt.event.ItemEvent
+import java.awt.FlowLayout.LEFT
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
@@ -29,23 +33,71 @@ class CallGraphUIComponents(val project: Project) {
     val progressBar = createProgressBar()
     val rootListModel = DefaultListModel<MethodNode>()
     val rootList = JBList(rootListModel)
-    val sinkListModel = DefaultListModel<MethodNode>()
-    val sinkList = JBList(sinkListModel)
+
+    //    val infoArea = JTextArea().apply { isEditable = false }
     val searchComboBox = ComboBox<AnalysisScope>(AnalysisScope.values())
 
     val searchResultRootNode = DefaultMutableTreeNode("Search Results")
     val searchResultTreeModel = DefaultTreeModel(searchResultRootNode)
     val searchResultTree = Tree(searchResultTreeModel).apply {
+        cellRenderer = ResultTreeRenderer()
         isRootVisible = true
         showsRootHandles = true
     }
     val sourceField = JBTextField(15)
     val sinkField = JBTextField(15)
     val searchButton = JButton("Search")
-    val infoArea = JBTextArea(5, 50).apply { isEditable = false }
-    val vulnTypeComboBox = ComboBox<MainVulnerabilityType>()
-    val subTypeComboBox = ComboBox<SubVulnerabilityType>()
-    val sinkMethodList = SinkList.ALL_SUB_VUL_DEFINITIONS
+
+    val systemPlatformLabel =
+        JBLabel("System Plat: ${System.getProperty("os.name")}", LEFT).apply {
+            border = JBUI.Borders.empty(5)
+            when (System.getProperty("os.name")) {
+                "Windows" -> icon = IconUtil.windowsIcon
+                "Linux" -> icon = IconUtil.linuxIcon
+                "Mac OS X" -> icon = IconUtil.macIcon
+                else -> icon = IconUtil.platformIcon
+            }
+        }
+
+    val graphStatusLabel = JBLabel("CallGraph: Not ready", IconUtil.graphNotReadyIcon, LEFT).apply {
+        border = JBUI.Borders.empty(5)
+    }
+
+    val methodLabel = JBLabel("MethodNode: 0", IconUtil.methodNotReadyIcon, LEFT).apply {
+        border = JBUI.Borders.empty(5)
+    }
+
+    val memoryLabel = JBLabel("Used memory: 0 MB", IconUtil.memoryLowIcon, LEFT).apply {
+        border = JBUI.Borders.empty(5)
+    }
+
+    val buildInfoLabel = JBLabel("Build info: No info", IconUtil.normalIcon, LEFT).apply {
+        border = JBUI.Borders.empty(5)
+    }
+
+    val searchInfoLabel = JBLabel("Search info: No info", IconUtil.normalIcon, LEFT).apply {
+        border = JBUI.Borders.empty(5)
+    }
+
+    val errorInfoLabel = JBLabel("Error: No errors", IconUtil.errorIcon, LEFT).apply {
+        border = JBUI.Borders.empty(5)
+    }
+
+    val statusPanel = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        fun createLabel(jbPanel: JBLabel) = jbPanel.apply {
+            border = JBUI.Borders.empty(5)
+            iconTextGap = 8
+            foreground = JBColor.foreground()
+        }
+        add(createLabel(systemPlatformLabel))
+        add(createLabel(graphStatusLabel))
+        add(createLabel(methodLabel))
+        add(createLabel(memoryLabel))
+        add(createLabel(buildInfoLabel))
+        add(createLabel(searchInfoLabel))
+        add(createLabel(errorInfoLabel))
+    }
 
     fun createMainPanel(): JBPanel<JBPanel<*>> {
         val mainPanel = JBPanel<JBPanel<*>>(BorderLayout())
@@ -61,15 +113,6 @@ class CallGraphUIComponents(val project: Project) {
         border = BorderFactory.createEmptyBorder(2, 10, 2, 10)
         preferredSize = Dimension(300, 20)
         isVisible = false
-    }
-
-    fun createSinkListMouseListener() = object : MouseAdapter() {
-        override fun mouseClicked(e: MouseEvent) {
-            if (e.clickCount == 2 && !sinkList.isSelectionEmpty) {
-                val selected = sinkList.selectedValue
-                sinkField.text = selected.name
-            }
-        }
     }
 
     private fun createNorthContainer(): JBPanel<JBPanel<*>> {
@@ -126,19 +169,15 @@ class CallGraphUIComponents(val project: Project) {
 
         c.gridx = 0
         c.gridy = 1
-        panel.add(JLabel("VulnType:"), c)
 
         c.gridx = 1
         c.weightx = 0.0
-        panel.add(vulnTypeComboBox, c)
 
         c.gridx = 2
         c.weightx = 0.0
-        panel.add(JLabel("SubType:"), c)
 
         c.gridx = 3
         c.weightx = 0.0
-        panel.add(subTypeComboBox, c)
 
         c.gridx = 4
         c.weightx = 0.0
@@ -149,30 +188,6 @@ class CallGraphUIComponents(val project: Project) {
 
 
     fun initializeComboBoxes() {
-        // 填充 MainVulnerabilityType
-        MainVulnerabilityType.values().forEach { vulnTypeComboBox.addItem(it) }
-
-        // 当选择了某个 MainVulnerabilityType 时，更新 subTypeComboBox 的内容
-        vulnTypeComboBox.addItemListener { event ->
-            if (event.stateChange == ItemEvent.SELECTED) {
-                val selectedMainType = event.item as MainVulnerabilityType
-                updateSubTypeComboBox(selectedMainType)
-            }
-        }
-
-        // 监听 subTypeComboBox 的选项变化
-        subTypeComboBox.addItemListener { event ->
-            if (event.stateChange == ItemEvent.SELECTED) {
-                val selectedSubType = event.item as SubVulnerabilityType
-                updateSinkList(selectedSubType)
-            }
-        }
-
-        // 默认先选中第一个 MainVulnerabilityType，并加载相应子类型
-        if (vulnTypeComboBox.itemCount > 0) {
-            vulnTypeComboBox.selectedIndex = 0
-            updateSubTypeComboBox(vulnTypeComboBox.selectedItem as MainVulnerabilityType)
-        }
 
         //处理结果双击复制和跳转
         searchResultTree.addMouseListener(object : MouseAdapter() {
@@ -188,15 +203,12 @@ class CallGraphUIComponents(val project: Project) {
                     val node = path.lastPathComponent as? DefaultMutableTreeNode ?: return
 
                     // 取出这个节点的 userObject
-                    // 假设这里存了一个 MethodNode或字符串
                     val userObject = node.userObject
 
-                    if(userObject is MethodNode){
+                    if (userObject is MethodNode) {
                         val offset = userObject.sourceSpan
-                        // TODO 优化跳转到源码/Class的位置
                         offset?.let {
-                            OpenFileDescriptor(project, it.virtualFile,offset.offset).navigate(true)
-                            infoArea.append("Jump to ${it.virtualFile.name}:${it.offset}\n")
+                            OpenFileDescriptor(project, it.virtualFile, offset.offset).navigate(true)
                         }
                     }
 
@@ -207,70 +219,22 @@ class CallGraphUIComponents(val project: Project) {
 
     }
 
-    fun updateSubTypeComboBox(mainType: MainVulnerabilityType) {
-        subTypeComboBox.removeAllItems()
-        // 根据父类型筛选可用的子类型
-        SubVulnerabilityType.values().filter { it.parent == mainType }.forEach {
-            subTypeComboBox.addItem(it)
-        }
-
-    }
-
-    /**
-     * Update sink list 展示对应的 sink 方法
-     *
-     * @param selectedSubType
-     */
-    private fun updateSinkList(selectedSubType: SubVulnerabilityType) {
-        sinkListModel.removeAllElements()
-
-        // 从 map 中拿到定义
-        val definition = sinkMethodList.find { it.subType == selectedSubType }
-        definition?.methodSinks?.forEach { (className, methods) ->
-            methods.forEach { methodName ->
-                val node = MethodNode(
-                    className = className,
-                    name = methodName,
-                    returnType = "",
-                    parameters = emptyList(),
-                    body = emptyList()
-                )
-                sinkListModel.addElement(node)
-            }
-        }
-
-        definition?.constructorSinks?.forEach { ctorClassName ->
-            val name = "[Constructor] $ctorClassName"
-            val node = MethodNode(
-                className = name,
-                name = "<init>",
-                returnType = "",
-                parameters = emptyList(),
-                body = emptyList()
-            )
-            sinkListModel.addElement(node)
-        }
-    }
-
     private fun createCenterPanel(): JComponent {
         // 初始化列表渲染器
         val methodRenderer = MethodListRenderer.createMethodRenderer()
         rootList.cellRenderer = methodRenderer
-        sinkList.cellRenderer = methodRenderer
+//        sinkList.cellRenderer = methodRenderer
 //        searchResultList.cellRenderer = methodRenderer
 
         // 创建各个功能面板
         val rootPanel = createTitledPanel("Root Methods", JBScrollPane(rootList))
-        val sinkPanel = createTitledPanel("Sink Methods", JBScrollPane(sinkList))
+        val infoPanel = createTitledPanel("Info", JBScrollPane(statusPanel))
         val searchResultPanel = createTitledPanel("Search Results", JBScrollPane(searchResultTree))
-        val infoPanel = createTitledPanel("Info", JBScrollPane(infoArea)).apply {
-            preferredSize = Dimension(preferredSize.width, 150)
-        }
 
         // 配置分割器
         val leftRightSplit = JBSplitter(false, 0.5f).apply {
             firstComponent = rootPanel
-            secondComponent = sinkPanel
+            secondComponent = infoPanel
             dividerWidth = 5
         }
 
@@ -283,10 +247,9 @@ class CallGraphUIComponents(val project: Project) {
         // 组合底部信息面板
         return JBPanel<JBPanel<*>>(BorderLayout()).apply {
             add(verticalSplit, BorderLayout.CENTER)
-            add(infoPanel, BorderLayout.SOUTH)
 
             // 保持原有尺寸约束
-            listOf(rootList, sinkList, searchResultTree).forEach {
+            listOf(rootList, statusPanel, searchResultTree).forEach {
                 it.minimumSize = Dimension(200, 100)
             }
             searchResultTree.minimumSize = Dimension(400, 100)
@@ -315,6 +278,34 @@ class CallGraphUIComponents(val project: Project) {
         }
 
         contentManager.setSelectedContent(content)
+    }
+
+    fun updateInfoPanel(callGraph: CallGraph) {
+        val runtime = Runtime.getRuntime()
+        val usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024
+        graphStatusLabel.text = "CallGraph: ready"
+        graphStatusLabel.icon = IconUtil.graphReadyIcon
+        methodLabel.text = "MethodNode: ${callGraph.nodes.size}"
+        methodLabel.icon = IconUtil.methodReadyIcon
+        memoryLabel.icon = IconUtil.graphReadyIcon
+        memoryLabel.text = "Used memory: $usedMemory MB"
+        when (usedMemory) {
+            in 0..2048 -> memoryLabel.icon = IconUtil.memoryLowIcon
+            in 2048..4096 -> memoryLabel.icon = IconUtil.memoryMediumIcon
+            else -> memoryLabel.icon = IconUtil.memoryHighIcon
+        }
+    }
+
+    fun addBuildInfo(buildInfo: String) {
+        buildInfoLabel.text = "Build info: $buildInfo"
+    }
+
+    fun addSearchInfo(searchInfo: String) {
+        searchInfoLabel.text = "Search info: $searchInfo"
+    }
+
+    fun addErrorInfo(errorInfo: String) {
+        errorInfoLabel.text = "Error: $errorInfo"
     }
 
 }

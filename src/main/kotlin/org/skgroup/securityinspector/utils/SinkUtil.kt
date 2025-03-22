@@ -34,10 +34,10 @@ object SinkUtil {
         ".*\\(\\.\\*[^()*+\\]]+\\]?\\)\\{[1-9][0-9]+,?[0-9]*\\}.*"  // (.*[a-z]){n} n >= 10
     )
 
-    val pattern = Regex("passwd|pass|password|pwd|secret|token", RegexOption.IGNORE_CASE)
-    val connPwdPattern = Regex("password=(.*?)($|&)", RegexOption.IGNORE_CASE)
-    const val entropyThreshold = 50.0
-    const val truncate = 16
+    private val pattern = Regex("passwd|pass|password|pwd|secret|token", RegexOption.IGNORE_CASE)
+    private val connPwdPattern = Regex("password=(.*?)($|&)", RegexOption.IGNORE_CASE)
+    private const val entropyThreshold = 50.0
+    private const val truncate = 16
     internal val dollarVarPattern = Pattern.compile("\\$\\{(\\S+?)\\}")
 
     fun collectProjectIssues(
@@ -64,7 +64,7 @@ object SinkUtil {
         return null
     }
 
-    fun getLiteralExpression(expression: PsiExpression?): PsiLiteralExpression? {
+    private fun getLiteralExpression(expression: PsiExpression?): PsiLiteralExpression? {
         return when (expression) {
             is PsiReferenceExpression -> {
                 val resolvedElement = expression.resolve() as? PsiVariable
@@ -76,7 +76,7 @@ object SinkUtil {
         }
     }
 
-    fun getLiteralInnerText(expression: PsiExpression?): String? {
+    private fun getLiteralInnerText(expression: PsiExpression?): String? {
         val literal = ExpressionUtils.getLiteral(expression)
         return literal?.value?.toString()
     }
@@ -96,7 +96,7 @@ object SinkUtil {
         return null
     }
 
-    fun handleHashtablePut(
+    private fun handleHashtablePut(
         args: Array<PsiExpression>
     ): SubVulnerabilityDefinition? {
         if (args.size == 2 && args[1] is PsiLiteralExpression) {
@@ -114,7 +114,7 @@ object SinkUtil {
         return null
     }
 
-    fun handleDriverManagerGetConnection(
+    private fun handleDriverManagerGetConnection(
         args: Array<PsiExpression>
     ): SubVulnerabilityDefinition? {
         when (args.size) {
@@ -156,13 +156,13 @@ object SinkUtil {
         return null
     }
 
-    fun isHighEntropyString(v: String): Boolean {
+    private fun isHighEntropyString(v: String): Boolean {
         val truncatedValue = if (truncate < v.length) v.substring(0, truncate) else v
         return Nbvcxz().estimate(truncatedValue).entropy > entropyThreshold
     }
 
-    fun isASCII(text: String): Boolean {
-        return text.all { it.toInt() <= 128 }
+    private fun isASCII(text: String): Boolean {
+        return text.all { it.code <= 128 }
     }
 
     fun getText(expression: PsiExpression?, force: Boolean): String? {

@@ -13,11 +13,11 @@ import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.ui.Gray
-import com.intellij.ui.components.JBTextArea
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraphBuilder
 import org.skgroup.securityinspector.enums.AnalysisScope
+import org.skgroup.securityinspector.ui.component.CallGraphUIComponents
 import org.skgroup.securityinspector.ui.component.ModuleSelectorDialog
 import org.skgroup.securityinspector.utils.GraphUtils
 import java.awt.Font
@@ -28,7 +28,7 @@ object CallGraphGenerator {
     fun generate(
         project: Project,
         progressBar: JProgressBar,
-        infoArea: JTextArea,
+        uiComponents: CallGraphUIComponents,
         rootListModel: DefaultListModel<MethodNode>,
         searchComboBox: ComboBox<AnalysisScope>
     ) {
@@ -43,7 +43,9 @@ object CallGraphGenerator {
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Generating CallGraph", true) {
             private var newGraph: CallGraph? = null
             private lateinit var javaFiles: List<PsiFile>
-            private var scope = ProjectScope.getAllScope(project)
+
+            //private var scope = ProjectScope.getAllScope(project)
+            private var scope = ProjectScope.getProjectScope(project)
 
             override fun run(indicator: ProgressIndicator) {
                 val future = CompletableFuture<Unit>()
@@ -64,6 +66,7 @@ object CallGraphGenerator {
                 }
 
                 if (indicator.isCanceled) {
+                    uiComponents.addBuildInfo("Call graph generation was cancelled.")
                     return
                 }
 
@@ -72,6 +75,7 @@ object CallGraphGenerator {
                     future.get()
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    uiComponents.addErrorInfo("Build CallGraph failed: ${e.message}")
                     return
                 }
 
@@ -107,14 +111,16 @@ object CallGraphGenerator {
                 newGraph?.let { graph ->
                     ApplicationManager.getApplication().invokeLater {
                         CallGraphMemoryService.getInstance(project).setCallGraph(graph)
-                        infoArea.append("Rebuilt CallGraph with ${graph.nodes.size} methods.\n")
-                        updateRootAndSinkLists(graph, rootListModel)
+                        // 更新信息面板
+                        uiComponents.updateInfoPanel(graph)
+                        updateRootList(graph, rootListModel)
                     }
                 }
             }
 
             override fun onFinished() {
                 SwingUtilities.invokeLater {
+                    uiComponents.addBuildInfo("Call Graph Finished")
                     progressBar.isVisible = false
                     progressBar.isIndeterminate = false
                 }
@@ -122,7 +128,7 @@ object CallGraphGenerator {
 
             override fun onCancel() {
                 SwingUtilities.invokeLater {
-                    infoArea.append("[Cancelled] Call graph generation was cancelled.\n")
+                    uiComponents.addBuildInfo("Call graph generation was cancelled.")
                 }
             }
         })
@@ -141,7 +147,7 @@ object CallGraphGenerator {
         project: Project,
         method: PsiMethod,
         progressBar: JProgressBar,
-        infoArea: JBTextArea,
+        uiComponents: CallGraphUIComponents,
         rootListModel: DefaultListModel<MethodNode>,
     ) {
         progressBar.apply {
@@ -158,6 +164,7 @@ object CallGraphGenerator {
             override fun run(indicator: ProgressIndicator) {
 
                 if (indicator.isCanceled) {
+                    uiComponents.addBuildInfo("Call graph generation was cancelled.")
                     return
                 }
 
@@ -173,7 +180,7 @@ object CallGraphGenerator {
                             ?: return@runReadAction
                     }
                     if (callerMethod != method) {
-                        generate(project, callerMethod, progressBar, infoArea, rootListModel)
+                        generate(project, callerMethod, progressBar, uiComponents, rootListModel)
                     }
                 }
                 ApplicationManager.getApplication().runReadAction {
@@ -184,16 +191,6 @@ object CallGraphGenerator {
                 tempGraph = builder.getCallGraph(project)
             }
 
-            //            override fun onSuccess() {
-//                newGraph?.let { graph ->
-//                    ApplicationManager.getApplication().invokeLater {
-//                        CallGraphMemoryService.getInstance(project).setCallGraph(graph)
-//                        infoArea.append("Build CallGraph for method ${method.name} with ${graph.nodes.size} methods.\n")
-//                        updateRootAndSinkLists(graph, rootListModel)
-//                    }
-//                }
-//            }
-            //注释原有图生成，采用增量方式替换
             override fun onSuccess() {
                 tempGraph?.let { delta ->
                     ApplicationManager.getApplication().invokeLater {
@@ -204,8 +201,8 @@ object CallGraphGenerator {
                         currentGraph.merge(delta)
                         memoryService.setCallGraph(currentGraph)
 
-                        infoArea.append("Added ${delta.nodes.size} nodes for Call graph\n")
-                        updateRootAndSinkLists(currentGraph, rootListModel)
+                        uiComponents.updateInfoPanel(currentGraph)
+                        updateRootList(currentGraph, rootListModel)
                     }
                 }
             }
@@ -214,18 +211,19 @@ object CallGraphGenerator {
                 SwingUtilities.invokeLater {
                     progressBar.isVisible = false
                     progressBar.isIndeterminate = false
+                    uiComponents.addBuildInfo("Call Graph Finished")
                 }
             }
 
             override fun onCancel() {
                 SwingUtilities.invokeLater {
-                    infoArea.append("[Cancelled] Call graph generation was cancelled.\n")
+                    uiComponents.addBuildInfo("Call graph generation was cancelled.")
                 }
             }
         })
     }
 
-    private fun updateRootAndSinkLists(
+    private fun updateRootList(
         callGraph: CallGraph,
         rootListModel: DefaultListModel<MethodNode>,
     ) {
