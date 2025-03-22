@@ -30,7 +30,7 @@ class CallGraphToolWindowPanel(private val project: Project) {
             CallGraphGenerator.generate(
                 project,
                 uiComponents.progressBar,
-                uiComponents.infoArea,
+                uiComponents,
                 uiComponents.rootListModel,
                 uiComponents.searchComboBox
             )
@@ -41,22 +41,21 @@ class CallGraphToolWindowPanel(private val project: Project) {
             CallGraphSearcher.search(
                 sourceField = uiComponents.sourceField,
                 sinkField = uiComponents.sinkField,
-                infoArea = uiComponents.infoArea,
+//                infoArea = uiComponents.infoArea,
                 searchResultRootNode = uiComponents.searchResultRootNode,
                 searchResultTreeModel = uiComponents.searchResultTreeModel,
                 project = project
             )
         }
 
-        uiComponents.sinkList.addMouseListener(uiComponents.createSinkListMouseListener())
     }
 
     private fun loadPersistedState() {
         service.getCallGraph()?.let {
-            uiComponents.infoArea.append("Loaded CallGraph from persistent state.\n")
+//            uiComponents.statusPanel.append("Loaded CallGraph from persistent state.\n")
             updateRootAndSinkLists(it)
         } ?: run {
-            uiComponents.infoArea.append("No existing CallGraph found.\n")
+//            uiComponents.statusPanel.append("No existing CallGraph found.\n")
         }
     }
 

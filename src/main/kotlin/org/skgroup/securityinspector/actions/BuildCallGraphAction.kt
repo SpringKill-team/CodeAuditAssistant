@@ -56,7 +56,7 @@ class BuildCallGraphAction : AnAction() {
             project,
             method,
             uiComponents.progressBar,
-            uiComponents.infoArea,
+            uiComponents,
             uiComponents.rootListModel,
         )
 

@@ -11,6 +11,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
+import org.skgroup.securityinspector.ui.renderer.FirstColumnRenderer
+import org.skgroup.securityinspector.ui.renderer.HighlightRenderer
 import org.skgroup.securityinspector.utils.SinkUtil.collectProjectIssues
 import java.awt.BorderLayout
 import java.awt.event.MouseAdapter

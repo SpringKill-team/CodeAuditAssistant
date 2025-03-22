@@ -3,6 +3,11 @@ package org.skgroup.securityinspector.utils
 import org.skgroup.securityinspector.enums.SubVulnerabilityDefinition
 import org.skgroup.securityinspector.enums.SubVulnerabilityType
 
+/**
+ * Sink list 是一个存储所有 Sink 的类，其中包含了所有的 Sink 的定义
+ *
+ * @version 1.0
+ */
 object SinkList {
 
     private val nettyResponseSplittingDefinition = SubVulnerabilityDefinition(

@@ -57,7 +57,7 @@ class SearchAsSinkAction : AnAction() {
         CallGraphSearcher.search(
             uiComponents.sourceField,
             uiComponents.sinkField,
-            uiComponents.infoArea,
+//            uiComponents.infoArea,
             uiComponents.searchResultRootNode,
             uiComponents.searchResultTreeModel,
             project
