@@ -49,7 +49,7 @@ object GraphUtils {
      * @param methodNode 传入一个 MethodNode 对象
      * @return  返回一个字符串，表示方法的签名
      */
-    fun getMethodSignature(methodNode: MethodNode): String {
+    private fun getMethodSignature(methodNode: MethodNode): String {
         val className = methodNode.className
         val methodName = methodNode.name
 
@@ -200,7 +200,7 @@ object GraphUtils {
         val path = mutableListOf<MethodNode>()
 
         fun isMatch(n1: MethodNode, n2: MethodNode): Boolean {
-            return n1.className == n2.className && n1.name == n2.name
+            return n1 == n2
         }
 
         fun dfs(cur: MethodNode): Boolean {
