@@ -1,6 +1,7 @@
 package org.skgroup.securityinspector.analysis.ast.nodes
 
 import org.skgroup.securityinspector.analysis.ast.SourceSpan
+import org.skgroup.securityinspector.enums.RefMode
 
 /**
  * Method node 是用于表示方法节点
@@ -19,9 +20,14 @@ data class MethodNode(
     val returnType: String,
     val parameters: List<ParameterNode>,
     val body: List<AstNode> = emptyList(),
+    val refMode: RefMode,
     override val sourceSpan: SourceSpan? = null
 ) : BaseAstNode(
     nodeType = "MethodDeclaration",
     children = body,
     sourceSpan = sourceSpan
-)
+){
+    override fun toString(): String {
+        return "MethodNode(className='$className', name='$name', returnType='$returnType', parameters=$parameters, body=$body, sourceSpan=$sourceSpan)"
+    }
+}

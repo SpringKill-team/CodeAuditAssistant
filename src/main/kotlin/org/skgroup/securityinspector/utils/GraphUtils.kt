@@ -13,6 +13,7 @@ import org.skgroup.securityinspector.analysis.ast.SourceSpan
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.ast.nodes.ParameterNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
+import org.skgroup.securityinspector.enums.RefMode
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -48,7 +49,7 @@ object GraphUtils {
      * @param methodNode 传入一个 MethodNode 对象
      * @return  返回一个字符串，表示方法的签名
      */
-    fun getMethodSignature(methodNode: MethodNode): String {
+    private fun getMethodSignature(methodNode: MethodNode): String {
         val className = methodNode.className
         val methodName = methodNode.name
 
@@ -75,7 +76,7 @@ object GraphUtils {
 
         val className = getClassName(method)
         val sourceSpan = getSourceSpan(method)
-        val methodNode = MethodNode(className, method.name, returnType, parameters, sourceSpan = sourceSpan)
+        val methodNode = MethodNode(className, method.name, returnType, parameters, sourceSpan = sourceSpan, refMode = RefMode.DECLARATION)
         val signature = getMethodSignature(methodNode)
 
         return methodNodeCache.getOrPut(signature) { methodNode }
@@ -97,7 +98,7 @@ object GraphUtils {
 
         val className = getClassName(method)
         val sourceSpan = getReferenceSourceSpan(reference)
-        val methodNode = MethodNode(className, method.name, returnType, parameters, sourceSpan = sourceSpan)
+        val methodNode = MethodNode(className, method.name, returnType, parameters, sourceSpan = sourceSpan, refMode = RefMode.CALL)
         val signature = getMethodSignature(methodNode)
 
         return methodNodeCache.getOrPut(signature) { methodNode }
@@ -119,7 +120,7 @@ object GraphUtils {
 
         val className = getClassName(method)
         val sourceSpan = getSourceSpan(expression)
-        val methodNode = MethodNode(className, method.name, returnType, parameters, sourceSpan = sourceSpan)
+        val methodNode = MethodNode(className, method.name, returnType, parameters, sourceSpan = sourceSpan, refMode = RefMode.DECLARATION)
         val signature = getMethodSignature(methodNode)
 
         return methodNodeCache.getOrPut(signature) { methodNode }
@@ -169,7 +170,7 @@ object GraphUtils {
             ?: clazz.name
             ?: "UnknownClass"
         val sourceSpan = getSourceSpan(clazz)
-        val methodNode = MethodNode(signature, "class", "void", emptyList(), sourceSpan = sourceSpan)
+        val methodNode = MethodNode(signature, "class", "void", emptyList(), sourceSpan = sourceSpan, refMode = RefMode.DECLARATION)
         signature = "[DI]" + signature
 
         return methodNodeCache.getOrPut(signature) { methodNode }
@@ -187,28 +188,6 @@ object GraphUtils {
 //        return MethodNode(signature, returnType, parameters, emptyList())
     }
 
-    /*fun getClassInitMethodNode(diClass: PsiClass): MethodNode {
-        val method = diClass.allMethods.firstOrNull { it.name == "<init>" } ?: return MethodNode(
-            "[DI]Unknown",
-            "void",
-            emptyList(),
-            emptyList()
-        )
-        val returnType = method.returnType?.canonicalText ?: "void"
-        val parameters = method.parameterList.parameters.map { param ->
-            val name = param.name ?: "Unknown"
-            val type = param.type.canonicalText
-            ParameterNode(name, type)
-        }
-
-        val signature = "[DI]" + getMethodSignature(method)
-
-        return methodNodeCache.getOrPut(signature) {
-            MethodNode(signature, returnType, parameters, emptyList())
-        }
-//        return MethodNode(signature, returnType, parameters, emptyList())
-    }
-*/
     /**
      * Find path 方法用来查找两个方法之间的调用路径（DFS查找）
      * @param graph 传入一个 CallGraph 对象
@@ -221,7 +200,7 @@ object GraphUtils {
         val path = mutableListOf<MethodNode>()
 
         fun isMatch(n1: MethodNode, n2: MethodNode): Boolean {
-            return n1.className == n2.className && n1.name == n2.name
+            return n1 == n2
         }
 
         fun dfs(cur: MethodNode): Boolean {
@@ -242,7 +221,7 @@ object GraphUtils {
         return if (dfs(node)) path.toList() else null
     }
 
-    fun findLibsJars(project: Project): List<VirtualFile> {
+    private fun findLibsJars(project: Project): List<VirtualFile> {
         val libsDir = project.basePath?.let { Paths.get(it, "libs") } ?: return emptyList()
         if (!Files.exists(libsDir)) return emptyList()
 

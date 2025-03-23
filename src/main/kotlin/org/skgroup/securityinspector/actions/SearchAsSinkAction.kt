@@ -18,7 +18,6 @@ import org.skgroup.securityinspector.ui.service.SecurityInspectorProjectService
  *
  * @author springkill
  * @version 1.0
- * @since 2025/3/9
  */
 class SearchAsSinkAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
@@ -57,7 +56,7 @@ class SearchAsSinkAction : AnAction() {
         CallGraphSearcher.search(
             uiComponents.sourceField,
             uiComponents.sinkField,
-            uiComponents.infoArea,
+//            uiComponents.infoArea,
             uiComponents.searchResultRootNode,
             uiComponents.searchResultTreeModel,
             project

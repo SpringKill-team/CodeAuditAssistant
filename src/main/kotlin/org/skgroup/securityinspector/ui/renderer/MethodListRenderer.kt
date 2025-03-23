@@ -1,4 +1,4 @@
-package org.skgroup.securityinspector.ui.component
+package org.skgroup.securityinspector.ui.renderer
 
 import com.intellij.icons.AllIcons
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode

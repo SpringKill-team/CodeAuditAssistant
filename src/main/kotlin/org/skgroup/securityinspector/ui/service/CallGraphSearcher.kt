@@ -42,7 +42,7 @@ object CallGraphSearcher {
     fun search(
         sourceField: JBTextField,
         sinkField: JBTextField,
-        infoArea: JBTextArea,
+//        infoArea: JBTextArea,
         // 用树的根节点和模型来展示结果
         searchResultRootNode: DefaultMutableTreeNode,
         searchResultTreeModel: DefaultTreeModel,
@@ -50,7 +50,6 @@ object CallGraphSearcher {
     ) {
         val service = CallGraphMemoryService.getInstance(project)
         val graph = service.getCallGraph() ?: run {
-            appendErrorMessage(infoArea, "No CallGraph found. Please generate first.")
             return
         }
 
@@ -65,13 +64,13 @@ object CallGraphSearcher {
 
         when {
             srcText.isEmpty() && sinkText.isEmpty() -> {
-                appendErrorMessage(infoArea, "Both Source & Sink are empty!")
+//                appendErrorMessage(infoArea, "Both Source & Sink are empty!")
             }
             sinkText.isNotEmpty() && srcText.isEmpty() -> {
-                handleSinkOnlySearch(sinkText, graph, searchResultRootNode, searchResultTreeModel, infoArea)
+                handleSinkOnlySearch(sinkText, graph, searchResultRootNode, searchResultTreeModel)
             }
             else -> {
-                handleFullSearch(srcText, sinkText, graph, searchResultRootNode, searchResultTreeModel, infoArea)
+                handleFullSearch(srcText, sinkText, graph, searchResultRootNode, searchResultTreeModel)
             }
         }
     }
@@ -81,14 +80,13 @@ object CallGraphSearcher {
         graph: CallGraph,
         searchResultRootNode: DefaultMutableTreeNode,
         searchResultTreeModel: DefaultTreeModel,
-        infoArea: JBTextArea
+//        infoArea: JBTextArea
     ) {
         try {
             val sinkRegex = sinkText.toRegex()
             val sinkNodes = graph.nodes.filter { sinkRegex.containsMatchIn(it.name) }
 
             if (sinkNodes.isEmpty()) {
-                appendInfoMessage(infoArea, "No method matches sink: $sinkText")
                 return
             }
 
@@ -110,10 +108,10 @@ object CallGraphSearcher {
             }
 
             if (!found) {
-                appendInfoMessage(infoArea, "No path found to $sinkText")
+//                appendInfoMessage(infoArea, "No path found to $sinkText")
             }
         } catch (e: PatternSyntaxException) {
-            handleRegexError(infoArea, sinkText, e)
+//            handleRegexError(infoArea, sinkText, e)
         }
     }
 
@@ -123,7 +121,7 @@ object CallGraphSearcher {
         graph: CallGraph,
         searchResultRootNode: DefaultMutableTreeNode,
         searchResultTreeModel: DefaultTreeModel,
-        infoArea: JBTextArea
+//        infoArea: JBTextArea
     ) {
         try {
             val srcRegex = srcText.toRegex()
@@ -133,12 +131,12 @@ object CallGraphSearcher {
             val sinks = graph.nodes.filter { sinkRegex.containsMatchIn(it.name) }
 
             when {
-                sources.isEmpty() -> appendInfoMessage(infoArea, "No method matches source: $srcText")
-                sinks.isEmpty() -> appendInfoMessage(infoArea, "No method matches sink: $sinkText")
-                else -> performPathSearch(sources, sinks, graph, searchResultRootNode, searchResultTreeModel, infoArea)
+//                sources.isEmpty() -> appendInfoMessage(infoArea, "No method matches source: $srcText")
+//                sinks.isEmpty() -> appendInfoMessage(infoArea, "No method matches sink: $sinkText")
+                else -> performPathSearch(sources, sinks, graph, searchResultRootNode, searchResultTreeModel)
             }
         } catch (e: PatternSyntaxException) {
-            handleRegexError(infoArea, "$srcText/$sinkText", e)
+//            handleRegexError(infoArea, "$srcText/$sinkText", e)
         }
     }
 
@@ -148,7 +146,7 @@ object CallGraphSearcher {
         graph: CallGraph,
         searchResultRootNode: DefaultMutableTreeNode,
         searchResultTreeModel: DefaultTreeModel,
-        infoArea: JBTextArea
+//        infoArea: JBTextArea
     ) {
         var foundAny = false
         sources.forEach { src ->
@@ -162,7 +160,7 @@ object CallGraphSearcher {
         }
 
         if (!foundAny) {
-            appendInfoMessage(infoArea, "No path found between ${sources.first().name} -> ${sinks.first().name}")
+//            appendInfoMessage(infoArea, "No path found between ${sources.first().name} -> ${sinks.first().name}")
         }
     }
 
@@ -189,7 +187,6 @@ object CallGraphSearcher {
 
             // 将整个调用链里的每个节点，放到 parentNode 的子节点中
             path.forEachIndexed { index, methodNode ->
-                val display = "$index. [${methodNode}]"
                 val childNode = DefaultMutableTreeNode(methodNode)
                 parentNode.add(childNode)
             }

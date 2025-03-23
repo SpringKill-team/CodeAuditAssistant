@@ -7,17 +7,18 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.ui.Gray
-import com.intellij.ui.components.JBTextArea
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraphBuilder
 import org.skgroup.securityinspector.enums.AnalysisScope
+import org.skgroup.securityinspector.ui.component.CallGraphUIComponents
 import org.skgroup.securityinspector.ui.component.ModuleSelectorDialog
 import org.skgroup.securityinspector.utils.GraphUtils
 import java.awt.Font
@@ -25,10 +26,14 @@ import java.util.concurrent.CompletableFuture
 import javax.swing.*
 
 object CallGraphGenerator {
+    // 全局唯一已检测方法set
+    private val processedMethods = mutableSetOf<String>()
+    private val processedFiles = mutableSetOf<PsiFile>()
+
     fun generate(
         project: Project,
         progressBar: JProgressBar,
-        infoArea: JTextArea,
+        uiComponents: CallGraphUIComponents,
         rootListModel: DefaultListModel<MethodNode>,
         searchComboBox: ComboBox<AnalysisScope>
     ) {
@@ -43,7 +48,9 @@ object CallGraphGenerator {
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Generating CallGraph", true) {
             private var newGraph: CallGraph? = null
             private lateinit var javaFiles: List<PsiFile>
-            private var scope = ProjectScope.getAllScope(project)
+
+            //private var scope = ProjectScope.getAllScope(project)
+            private var scope = ProjectScope.getProjectScope(project)
 
             override fun run(indicator: ProgressIndicator) {
                 val future = CompletableFuture<Unit>()
@@ -64,6 +71,7 @@ object CallGraphGenerator {
                 }
 
                 if (indicator.isCanceled) {
+                    uiComponents.addBuildInfo("Call graph generation was cancelled.")
                     return
                 }
 
@@ -72,6 +80,7 @@ object CallGraphGenerator {
                     future.get()
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    uiComponents.addErrorInfo("Build CallGraph failed: ${e.message}")
                     return
                 }
 
@@ -88,7 +97,9 @@ object CallGraphGenerator {
 
                     ApplicationManager.getApplication().runReadAction {
                         if (psiFile is PsiJavaFile) {
-                            psiFile.accept(builder)
+                            if (processedFiles.add(psiFile)) {
+                                psiFile.accept(builder)
+                            }
                         }
                     }
 
@@ -107,14 +118,16 @@ object CallGraphGenerator {
                 newGraph?.let { graph ->
                     ApplicationManager.getApplication().invokeLater {
                         CallGraphMemoryService.getInstance(project).setCallGraph(graph)
-                        infoArea.append("Rebuilt CallGraph with ${graph.nodes.size} methods.\n")
-                        updateRootAndSinkLists(graph, rootListModel)
+                        // 更新信息面板
+                        uiComponents.updateInfoPanel(graph)
+                        updateRootList(graph, rootListModel)
                     }
                 }
             }
 
             override fun onFinished() {
                 SwingUtilities.invokeLater {
+                    uiComponents.addBuildInfo("Call Graph Finished")
                     progressBar.isVisible = false
                     progressBar.isIndeterminate = false
                 }
@@ -122,7 +135,7 @@ object CallGraphGenerator {
 
             override fun onCancel() {
                 SwingUtilities.invokeLater {
-                    infoArea.append("[Cancelled] Call graph generation was cancelled.\n")
+                    uiComponents.addBuildInfo("Call graph generation was cancelled.")
                 }
             }
         })
@@ -141,9 +154,12 @@ object CallGraphGenerator {
         project: Project,
         method: PsiMethod,
         progressBar: JProgressBar,
-        infoArea: JBTextArea,
+        uiComponents: CallGraphUIComponents,
         rootListModel: DefaultListModel<MethodNode>,
     ) {
+        val signature =
+            "${method.containingClass?.qualifiedName}" + "#" + method.name + "(${method.parameterList.parameters.joinToString { it.type.presentableText }})"
+        if (!processedMethods.add(signature)) return
         progressBar.apply {
             isVisible = true
             isIndeterminate = true
@@ -158,6 +174,7 @@ object CallGraphGenerator {
             override fun run(indicator: ProgressIndicator) {
 
                 if (indicator.isCanceled) {
+                    uiComponents.addBuildInfo("Call graph generation was cancelled.")
                     return
                 }
 
@@ -166,34 +183,30 @@ object CallGraphGenerator {
                 indicator.text = "Analyzing ${method.name}"
 
                 val builder = CallGraphBuilder()
-                ReferencesSearch.search(method, GlobalSearchScope.projectScope(project)).forEach { reference ->
-                    var callerMethod: PsiMethod = method
-                    ApplicationManager.getApplication().runReadAction {
-                        callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
-                            ?: return@runReadAction
-                    }
-                    if (callerMethod != method) {
-                        generate(project, callerMethod, progressBar, infoArea, rootListModel)
-                    }
-                }
                 ApplicationManager.getApplication().runReadAction {
-                    method.accept(builder)
-                }
-                progressBar.string = "Building CallGraph for method ${method.name}"
+                    ReferencesSearch.search(method, method.resolveScope).forEach { reference ->
+                        var callerMethod: PsiMethod = method
+                        ApplicationManager.getApplication().runReadAction {
+//                            callerMethod = reference.resolve() as PsiMethod
+                            callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
+                                ?: return@runReadAction
+                        }
+                        val callee =
+                            "${callerMethod.containingClass?.qualifiedName}" + "#" + callerMethod.name + "(${callerMethod.parameterList.parameters.joinToString { it.type.presentableText }})"
+                        if (callerMethod != method && !processedMethods.contains(callee)) {
+                            generate(project, callerMethod, progressBar, uiComponents, rootListModel)
+                        }
+                    }
+                    if (method.containingFile.virtualFile.path.contains("src/test")) return@runReadAction
+                    ApplicationManager.getApplication().runReadAction {
+                        method.accept(builder)
+                    }
+                    progressBar.string = "Building CallGraph for method ${method.name}"
 
-                tempGraph = builder.getCallGraph(project)
+                    tempGraph = builder.getCallGraph(project)
+                }
             }
 
-            //            override fun onSuccess() {
-//                newGraph?.let { graph ->
-//                    ApplicationManager.getApplication().invokeLater {
-//                        CallGraphMemoryService.getInstance(project).setCallGraph(graph)
-//                        infoArea.append("Build CallGraph for method ${method.name} with ${graph.nodes.size} methods.\n")
-//                        updateRootAndSinkLists(graph, rootListModel)
-//                    }
-//                }
-//            }
-            //注释原有图生成，采用增量方式替换
             override fun onSuccess() {
                 tempGraph?.let { delta ->
                     ApplicationManager.getApplication().invokeLater {
@@ -204,8 +217,8 @@ object CallGraphGenerator {
                         currentGraph.merge(delta)
                         memoryService.setCallGraph(currentGraph)
 
-                        infoArea.append("Added ${delta.nodes.size} nodes for Call graph\n")
-                        updateRootAndSinkLists(currentGraph, rootListModel)
+                        uiComponents.updateInfoPanel(currentGraph)
+                        updateRootList(currentGraph, rootListModel)
                     }
                 }
             }
@@ -214,18 +227,19 @@ object CallGraphGenerator {
                 SwingUtilities.invokeLater {
                     progressBar.isVisible = false
                     progressBar.isIndeterminate = false
+                    uiComponents.addBuildInfo("Call Graph Finished")
                 }
             }
 
             override fun onCancel() {
                 SwingUtilities.invokeLater {
-                    infoArea.append("[Cancelled] Call graph generation was cancelled.\n")
+                    uiComponents.addBuildInfo("Call graph generation was cancelled.")
                 }
             }
         })
     }
 
-    private fun updateRootAndSinkLists(
+    private fun updateRootList(
         callGraph: CallGraph,
         rootListModel: DefaultListModel<MethodNode>,
     ) {
