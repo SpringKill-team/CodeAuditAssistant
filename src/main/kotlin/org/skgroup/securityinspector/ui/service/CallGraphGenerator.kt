@@ -7,6 +7,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
@@ -25,6 +26,10 @@ import java.util.concurrent.CompletableFuture
 import javax.swing.*
 
 object CallGraphGenerator {
+    // 全局唯一已检测方法set
+    private val processedMethods = mutableSetOf<String>()
+    private val processedFiles = mutableSetOf<PsiFile>()
+
     fun generate(
         project: Project,
         progressBar: JProgressBar,
@@ -92,7 +97,9 @@ object CallGraphGenerator {
 
                     ApplicationManager.getApplication().runReadAction {
                         if (psiFile is PsiJavaFile) {
-                            psiFile.accept(builder)
+                            if (processedFiles.add(psiFile)) {
+                                psiFile.accept(builder)
+                            }
                         }
                     }
 
@@ -150,6 +157,9 @@ object CallGraphGenerator {
         uiComponents: CallGraphUIComponents,
         rootListModel: DefaultListModel<MethodNode>,
     ) {
+        val signature =
+            "${method.containingClass?.qualifiedName}" + "#" + method.name + "(${method.parameterList.parameters.joinToString { it.type.presentableText }})"
+        if (!processedMethods.add(signature)) return
         progressBar.apply {
             isVisible = true
             isIndeterminate = true
@@ -173,22 +183,28 @@ object CallGraphGenerator {
                 indicator.text = "Analyzing ${method.name}"
 
                 val builder = CallGraphBuilder()
-                ReferencesSearch.search(method, GlobalSearchScope.projectScope(project)).forEach { reference ->
-                    var callerMethod: PsiMethod = method
-                    ApplicationManager.getApplication().runReadAction {
-                        callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
-                            ?: return@runReadAction
-                    }
-                    if (callerMethod != method) {
-                        generate(project, callerMethod, progressBar, uiComponents, rootListModel)
-                    }
-                }
                 ApplicationManager.getApplication().runReadAction {
-                    method.accept(builder)
-                }
-                progressBar.string = "Building CallGraph for method ${method.name}"
+                    ReferencesSearch.search(method, method.resolveScope).forEach { reference ->
+                        var callerMethod: PsiMethod = method
+                        ApplicationManager.getApplication().runReadAction {
+//                            callerMethod = reference.resolve() as PsiMethod
+                            callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
+                                ?: return@runReadAction
+                        }
+                        val callee =
+                            "${callerMethod.containingClass?.qualifiedName}" + "#" + callerMethod.name + "(${callerMethod.parameterList.parameters.joinToString { it.type.presentableText }})"
+                        if (callerMethod != method && !processedMethods.contains(callee)) {
+                            generate(project, callerMethod, progressBar, uiComponents, rootListModel)
+                        }
+                    }
+                    if (method.containingFile.virtualFile.path.contains("src/test")) return@runReadAction
+                    ApplicationManager.getApplication().runReadAction {
+                        method.accept(builder)
+                    }
+                    progressBar.string = "Building CallGraph for method ${method.name}"
 
-                tempGraph = builder.getCallGraph(project)
+                    tempGraph = builder.getCallGraph(project)
+                }
             }
 
             override fun onSuccess() {

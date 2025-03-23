@@ -35,12 +35,16 @@ class ResultTreeRenderer : DefaultTreeCellRenderer() {
                         RefMode.NEW -> icon = IconUtil.newIcon
                         else -> {}
                     }
-                    "$refMode : ${userObject.name}"
+                    "$refMode : ${
+                        userObject.className.substring(userObject.className.lastIndexOf(".") + 1)
+                    } #${userObject.name}"
                 }
-                is String ->{
+
+                is String -> {
                     icon = IconUtil.pathIcon
                     userObject
                 }
+
                 else -> userObject.toString()
             }
         }
