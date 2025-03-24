@@ -31,4 +31,8 @@ data class CallGraph(
         this.nodeTypes.putAll(other.nodeTypes)
     }
 
+    fun findSinks() = nodes.filter { edges[it].isNullOrEmpty() }
+
+    fun findRoots() = nodes.filter { it !in edges.values.flatten().toSet() }
+
 }

@@ -23,7 +23,6 @@ import java.util.regex.Pattern
  * @author springkill
  * @version 1.0
  */
-
 object SinkUtil {
 
     val regexPatterns = listOf(
