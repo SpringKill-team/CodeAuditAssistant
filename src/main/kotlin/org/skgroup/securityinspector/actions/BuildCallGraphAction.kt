@@ -30,8 +30,6 @@ class BuildCallGraphAction : AnAction() {
     }
 
     override fun update(e: AnActionEvent) {
-//        val project = e.project
-//        val psiElement = e.getData(CommonDataKeys.PSI_ELEMENT)
 
         CoroutineScope(Dispatchers.Default).launch {
             val isMethod = readAction {

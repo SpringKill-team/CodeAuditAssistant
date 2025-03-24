@@ -104,7 +104,7 @@ class DIProcessor(
 
                         // 将 cls -> field.type 关系记录到调用图
                         // 为了和现有的 method-based callGraph 统一，我们可以构造一个伪“类级方法节点”
-                        val callerNode = GraphUtils.getMethodNode(cls)   // 伪方法节点：类本身
+                        val callerNode = GraphUtils.getClassNode(cls)   // 伪方法节点：类本身
                         val calleeNode = findOrCreateMethodNodeForType(field.type)
 
                         // 入图
@@ -164,8 +164,8 @@ class DIProcessor(
 
                 if (implCls.isInheritor(serviceClass, true)) {
                     // 建立关联 service -> impl
-                    val serviceNode = GraphUtils.getMethodNode(serviceClass)
-                    val implNode = GraphUtils.getMethodNode(implCls)
+                    val serviceNode = GraphUtils.getClassNode(serviceClass)
+                    val implNode = GraphUtils.getClassNode(implCls)
 
                     callGraph.nodes.add(serviceNode)
                     callGraph.nodes.add(implNode)
@@ -214,7 +214,7 @@ class DIProcessor(
         val psiClass = PsiUtil.resolveClassInType(type)
         return if (psiClass != null) {
             // 直接用 psiClass 构造 MethodNode
-            GraphUtils.getMethodNode(psiClass)
+            GraphUtils.getClassNode(psiClass)
         } else {
             // 找不到对应类，做一个兜底处理
             MethodNode(type.canonicalText ?: "UnknownType",type.canonicalText ?: "UnknownType", "DI", emptyList(), emptyList(),RefMode.CALL)

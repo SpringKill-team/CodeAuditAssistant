@@ -32,8 +32,6 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
     // 用于记录当前访问的方法调用栈
     private val currentMethodStack = ArrayDeque<MethodNode>()
 
-//    private val diProcessor = DIProcessor(callGraph)
-
     /**
      * Visit method 方法用于访问一个Java方法并将其加入调用图
      * 用栈处理递归方法调用
