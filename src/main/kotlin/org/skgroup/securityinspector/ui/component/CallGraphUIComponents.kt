@@ -34,8 +34,7 @@ class CallGraphUIComponents(val project: Project) {
     val rootListModel = DefaultListModel<MethodNode>()
     val rootList = JBList(rootListModel)
 
-    //    val infoArea = JTextArea().apply { isEditable = false }
-    val searchComboBox = ComboBox<AnalysisScope>(AnalysisScope.values())
+    val searchComboBox = ComboBox(AnalysisScope.values())
 
     val searchResultRootNode = DefaultMutableTreeNode("Search Results")
     val searchResultTreeModel = DefaultTreeModel(searchResultRootNode)
@@ -223,8 +222,6 @@ class CallGraphUIComponents(val project: Project) {
         // 初始化列表渲染器
         val methodRenderer = MethodListRenderer.createMethodRenderer()
         rootList.cellRenderer = methodRenderer
-//        sinkList.cellRenderer = methodRenderer
-//        searchResultList.cellRenderer = methodRenderer
 
         // 创建各个功能面板
         val rootPanel = createTitledPanel("Root Methods", JBScrollPane(rootList))

@@ -17,17 +17,6 @@ data class CallGraph(
     val edgeTypes: MutableMap<Pair<MethodNode, MethodNode>, EdgeType> = mutableMapOf(),
     val nodeTypes: MutableMap<MethodNode, NodeType> = mutableMapOf()
 ) {
-    fun addEdge(from: MethodNode, to: MethodNode, type: EdgeType) {
-        edges.getOrPut(from) { mutableSetOf() }.add(to)
-        edgeTypes[Pair(from, to)] = type
-        nodes.add(from)
-        nodes.add(to)
-    }
-
-    fun addSpecialNode(node: MethodNode, type: NodeType) {
-        nodeTypes[node] = type
-    }
-
     fun merge(other: CallGraph) {
         // 合并节点
         this.nodes.addAll(other.nodes)

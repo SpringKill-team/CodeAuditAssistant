@@ -200,7 +200,7 @@ object GraphUtils {
         val path = mutableListOf<MethodNode>()
 
         fun isMatch(n1: MethodNode, n2: MethodNode): Boolean {
-            return n1 == n2
+            return n1.className == n2.className && n1.name == n2.name
         }
 
         fun dfs(cur: MethodNode): Boolean {
