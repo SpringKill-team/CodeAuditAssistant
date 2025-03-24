@@ -98,7 +98,10 @@ object CallGraphGenerator {
                     ApplicationManager.getApplication().runReadAction {
                         if (psiFile is PsiJavaFile) {
                             if (processedFiles.add(psiFile)) {
-                                psiFile.accept(builder)
+                                PsiTreeUtil.findChildrenOfType(psiFile, PsiMethod::class.java).forEach{
+                                    it.accept(builder)
+                                }
+//                                psiFile.accept(builder)
                             }
                         }
                     }

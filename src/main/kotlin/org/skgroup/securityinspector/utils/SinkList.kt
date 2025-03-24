@@ -6,6 +6,7 @@ import org.skgroup.securityinspector.enums.SubVulnerabilityType
 /**
  * Sink list 是一个存储所有 Sink 的类，其中包含了所有的 Sink 的定义
  *
+ * @author springkill
  * @version 1.0
  */
 object SinkList {
