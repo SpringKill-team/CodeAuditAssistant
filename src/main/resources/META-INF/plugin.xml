@@ -38,15 +38,12 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-
         <toolWindow id="SecurityInspector"
                     factoryClass="org.skgroup.securityinspector.ui.SecurityInspectorToolWindowFactory"
                     anchor="left"
                     icon="/icons/pluginIcon.svg"
         />
-
         <annotator language="JAVA" implementationClass="org.skgroup.securityinspector.utils.ProblemAnnotator"/>
-
     </extensions>
 
     <actions>
@@ -54,7 +51,6 @@
                 text="Build Call Graph">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
-
         <action id="SearchAsSink" class="org.skgroup.securityinspector.actions.SearchAsSinkAction"
                 text="Search As Sink">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
