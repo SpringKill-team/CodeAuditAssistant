@@ -97,27 +97,58 @@ class CallGraphUIComponents(val project: Project) {
         add(createLabel(errorInfoLabel))
     }
 
-    // New UI components for the right panel
-    val newPanel = JBPanel<JBPanel<*>>(BorderLayout()).apply {
-        val input1 = JBTextField(15)
-        val input2 = JBTextField(15)
-        val actionButton = JButton("Action")
-        add(input1, BorderLayout.NORTH)
-        add(input2, BorderLayout.CENTER)
-        add(actionButton, BorderLayout.SOUTH)
+    val methodFinderPanel = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+        layout = GridBagLayout()
+        val c = GridBagConstraints().apply {
+            fill = GridBagConstraints.HORIZONTAL
+            insets = Insets(5, 5, 5, 5)
+        }
+
+        val fields = listOf(
+            "Class Name:" to JBTextField(20),
+            "Access Modifier:" to JBTextField(10),
+            "Method Modifier:" to JBTextField(10),
+            "Method Name:" to JBTextField(15),
+            "Param Count:" to JBTextField(5),
+            "Param Type:" to JBTextField(15),
+            "Param Name:" to JBTextField(15),
+            "Varargs:" to JBTextField(5),
+            "Throws Clause:" to JBTextField(15),
+            "Return Type:" to JBTextField(15),
+            "Annotations:" to JBTextField(20)
+        )
+
+        fields.forEachIndexed { index, (labelText, textField) ->
+            c.gridx = 0
+            c.gridy = index
+            c.weightx = 0.0
+            add(JBLabel(labelText), c)
+
+            c.gridx = 1
+            c.weightx = 1.0
+            add(textField, c)
+        }
+
+        c.gridx = 0
+        c.gridy = fields.size
+        c.gridwidth = 2
+        c.fill = GridBagConstraints.NONE
+        c.anchor = GridBagConstraints.CENTER
+        val actionButton = JButton("Find Method")
+        add(actionButton, c)
     }
 
     val toggleButton = JButton("Toggle Panel")
-    lateinit var splitter: JBSplitter // Splitter to manage the new panel
+    lateinit var splitter: JBSplitter
 
     fun createMainPanel(): JBPanel<JBPanel<*>> {
         val mainPanel = JBPanel<JBPanel<*>>(BorderLayout())
         mainPanel.add(createNorthContainer(), BorderLayout.NORTH)
 
         val centerPanel = createCenterPanel()
-        splitter = JBSplitter(false, 0.8f).apply { // Horizontal splitter (false = horizontal)
+        splitter = JBSplitter(false, 0.8f).apply {
             firstComponent = centerPanel
-            secondComponent = newPanel
+            secondComponent = methodFinderPanel
             dividerWidth = 5
         }
         mainPanel.add(splitter, BorderLayout.CENTER)
@@ -320,7 +351,6 @@ class CallGraphUIComponents(val project: Project) {
         errorInfoLabel.text = "Error: $errorInfo"
     }
 
-    // Initialize toggle button behavior
     init {
         var isPanelVisible = true
         toggleButton.addActionListener {
@@ -329,7 +359,7 @@ class CallGraphUIComponents(val project: Project) {
                 splitter.secondComponent = null
             } else {
                 // 显示面板：重新添加 newPanel
-                splitter.secondComponent = newPanel
+                splitter.secondComponent = methodFinderPanel
             }
             isPanelVisible = !isPanelVisible // 切换状态
             splitter.revalidate() // 重新布局
