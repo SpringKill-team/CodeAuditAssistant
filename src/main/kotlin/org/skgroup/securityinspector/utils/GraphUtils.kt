@@ -11,6 +11,7 @@ import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import org.skgroup.securityinspector.analysis.ast.SourceSpan
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
+import org.skgroup.securityinspector.analysis.ast.nodes.MethodSigNode
 import org.skgroup.securityinspector.analysis.ast.nodes.ParameterNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.enums.RefMode
@@ -271,5 +272,47 @@ object GraphUtils {
                 .filter { it.language == JavaLanguage.INSTANCE }
         }
 
+    private fun geyMethodSigNode(method: PsiMethod): MethodSigNode {
+        val className = method.className ?: "UnknownClass"
+        val methodAccessModifier = getAccessModifier(method)
+        val methodModifier = getModifiers(method)
+        val methodName = method.name ?: "UnknownMethod"
+        val methodParameters = emptyList<ParameterNode>()
+        val methodVarargs = method.isVarArgs
+        val methodThrowsClause = emptyList<String>()
+        val methodReturnType = method.returnType?.canonicalText ?: "void"
+        val methodAnnotations = emptyList<String>()
+        val sourceSpan = getSourceSpan(method)
 
+        return MethodSigNode(
+            className,
+            methodAccessModifier,
+            methodModifier,
+            methodName,
+            methodParameters,
+            methodVarargs,
+            methodThrowsClause,
+            methodReturnType,
+            methodAnnotations,
+            sourceSpan = sourceSpan
+        )
+
+    }
+
+    private fun getAccessModifier(method: PsiMethod): String {
+        return when {
+            method.hasModifierProperty(PsiModifier.PUBLIC) -> "public"
+            method.hasModifierProperty(PsiModifier.PROTECTED) -> "protected"
+            method.hasModifierProperty(PsiModifier.PRIVATE) -> "private"
+            else -> "package-private"
+        }
+    }
+
+    private fun getModifiers(method: PsiMethod): String {
+        val modifiers = mutableListOf<String>()
+        if (method.hasModifierProperty(PsiModifier.STATIC)) modifiers.add("static")
+        if (method.hasModifierProperty(PsiModifier.FINAL)) modifiers.add("final")
+        if (method.hasModifierProperty(PsiModifier.SYNCHRONIZED)) modifiers.add("synchronized")
+        return modifiers.joinToString(" ")
+    }
 }

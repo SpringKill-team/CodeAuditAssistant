@@ -18,7 +18,6 @@ import org.skgroup.securityinspector.enums.AnalysisScope
 import org.skgroup.securityinspector.ui.renderer.MethodListRenderer
 import org.skgroup.securityinspector.ui.renderer.ResultTreeRenderer
 import org.skgroup.securityinspector.utils.IconUtil
-import org.skgroup.securityinspector.utils.SinkList
 import java.awt.*
 import java.awt.FlowLayout.LEFT
 import java.awt.event.MouseAdapter
@@ -98,10 +97,31 @@ class CallGraphUIComponents(val project: Project) {
         add(createLabel(errorInfoLabel))
     }
 
+    // New UI components for the right panel
+    val newPanel = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+        val input1 = JBTextField(15)
+        val input2 = JBTextField(15)
+        val actionButton = JButton("Action")
+        add(input1, BorderLayout.NORTH)
+        add(input2, BorderLayout.CENTER)
+        add(actionButton, BorderLayout.SOUTH)
+    }
+
+    val toggleButton = JButton("Toggle Panel")
+    lateinit var splitter: JBSplitter // Splitter to manage the new panel
+
     fun createMainPanel(): JBPanel<JBPanel<*>> {
         val mainPanel = JBPanel<JBPanel<*>>(BorderLayout())
         mainPanel.add(createNorthContainer(), BorderLayout.NORTH)
-        mainPanel.add(createCenterPanel(), BorderLayout.CENTER)
+
+        val centerPanel = createCenterPanel()
+        splitter = JBSplitter(false, 0.8f).apply { // Horizontal splitter (false = horizontal)
+            firstComponent = centerPanel
+            secondComponent = newPanel
+            dividerWidth = 5
+        }
+        mainPanel.add(splitter, BorderLayout.CENTER)
+
         return mainPanel
     }
 
@@ -115,9 +135,10 @@ class CallGraphUIComponents(val project: Project) {
     }
 
     private fun createNorthContainer(): JBPanel<JBPanel<*>> {
-        val topPanel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT)).apply {
+        val topPanel = JBPanel<JBPanel<*>>(FlowLayout(LEFT)).apply {
             add(runAnalysisButton)
             add(searchComboBox)
+            add(toggleButton)
             add(progressBar)
         }
         val searchPanel = createSearchPanel()
@@ -127,12 +148,11 @@ class CallGraphUIComponents(val project: Project) {
         return JBPanel<JBPanel<*>>(BorderLayout()).apply {
             add(topPanel, BorderLayout.NORTH)
             add(searchPanel, BorderLayout.SOUTH)
-
             border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         }
     }
 
-    //搜索模块布局
+    // 搜索模块布局
     private fun createSearchPanel(): JBPanel<JBPanel<*>> {
         val panel = JBPanel<JBPanel<*>>()
         panel.layout = GridBagLayout()
@@ -185,10 +205,8 @@ class CallGraphUIComponents(val project: Project) {
         return panel
     }
 
-
     fun initializeComboBoxes() {
-
-        //处理结果双击复制和跳转
+        // 处理结果双击复制和跳转
         searchResultTree.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 // 双击666
@@ -210,12 +228,9 @@ class CallGraphUIComponents(val project: Project) {
                             OpenFileDescriptor(project, it.virtualFile, offset.offset).navigate(true)
                         }
                     }
-
                 }
             }
         })
-
-
     }
 
     private fun createCenterPanel(): JComponent {
@@ -305,4 +320,20 @@ class CallGraphUIComponents(val project: Project) {
         errorInfoLabel.text = "Error: $errorInfo"
     }
 
+    // Initialize toggle button behavior
+    init {
+        var isPanelVisible = true
+        toggleButton.addActionListener {
+            if (isPanelVisible) {
+                // 隐藏面板：将 secondComponent 设置为 null
+                splitter.secondComponent = null
+            } else {
+                // 显示面板：重新添加 newPanel
+                splitter.secondComponent = newPanel
+            }
+            isPanelVisible = !isPanelVisible // 切换状态
+            splitter.revalidate() // 重新布局
+            splitter.repaint()   // 重绘界面
+        }
+    }
 }
