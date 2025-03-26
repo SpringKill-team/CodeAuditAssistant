@@ -46,6 +46,20 @@ class CallGraphUIComponents(val project: Project) {
     val sinkField = JBTextField(15)
     val searchButton = JButton("Search")
 
+    val containInfo = JBCheckBox("Info").apply {
+        addActionListener {
+            val enabled = isSelected
+            System.setProperty("BUILD_WITH_METHOD_INFO", enabled.toString())
+        }
+    }
+
+    val containPath = JBCheckBox("Path").apply {
+        addActionListener {
+            val enabled = isSelected
+            System.setProperty("BUILD_WITH_PATH", enabled.toString())
+        }
+    }
+
     val systemPlatformLabel =
         JBLabel("System Plat: ${System.getProperty("os.name")}", LEFT).apply {
             border = JBUI.Borders.empty(5)
