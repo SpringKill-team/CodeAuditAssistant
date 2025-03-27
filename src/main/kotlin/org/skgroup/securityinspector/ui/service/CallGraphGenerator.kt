@@ -7,9 +7,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
-import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.ProjectScope
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.psi.util.PsiTreeUtil
@@ -17,6 +15,7 @@ import com.intellij.ui.Gray
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraphBuilder
+import org.skgroup.securityinspector.analysis.graphs.callgraph.MethodSigGraph
 import org.skgroup.securityinspector.enums.AnalysisScope
 import org.skgroup.securityinspector.ui.component.CallGraphUIComponents
 import org.skgroup.securityinspector.ui.component.ModuleSelectorDialog
@@ -47,6 +46,7 @@ object CallGraphGenerator {
 
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Generating CallGraph", true) {
             private var newGraph: CallGraph? = null
+            private var sigGraph: MethodSigGraph? = null
             private lateinit var javaFiles: List<PsiFile>
 
             //private var scope = ProjectScope.getAllScope(project)
@@ -98,7 +98,7 @@ object CallGraphGenerator {
                     ApplicationManager.getApplication().runReadAction {
                         if (psiFile is PsiJavaFile) {
                             if (processedFiles.add(psiFile)) {
-                                PsiTreeUtil.findChildrenOfType(psiFile, PsiMethod::class.java).forEach{
+                                PsiTreeUtil.findChildrenOfType(psiFile, PsiMethod::class.java).forEach {
                                     it.accept(builder)
                                 }
 //                                psiFile.accept(builder)
@@ -115,6 +115,7 @@ object CallGraphGenerator {
                 }
 
                 newGraph = builder.getCallGraph(project)
+                sigGraph = builder.getMethodSigGraph()
             }
 
             override fun onSuccess() {
@@ -126,6 +127,11 @@ object CallGraphGenerator {
                         updateRootList(graph, rootListModel)
                     }
                 }
+
+                ApplicationManager.getApplication().invokeLater {
+                    sigGraph?.let { CallGraphMemoryService.getInstance(project).setMethodSigGraph(it) }
+                }
+
             }
 
             override fun onFinished() {

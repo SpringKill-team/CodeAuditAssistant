@@ -1,6 +1,7 @@
 package org.skgroup.securityinspector.ui.renderer
 
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
+import org.skgroup.securityinspector.analysis.ast.nodes.MethodSigNode
 import org.skgroup.securityinspector.enums.RefMode
 import org.skgroup.securityinspector.utils.IconUtil
 import java.awt.Component
@@ -43,6 +44,11 @@ class ResultTreeRenderer : DefaultTreeCellRenderer() {
                 is String -> {
                     icon = IconUtil.pathIcon
                     userObject
+                }
+
+                is MethodSigNode -> {
+                    icon = IconUtil.newIcon
+                    "${userObject.className}# ${userObject.methodName}"
                 }
 
                 else -> userObject.toString()

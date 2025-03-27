@@ -272,16 +272,16 @@ object GraphUtils {
                 .filter { it.language == JavaLanguage.INSTANCE }
         }
 
-    private fun geyMethodSigNode(method: PsiMethod): MethodSigNode {
+    fun getMethodSigNode(method: PsiMethod): MethodSigNode {
         val className = method.className ?: "UnknownClass"
         val methodAccessModifier = getAccessModifier(method)
         val methodModifier = getModifiers(method)
         val methodName = method.name ?: "UnknownMethod"
-        val methodParameters = emptyList<ParameterNode>()
+        val methodParameters = getParameters(method)
         val methodVarargs = method.isVarArgs
-        val methodThrowsClause = emptyList<String>()
+        val methodThrowsClause = getMethodThrowsClause(method)
         val methodReturnType = method.returnType?.canonicalText ?: "void"
-        val methodAnnotations = emptyList<String>()
+        val methodAnnotations = getMethodAnnotations(method)
         val sourceSpan = getSourceSpan(method)
 
         return MethodSigNode(
@@ -297,6 +297,23 @@ object GraphUtils {
             sourceSpan = sourceSpan
         )
 
+    }
+
+    private fun getParameters(method: PsiMethod): List<ParameterNode> {
+        return method.parameterList.parameters.map {
+            ParameterNode(
+                it.name ?: "UnknownParameter",
+                it.type.canonicalText
+            )
+        }
+    }
+
+    private fun getMethodThrowsClause(method: PsiMethod): List<String> {
+        return method.throwsList.referenceElements.map { it.text }
+    }
+
+    private fun getMethodAnnotations(method: PsiMethod): List<String> {
+        return method.modifierList.annotations.map { it.text } ?: emptyList()
     }
 
     private fun getAccessModifier(method: PsiMethod): String {

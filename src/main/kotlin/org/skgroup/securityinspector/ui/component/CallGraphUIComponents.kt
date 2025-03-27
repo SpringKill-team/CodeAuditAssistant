@@ -12,6 +12,7 @@ import com.intellij.ui.components.*
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.ui.JBUI
+import org.skgroup.securityinspector.analysis.ast.nodes.BaseAstNode
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.enums.AnalysisScope
@@ -46,6 +47,7 @@ class CallGraphUIComponents(val project: Project) {
     val sinkField = JBTextField(15)
     val searchButton = JButton("Search")
 
+    val findMethodButton = JButton("Find Method")
     val containInfo = JBCheckBox("Info").apply {
         addActionListener {
             val enabled = isSelected
@@ -59,6 +61,39 @@ class CallGraphUIComponents(val project: Project) {
             System.setProperty("BUILD_WITH_PATH", enabled.toString())
         }
     }
+
+    val classNameLabel = JBLabel("Class Name:")
+    val classNameField = JBTextField(20)
+
+    val accessModifierLabel = JBLabel("Access Modifier:")
+    val accessModifierField = JBTextField(10)
+
+    val methodModifierLabel = JBLabel("Method Modifier:")
+    val methodModifierField = JBTextField(10)
+
+    val methodNameLabel = JBLabel("Method Name:")
+    val methodNameField = JBTextField(15)
+
+    val paramCountLabel = JBLabel("Param Count:")
+    val paramCountField = JBTextField(5)
+
+    val paramTypeLabel = JBLabel("Param Type:")
+    val paramTypeField = JBTextField(15)
+
+    val paramNameLabel = JBLabel("Param Name:")
+    val paramNameField = JBTextField(15)
+
+    val varargsLabel = JBLabel("Varargs:")
+    val varargsField = JBTextField(5)
+
+    val throwsClauseLabel = JBLabel("Throws Clause:")
+    val throwsClauseField = JBTextField(15)
+
+    val returnTypeLabel = JBLabel("Return Type:")
+    val returnTypeField = JBTextField(15)
+
+    val annotationsLabel = JBLabel("Annotations:")
+    val annotationsField = JBTextField(20)
 
     val systemPlatformLabel =
         JBLabel("System Plat: ${System.getProperty("os.name")}", LEFT).apply {
@@ -119,28 +154,42 @@ class CallGraphUIComponents(val project: Project) {
         }
 
         val fields = listOf(
-            "Class Name:" to JBTextField(20),
-            "Access Modifier:" to JBTextField(10),
-            "Method Modifier:" to JBTextField(10),
-            "Method Name:" to JBTextField(15),
-            "Param Count:" to JBTextField(5),
-            "Param Type:" to JBTextField(15),
-            "Param Name:" to JBTextField(15),
-            "Varargs:" to JBTextField(5),
-            "Throws Clause:" to JBTextField(15),
-            "Return Type:" to JBTextField(15),
-            "Annotations:" to JBTextField(20)
+            classNameLabel,
+            classNameField,
+            accessModifierLabel,
+            accessModifierField,
+            methodModifierLabel,
+            methodModifierField,
+            methodNameLabel,
+            methodNameField,
+            paramCountLabel,
+            paramCountField,
+            paramTypeLabel,
+            paramTypeField,
+            paramNameLabel,
+            paramNameField,
+            varargsLabel,
+            varargsField,
+            throwsClauseLabel,
+            throwsClauseField,
+            returnTypeLabel,
+            returnTypeField,
+            annotationsLabel,
+            annotationsField,
         )
 
-        fields.forEachIndexed { index, (labelText, textField) ->
-            c.gridx = 0
-            c.gridy = index
-            c.weightx = 0.0
-            add(JBLabel(labelText), c)
-
-            c.gridx = 1
-            c.weightx = 1.0
-            add(textField, c)
+        fields.forEachIndexed { index, it ->
+            if (it is JBLabel) {
+                c.gridx = 0
+                c.gridy = index
+                c.weightx = 0.0
+                add(it, c)
+            } else {
+                c.gridx = 1
+                c.gridy = index - 1
+                c.weightx = 1.0
+                add(it, c)
+            }
         }
 
         c.gridx = 0
@@ -148,8 +197,7 @@ class CallGraphUIComponents(val project: Project) {
         c.gridwidth = 2
         c.fill = GridBagConstraints.NONE
         c.anchor = GridBagConstraints.CENTER
-        val actionButton = JButton("Find Method")
-        add(actionButton, c)
+        add(findMethodButton, c)
     }
 
     val toggleButton = JButton("Toggle Panel")
@@ -162,7 +210,7 @@ class CallGraphUIComponents(val project: Project) {
         val centerPanel = createCenterPanel()
         splitter = JBSplitter(false, 0.8f).apply {
             firstComponent = centerPanel
-            secondComponent = methodFinderPanel
+            secondComponent = null
             dividerWidth = 5
         }
         mainPanel.add(splitter, BorderLayout.CENTER)
@@ -214,20 +262,22 @@ class CallGraphUIComponents(val project: Project) {
         panel.add(JBLabel("ROOT:"), c)
 
         c.gridx = 1
-        c.weightx = 0.0
         panel.add(sourceField, c)
 
         c.gridx = 2
-        c.weightx = 0.0
         panel.add(JBLabel("SINK:"), c)
 
         c.gridx = 3
-        c.weightx = 0.0
         panel.add(sinkField, c)
 
         c.gridx = 4
-        c.weightx = 0.0
         panel.add(searchButton, c)
+
+        c.gridx = 5
+        panel.add(containInfo, c)
+
+        c.gridx = 6
+        panel.add(containPath, c)
 
         c.weightx = 0.0
 
@@ -267,10 +317,10 @@ class CallGraphUIComponents(val project: Project) {
                     // 取出这个节点的 userObject
                     val userObject = node.userObject
 
-                    if (userObject is MethodNode) {
+                    if (userObject is BaseAstNode) {
                         val offset = userObject.sourceSpan
                         offset?.let {
-                            OpenFileDescriptor(project, it.virtualFile, offset.offset).navigate(true)
+                            OpenFileDescriptor(project, it.virtualFile, offset.offset-1).navigate(true)
                         }
                     }
                 }
@@ -368,7 +418,7 @@ class CallGraphUIComponents(val project: Project) {
     init {
         var isPanelVisible = true
         toggleButton.addActionListener {
-            if (isPanelVisible) {
+            if (!isPanelVisible) {
                 // 隐藏面板：将 secondComponent 设置为 null
                 splitter.secondComponent = null
             } else {
