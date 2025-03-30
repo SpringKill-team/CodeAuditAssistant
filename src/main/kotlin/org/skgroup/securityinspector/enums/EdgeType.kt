@@ -8,6 +8,8 @@ package org.skgroup.securityinspector.enums
  * @since 2025/2/16
  */
 enum class EdgeType {
+    CALL,
+    IMPLEMENTS,
     DIRECT_CALL,
     LAMBDA_CONTAINMENT,
     IOC_INJECTION,

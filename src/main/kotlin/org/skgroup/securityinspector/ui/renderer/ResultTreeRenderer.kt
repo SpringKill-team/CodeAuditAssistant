@@ -34,6 +34,7 @@ class ResultTreeRenderer : DefaultTreeCellRenderer() {
                         RefMode.CALL -> icon = IconUtil.callIcon
                         RefMode.DECLARATION -> icon = IconUtil.declarationIcon
                         RefMode.NEW -> icon = IconUtil.newIcon
+                        RefMode.IMPLEMENTATION -> {}
                         else -> {}
                     }
                     "$refMode : ${

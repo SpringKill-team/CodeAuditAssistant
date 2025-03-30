@@ -21,12 +21,16 @@ data class MethodNode(
     val parameters: List<ParameterNode>,
     val body: List<AstNode> = emptyList(),
     val refMode: RefMode,
+    var signature: String = "",
     override val sourceSpan: SourceSpan? = null
 ) : BaseAstNode(
     nodeType = "MethodDeclaration",
     children = body,
     sourceSpan = sourceSpan
 ){
+    init {
+        signature = "$className.$name(${parameters.joinToString { it.type }})"
+    }
     override fun toString(): String {
         return "MethodNode(className='$className', name='$name', returnType='$returnType', parameters=$parameters, body=$body, sourceSpan=$sourceSpan)"
     }

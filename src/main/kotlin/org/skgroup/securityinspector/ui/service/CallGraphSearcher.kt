@@ -202,9 +202,10 @@ object CallGraphSearcher {
             return
         }
 
-        val sources = graph.nodes.filter { srcRegex.getOrThrow().containsMatchIn(it.name) }
-        val sinks = graph.nodes.filter { sinkRegex.getOrThrow().containsMatchIn(it.name) }
-
+//        val sources = graph.nodes.filter { srcRegex.getOrThrow().containsMatchIn(it.name) }
+        val sources = graph.nodes.filter { it.name == srcPattern }
+//        val sinks = graph.nodes.filter { sinkRegex.getOrThrow().containsMatchIn(it.name) }
+        val sinks = graph.nodes.filter { it.name == sinkPattern }
         when {
             sources.isEmpty() -> Unit
             sinks.isEmpty() -> Unit
