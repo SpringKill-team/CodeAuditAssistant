@@ -2,10 +2,12 @@ package org.skgroup.securityinspector.ui.service
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
+import org.skgroup.securityinspector.analysis.ast.nodes.MethodSigNode
+import org.skgroup.securityinspector.analysis.ast.nodes.ParameterNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
+import org.skgroup.securityinspector.analysis.graphs.callgraph.MethodSigGraph
 import org.skgroup.securityinspector.utils.GraphUtils
 import java.util.regex.PatternSyntaxException
 import javax.swing.SwingUtilities
@@ -25,6 +27,63 @@ object CallGraphSearcher {
         toRegex().also {
             if (isEmpty()) throw PatternSyntaxException("Empty pattern", "", 0)
         }
+    }
+
+    fun search(
+        methodSigGraph: MethodSigGraph,
+        className: String?,
+        accessModifier: String?,
+        methodModifier: String?,
+        methodName: String?,
+        paramCount: Int?,
+        paramType: String?,
+        paramName: String?,
+        varArgs: String?,
+        throwClause: String?,
+        returnType: String?,
+        annotations: String?,
+        searchResultRootNode: DefaultMutableTreeNode,
+        searchResultTreeModel: DefaultTreeModel,
+    ) {
+        clearPreviousResults(searchResultRootNode,searchResultTreeModel)
+        val result = methodSigGraph.nodes.filter {
+            val parameterType = getParamString(it.methodParams)
+            val parameterName = getParamString(it.methodParams)
+            (
+                    className == "" || it.className == className) &&
+                    (accessModifier == "" || it.methodAccessModifier == accessModifier) &&
+                    (methodModifier == "" || it.methodModifier == methodModifier) &&
+                    (methodName == "" || it.methodName == methodName) &&
+                    (paramCount == null || it.methodParams.size == paramCount) &&
+                    (paramType == "" || containsString(paramType!!, parameterType)) &&
+                    (paramName == "" || containsString(paramName!!, parameterName)) &&
+                    (varArgs == "" || it.methodVarargs == varArgs.toBoolean()) &&
+                    (throwClause == "" || containsString(throwClause!!, getListString(it.methodThrowsClause))) &&
+                    (returnType == "" || it.methodReturnType == returnType) &&
+                    (annotations == "" || containsString(annotations!!, getListString(it.methodAnnotations)))
+        }
+        updateTreeWithList(result, searchResultRootNode, searchResultTreeModel)
+    }
+
+    fun getParamString(parameterNodeList: List<ParameterNode>): String {
+        return parameterNodeList.joinToString(",") { it.type }
+    }
+
+    fun getListString(list: List<String>): String {
+        return list.joinToString(",")
+    }
+
+    fun containsString(searchString: String, targetString: String): Boolean {
+        val searchParts = searchString.split(",").map { it.trim() }
+        val targetParts = targetString.split(",").map { it.trim() }
+
+        for (i in searchParts.indices) {
+            val searchPart = searchParts[i]
+            val targetPart = targetParts[i]
+            if (searchPart == "*") continue
+            if (searchPart != targetPart) return false
+        }
+        return true
     }
 
     /**
@@ -143,9 +202,10 @@ object CallGraphSearcher {
             return
         }
 
-        val sources = graph.nodes.filter { srcRegex.getOrThrow().containsMatchIn(it.name) }
-        val sinks = graph.nodes.filter { sinkRegex.getOrThrow().containsMatchIn(it.name) }
-
+//        val sources = graph.nodes.filter { srcRegex.getOrThrow().containsMatchIn(it.name) }
+        val sources = graph.nodes.filter { it.name == srcPattern }
+//        val sinks = graph.nodes.filter { sinkRegex.getOrThrow().containsMatchIn(it.name) }
+        val sinks = graph.nodes.filter { it.name == sinkPattern }
         when {
             sources.isEmpty() -> Unit
             sinks.isEmpty() -> Unit
@@ -190,6 +250,19 @@ object CallGraphSearcher {
         SwingUtilities.invokeLater {
             paths.forEach { path ->
                 rootNode.add(createPathNode(path))
+            }
+            treeModel.reload(rootNode)
+        }
+    }
+
+    private fun updateTreeWithList(
+        paths: List<MethodSigNode>,
+        rootNode: DefaultMutableTreeNode,
+        treeModel: DefaultTreeModel
+    ) {
+        SwingUtilities.invokeLater {
+            paths.forEach { path ->
+                rootNode.add(DefaultMutableTreeNode(path))
             }
             treeModel.reload(rootNode)
         }

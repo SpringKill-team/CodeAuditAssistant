@@ -29,8 +29,19 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
     // 用于存储最终的调用图，全局唯一
     private val callGraph = CallGraph()
 
+    // 方法信息列表
+    private val methodSigGraph = MethodSigGraph()
+
     // 用于记录当前访问的方法调用栈
     private val currentMethodStack = ArrayDeque<MethodNode>()
+    private val methodStack = ArrayDeque<PsiMethod>()
+    private val implMethodSet = mutableSetOf<PsiMethod>()
+
+    // 用于表示是否构建方法完整信息的标志
+    private var buildWithInfo = System.getProperty("BUILD_WITH_METHOD_INFO")?.toBoolean() ?: false
+
+    // 用于表示是否构建调用路径的标志
+    private var buildWithPath = System.getProperty("BUILD_WITH_PATH")?.toBoolean() ?: false
 
     /**
      * Visit method 方法用于访问一个Java方法并将其加入调用图
@@ -43,38 +54,44 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
         //堆栈用节点，在压栈前会被替换
         var calleeStackNode = GraphUtils.getMethodNode(method)
 
-        // 查找对该方法的所有引用，建立反向调用关系
-        val projectScope = GlobalSearchScope.projectScope(method.project)
-        ReferencesSearch.search(method, projectScope).forEach { reference ->
-            val callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
-                ?: return@forEach
+        if (buildWithInfo) methodSigGraph.nodes.add(GraphUtils.getMethodSigNode(method))
 
-            val calleeMethodNode = GraphUtils.getMethodNode(method, reference)
-            calleeStackNode = calleeMethodNode
-            callGraph.nodes.add(calleeMethodNode)
-
-            val callerMethodNode = GraphUtils.getMethodNode(callerMethod, reference)
-
-            if (method.hasModifierProperty(PsiModifier.ABSTRACT) || method.containingClass?.isInterface == true) {
-                findConcreteImplementations(method).forEach { implMethod ->
-                    val implNode = GraphUtils.getMethodNode(implMethod)
-                    callGraph.edges.getOrPut(callerMethodNode) { mutableSetOf() }.add(implNode)
-                }
-            }
-
-            // 建立反向调用关系
-            callGraph.nodes.add(callerMethodNode)
-            callGraph.edges.getOrPut(callerMethodNode) { mutableSetOf() }.add(calleeMethodNode)
-
-            handleDependencyInjectionAnnotations(method, calleeMethodNode)
+        if (buildWithPath) {
+            // 查找对该方法的所有引用，建立反向调用关系
+//            val projectScope = GlobalSearchScope.projectScope(method.project)
+//            ReferencesSearch.search(method, projectScope).forEach { reference ->
+//                val callerMethod = PsiTreeUtil.getParentOfType(reference.element, PsiMethod::class.java)
+//                    ?: return@forEach
+//
+//                val calleeMethodNode = GraphUtils.getMethodNode(method, reference)
+//                calleeStackNode = calleeMethodNode
+//                callGraph.nodes.add(calleeMethodNode)
+//
+//                val callerMethodNode = GraphUtils.getMethodNode(callerMethod, reference)
+//
+//                if (method.hasModifierProperty(PsiModifier.ABSTRACT) || method.containingClass?.isInterface == true) {
+//                    findConcreteImplementations(method).forEach { implMethod ->
+//                        val implNode = GraphUtils.getMethodNode(implMethod)
+//                        callGraph.edges.getOrPut(callerMethodNode) { mutableSetOf() }.add(implNode)
+//                    }
+//                }
+//
+//                // 建立反向调用关系
+//                callGraph.nodes.add(callerMethodNode)
+//                callGraph.edges.getOrPut(callerMethodNode) { mutableSetOf() }.add(calleeMethodNode)
+//
+//                handleDependencyInjectionAnnotations(method, calleeMethodNode)
+//            }
         }
 
         // 将此方法节点加入 callGraph
         currentMethodStack.push(calleeStackNode)
+        methodStack.push(method)
 
         super.visitMethod(method)
 
         currentMethodStack.pop()
+        methodStack.pop()
     }
 
     /**
@@ -83,45 +100,45 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
      * @param expression    方法调用表达式
      */
     override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
-        if (currentMethodStack.isEmpty()) return
+        if (buildWithPath) {
+            if (currentMethodStack.isEmpty()) return
 
-        val caller = currentMethodStack.peek()
-        // 解析被调用的方法
-        val resolvedMethod = expression.resolveMethod()
-        // 调试日志
-        if (resolvedMethod == null) {
-            println("method call expression $expression can not be resolve.")
-            return
-        }
-        if (resolvedMethod.hasModifierProperty(PsiModifier.ABSTRACT) || resolvedMethod.containingClass?.isInterface == true) {
-            findConcreteImplementations(resolvedMethod).forEach { implMethod ->
-                val implNode = GraphUtils.getMethodNode(implMethod, expression)
-                callGraph.edges.getOrPut(caller) { mutableSetOf() }.add(implNode)
+            val caller = currentMethodStack.peek()
+            // 解析被调用的方法
+            val resolvedMethod = expression.resolveMethod()
+            // 调试日志
+            if (resolvedMethod == null) {
+                println("method call expression $expression can not be resolve.")
+                return
             }
-        }
-//        val clazz: PsiClass? = resolvedMethod.containingClass
-        expression.reference?.let {
-            val calleeMethodNode = GraphUtils.getMethodNode(resolvedMethod, it)
-            // 将 callee 加入节点集合
-            callGraph.nodes.add(calleeMethodNode)
-            // 在 callGraph 中记录调用关系 (caller -> callee)
-            callGraph.edges
-                .getOrPut(caller) { mutableSetOf() }
-                .add(calleeMethodNode)
-            handleIoCContainerCall(expression, caller, calleeMethodNode)
-        } ?: run {
-            if (PsiTreeUtil.getParentOfType(expression, PsiLambdaExpression::class.java) != null) {
-                println("in lambda method call expression $expression can not resolve reference.")
-            } else {
-                println("unknown method call expression $expression can not resolve reference.")
-            }
+
             val calleeMethodNode = GraphUtils.getMethodNode(resolvedMethod, expression)
-            callGraph.nodes.add(calleeMethodNode)
-            // 在 callGraph 中记录调用关系 (caller -> callee)
-            callGraph.edges
-                .getOrPut(caller) { mutableSetOf() }
-                .add(calleeMethodNode)
-            handleIoCContainerCall(expression, caller, calleeMethodNode)
+
+
+            if (resolvedMethod.hasModifierProperty(PsiModifier.ABSTRACT) || resolvedMethod.containingClass?.isInterface == true) {
+                findConcreteImplementations(resolvedMethod).forEach { implMethod ->
+                    val implNode = GraphUtils.getImplNode(implMethod, expression)
+                    callGraph.edges.getOrPut(calleeMethodNode) { mutableSetOf() }.add(implNode)
+                    callGraph.nodes.add(implNode)
+                    if(implMethodSet.add(implMethod)) implMethod.accept(this)
+                }
+            }
+            if (methodStack.peek().findSuperMethods().toSet()
+                    .containsAll(resolvedMethod.findSuperMethods().toSet())) {
+                // 将 callee 加入节点集合
+                callGraph.nodes.add(calleeMethodNode)
+                callGraph.nodes.add(caller)
+//                if (methodStack.peek().findSuperMethods().toSet()
+//                        .containsAll(resolvedMethod.findSuperMethods().toSet())
+//                ) {
+//
+//                }
+                // 在 callGraph 中记录调用关系 (caller -> callee)
+                callGraph.edges
+                    .getOrPut(caller) { mutableSetOf() }
+                    .add(calleeMethodNode)
+                handleIoCContainerCall(expression, caller, calleeMethodNode)
+            }
         }
         super.visitMethodCallExpression(expression)
     }
@@ -132,38 +149,40 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
      * @param expression
      */
     override fun visitNewExpression(expression: PsiNewExpression) {
-        if (currentMethodStack.isEmpty()) return
+        if (buildWithPath) {
+            if (currentMethodStack.isEmpty()) return
 
-        val callerMethodNode = currentMethodStack.peek()
-        // 解析构造方法
-        val constructor = expression.resolveConstructor()
-        // 调试日志
-        if (constructor == null) {
-            println("new expression $constructor can not be resolve.")
-            return
-        }
-//        val clazz: PsiClass? = constructor.containingClass
-        expression.reference?.let {
-            val calleeMethodNode = GraphUtils.getMethodNode(constructor, it)
-            // 将 callee 加入节点集合
-            callGraph.nodes.add(calleeMethodNode)
-            // 在 callGraph 中记录 (caller -> callee构造方法)
-            callGraph.edges
-                .getOrPut(callerMethodNode) { mutableSetOf() }
-                .add(calleeMethodNode)
-            println("expression $expression resolve reference success.")
-        } ?: run {
-            if (PsiTreeUtil.getParentOfType(expression, PsiLambdaExpression::class.java) != null) {
-                println("in lambda method call expression $expression can not resolve reference.")
-            } else {
-                println("unknown new expression $constructor can not resolve reference.")
+            val callerMethodNode = currentMethodStack.peek()
+            // 解析构造方法
+            val constructor = expression.resolveConstructor()
+            // 调试日志
+            if (constructor == null) {
+                println("new expression $constructor can not be resolve.")
+                return
             }
-            val calleeMethodNode = GraphUtils.getMethodNode(constructor, expression)
-            callGraph.nodes.add(calleeMethodNode)
-            // 在 callGraph 中记录调用关系 (caller -> callee)
-            callGraph.edges
-                .getOrPut(callerMethodNode) { mutableSetOf() }
-                .add(calleeMethodNode)
+//        val clazz: PsiClass? = constructor.containingClass
+            expression.reference?.let {
+                val calleeMethodNode = GraphUtils.getNewMethodNode(constructor, it)
+                // 将 callee 加入节点集合
+                callGraph.nodes.add(calleeMethodNode)
+                // 在 callGraph 中记录 (caller -> callee构造方法)
+                callGraph.edges
+                    .getOrPut(callerMethodNode) { mutableSetOf() }
+                    .add(calleeMethodNode)
+                println("expression $expression resolve reference success.")
+            } ?: run {
+                if (PsiTreeUtil.getParentOfType(expression, PsiLambdaExpression::class.java) != null) {
+                    println("in lambda method call expression $expression can not resolve reference.")
+                } else {
+                    println("unknown new expression $constructor can not resolve reference.")
+                }
+                val calleeMethodNode = GraphUtils.getMethodNode(constructor, expression)
+                callGraph.nodes.add(calleeMethodNode)
+                // 在 callGraph 中记录调用关系 (caller -> callee)
+                callGraph.edges
+                    .getOrPut(callerMethodNode) { mutableSetOf() }
+                    .add(calleeMethodNode)
+            }
         }
         super.visitNewExpression(expression)
     }
@@ -176,39 +195,41 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
     override fun visitLambdaExpression(expression: PsiLambdaExpression) {
         super.visitLambdaExpression(expression)
 
-        // TODO 如果需要将 Lambda 表达式本身视为一个“方法节点”，可以考虑建模为内部匿名类的形式
-        if (currentMethodStack.isEmpty()) {
-            return
-        }
+        if (buildWithPath) {
+            // TODO 如果需要将 Lambda 表达式本身视为一个“方法节点”，可以考虑建模为内部匿名类的形式
+            if (currentMethodStack.isEmpty()) {
+                return
+            }
 
-        // 在 Lambda 内部继续递归访问，比如对 Lambda 体内的方法调用进行追踪
-        expression.body?.accept(object : JavaRecursiveElementVisitor() {
-            override fun visitMethodCallExpression(lambdaCall: PsiMethodCallExpression) {
-                super.visitMethodCallExpression(lambdaCall)
-                val caller = currentMethodStack.peek()
-                val resolvedMethod = lambdaCall.resolveMethod() ?: return
-                lambdaCall.children.forEach { child ->
-                    val calleeMethodNode = child.reference?.let {
-                        GraphUtils.getMethodNode(resolvedMethod, it)
-                    } ?: run {
-                        GraphUtils.getLambdaMethodNode(resolvedMethod)
-                    }
-                    callGraph.nodes.add(caller)
-                    calleeMethodNode?.let {
-                        callGraph.nodes.add(it)
-                        callGraph.edges
-                            .getOrPut(caller) { mutableSetOf() }
-                            .add(it)
+            // 在 Lambda 内部继续递归访问，比如对 Lambda 体内的方法调用进行追踪
+            expression.body?.accept(object : JavaRecursiveElementVisitor() {
+                override fun visitMethodCallExpression(lambdaCall: PsiMethodCallExpression) {
+                    super.visitMethodCallExpression(lambdaCall)
+                    val caller = currentMethodStack.peek()
+                    val resolvedMethod = lambdaCall.resolveMethod() ?: return
+                    lambdaCall.children.forEach { child ->
+                        val calleeMethodNode = child.reference?.let {
+                            GraphUtils.getMethodNode(resolvedMethod, it)
+                        } ?: run {
+                            GraphUtils.getLambdaMethodNode(resolvedMethod)
+                        }
+                        callGraph.nodes.add(caller)
+                        calleeMethodNode?.let {
+                            callGraph.nodes.add(it)
+                            callGraph.edges
+                                .getOrPut(caller) { mutableSetOf() }
+                                .add(it)
+                        }
                     }
                 }
-            }
 
-            override fun visitMethodReferenceExpression(expression: PsiMethodReferenceExpression) {
-                super.visitMethodReferenceExpression(expression)
-                // 对 Lambda 中的 method reference 也进行处理
-                handleMethodReference(expression)
-            }
-        })
+                override fun visitMethodReferenceExpression(expression: PsiMethodReferenceExpression) {
+                    super.visitMethodReferenceExpression(expression)
+                    // 对 Lambda 中的 method reference 也进行处理
+                    handleMethodReference(expression)
+                }
+            })
+        }
     }
 
     /**
@@ -216,10 +237,12 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
      */
     override fun visitMethodReferenceExpression(expression: PsiMethodReferenceExpression) {
         super.visitMethodReferenceExpression(expression)
-        if (currentMethodStack.isEmpty()) {
-            return
+        if (buildWithPath) {
+            if (currentMethodStack.isEmpty()) {
+                return
+            }
+            handleMethodReference(expression)
         }
-        handleMethodReference(expression)
     }
 
     /**
@@ -310,6 +333,10 @@ class CallGraphBuilder : JavaRecursiveElementVisitor() {
             // 如果 process() 内部依赖 PSI 的方法，也就安全了
         }
         return callGraph
+    }
+
+    fun getMethodSigGraph(): MethodSigGraph {
+        return methodSigGraph
     }
 
 }

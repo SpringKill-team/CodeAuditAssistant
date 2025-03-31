@@ -41,13 +41,33 @@ class CallGraphToolWindowPanel(private val project: Project) {
             CallGraphSearcher.search(
                 sourceField = uiComponents.sourceField,
                 sinkField = uiComponents.sinkField,
-//                infoArea = uiComponents.infoArea,
                 searchResultRootNode = uiComponents.searchResultRootNode,
                 searchResultTreeModel = uiComponents.searchResultTreeModel,
                 project = project
             )
         }
 
+        uiComponents.findMethodButton.addActionListener {
+            val sigGraph = service.getMethodSigGraph()
+            sigGraph?.let {
+                CallGraphSearcher.search(
+                    it,
+                    uiComponents.classNameField.text,
+                    uiComponents.accessModifierField.text,
+                    uiComponents.methodModifierField.text,
+                    uiComponents.methodNameField.text,
+                    uiComponents.paramCountField.text.toIntOrNull(),
+                    uiComponents.paramTypeField.text,
+                    uiComponents.paramNameField.text,
+                    uiComponents.varargsField.text,
+                    uiComponents.throwsClauseField.text,
+                    uiComponents.returnTypeField.text,
+                    uiComponents.annotationsField.text,
+                    uiComponents.searchResultRootNode,
+                    uiComponents.searchResultTreeModel
+                )
+            }
+        }
     }
 
     private fun loadPersistedState() {
