@@ -11,6 +11,7 @@ import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import org.skgroup.securityinspector.analysis.ast.SourceSpan
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
+import org.skgroup.securityinspector.analysis.ast.nodes.MethodSigNode
 import org.skgroup.securityinspector.analysis.ast.nodes.ParameterNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.enums.RefMode
@@ -92,6 +93,12 @@ object GraphUtils {
         refMode = RefMode.CALL
     )
 
+    fun getNewMethodNode(method: PsiMethod, reference: PsiReference) = createMethodNode(
+        method = method,
+        sourceSpan = getSourceSpan(reference.element),
+        refMode = RefMode.NEW
+    )
+
     /**
      * Get method node 方法用来获取方法节点，引用位置通过表达式获取
      *
@@ -102,7 +109,19 @@ object GraphUtils {
     fun getMethodNode(method: PsiMethod, expression: PsiExpression) = createMethodNode(
         method = method,
         sourceSpan = getSourceSpan(expression),
-        refMode = RefMode.DECLARATION
+        refMode = RefMode.CALL
+    )
+
+    fun getImplNode(method: PsiMethod, expression: PsiExpression) = createMethodNode(
+        method = method,
+        sourceSpan = getSourceSpan(expression),
+        refMode = RefMode.IMPLEMENTATION
+    )
+
+    fun getMethodNode(method: PsiMethod, expression: PsiNewExpression) = createMethodNode(
+        method = method,
+        sourceSpan = getSourceSpan(expression),
+        refMode = RefMode.NEW
     )
 
     /**
@@ -192,14 +211,10 @@ object GraphUtils {
         val visited = mutableSetOf<MethodNode>()
         val path = mutableListOf<MethodNode>()
 
-        fun isMatch(n1: MethodNode, n2: MethodNode): Boolean {
-            return n1.className == n2.className && n1.name == n2.name
-        }
-
         fun dfs(cur: MethodNode): Boolean {
             visited.add(cur)
             path.add(cur)
-            if (isMatch(cur, target)) return true
+            if (cur.signature == target.signature) return true
 
             graph.edges[cur]?.forEach { neighbor ->
                 if (neighbor !in visited && dfs(neighbor)) return true
@@ -209,7 +224,7 @@ object GraphUtils {
             return false
         }
 
-        return if (dfs(node)) path.toList() else null
+        return if (dfs(node)) path else null
     }
 
     /**
@@ -268,8 +283,67 @@ object GraphUtils {
         ApplicationManager.getApplication().runReadAction<List<PsiFile>> {
             FileTypeIndex.getFiles(JavaFileType.INSTANCE, scope)
                 .mapNotNull { PsiManager.getInstance(project).findFile(it) }
-                .filter { it.language == JavaLanguage.INSTANCE }
+                .filter { it.language == JavaLanguage.INSTANCE && !it.virtualFile.path.contains("src/test") }
         }
 
+    fun getMethodSigNode(method: PsiMethod): MethodSigNode {
+        val className = method.className ?: "UnknownClass"
+        val methodAccessModifier = getAccessModifier(method)
+        val methodModifier = getModifiers(method)
+        val methodName = method.name ?: "UnknownMethod"
+        val methodParameters = getParameters(method)
+        val methodVarargs = method.isVarArgs
+        val methodThrowsClause = getMethodThrowsClause(method)
+        val methodReturnType = method.returnType?.canonicalText ?: "void"
+        val methodAnnotations = getMethodAnnotations(method)
+        val sourceSpan = getSourceSpan(method)
 
+        return MethodSigNode(
+            className,
+            methodAccessModifier,
+            methodModifier,
+            methodName,
+            methodParameters,
+            methodVarargs,
+            methodThrowsClause,
+            methodReturnType,
+            methodAnnotations,
+            sourceSpan = sourceSpan
+        )
+
+    }
+
+    private fun getParameters(method: PsiMethod): List<ParameterNode> {
+        return method.parameterList.parameters.map {
+            ParameterNode(
+                it.name ?: "UnknownParameter",
+                it.type.canonicalText
+            )
+        }
+    }
+
+    private fun getMethodThrowsClause(method: PsiMethod): List<String> {
+        return method.throwsList.referenceElements.map { it.text }
+    }
+
+    private fun getMethodAnnotations(method: PsiMethod): List<String> {
+        return method.modifierList.annotations.map { it.text } ?: emptyList()
+    }
+
+    private fun getAccessModifier(method: PsiMethod): String {
+        return when {
+            method.hasModifierProperty(PsiModifier.PUBLIC) -> "public"
+            method.hasModifierProperty(PsiModifier.PROTECTED) -> "protected"
+            method.hasModifierProperty(PsiModifier.PRIVATE) -> "private"
+            else -> "package-private"
+        }
+    }
+
+    private fun getModifiers(method: PsiMethod): String {
+        val modifiers = mutableListOf<String>()
+        if (method.hasModifierProperty(PsiModifier.STATIC)) modifiers.add("static")
+        if (method.hasModifierProperty(PsiModifier.FINAL)) modifiers.add("final")
+        if (method.hasModifierProperty(PsiModifier.SYNCHRONIZED)) modifiers.add("synchronized")
+        return modifiers.joinToString(" ")
+    }
 }

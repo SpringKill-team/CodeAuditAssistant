@@ -12,13 +12,13 @@ import com.intellij.ui.components.*
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.ui.JBUI
+import org.skgroup.securityinspector.analysis.ast.nodes.BaseAstNode
 import org.skgroup.securityinspector.analysis.ast.nodes.MethodNode
 import org.skgroup.securityinspector.analysis.graphs.callgraph.CallGraph
 import org.skgroup.securityinspector.enums.AnalysisScope
 import org.skgroup.securityinspector.ui.renderer.MethodListRenderer
 import org.skgroup.securityinspector.ui.renderer.ResultTreeRenderer
 import org.skgroup.securityinspector.utils.IconUtil
-import org.skgroup.securityinspector.utils.SinkList
 import java.awt.*
 import java.awt.FlowLayout.LEFT
 import java.awt.event.MouseAdapter
@@ -46,6 +46,54 @@ class CallGraphUIComponents(val project: Project) {
     val sourceField = JBTextField(15)
     val sinkField = JBTextField(15)
     val searchButton = JButton("Search")
+
+    val findMethodButton = JButton("Find Method")
+    val containInfo = JBCheckBox("Info").apply {
+        addActionListener {
+            val enabled = isSelected
+            System.setProperty("BUILD_WITH_METHOD_INFO", enabled.toString())
+        }
+    }
+
+    val containPath = JBCheckBox("Path").apply {
+        addActionListener {
+            val enabled = isSelected
+            System.setProperty("BUILD_WITH_PATH", enabled.toString())
+        }
+    }
+
+    val classNameLabel = JBLabel("Class Name:")
+    val classNameField = JBTextField(20)
+
+    val accessModifierLabel = JBLabel("Access Modifier:")
+    val accessModifierField = JBTextField(10)
+
+    val methodModifierLabel = JBLabel("Method Modifier:")
+    val methodModifierField = JBTextField(10)
+
+    val methodNameLabel = JBLabel("Method Name:")
+    val methodNameField = JBTextField(15)
+
+    val paramCountLabel = JBLabel("Param Count:")
+    val paramCountField = JBTextField(5)
+
+    val paramTypeLabel = JBLabel("Param Type:")
+    val paramTypeField = JBTextField(15)
+
+    val paramNameLabel = JBLabel("Param Name:")
+    val paramNameField = JBTextField(15)
+
+    val varargsLabel = JBLabel("Varargs:")
+    val varargsField = JBTextField(5)
+
+    val throwsClauseLabel = JBLabel("Throws Clause:")
+    val throwsClauseField = JBTextField(15)
+
+    val returnTypeLabel = JBLabel("Return Type:")
+    val returnTypeField = JBTextField(15)
+
+    val annotationsLabel = JBLabel("Annotations:")
+    val annotationsField = JBTextField(20)
 
     val systemPlatformLabel =
         JBLabel("System Plat: ${System.getProperty("os.name")}", LEFT).apply {
@@ -98,10 +146,75 @@ class CallGraphUIComponents(val project: Project) {
         add(createLabel(errorInfoLabel))
     }
 
+    val methodFinderPanel = JBPanel<JBPanel<*>>(BorderLayout()).apply {
+        layout = GridBagLayout()
+        val c = GridBagConstraints().apply {
+            fill = GridBagConstraints.HORIZONTAL
+            insets = Insets(5, 5, 5, 5)
+        }
+
+        val fields = listOf(
+            classNameLabel,
+            classNameField,
+            accessModifierLabel,
+            accessModifierField,
+            methodModifierLabel,
+            methodModifierField,
+            methodNameLabel,
+            methodNameField,
+            paramCountLabel,
+            paramCountField,
+            paramTypeLabel,
+            paramTypeField,
+            paramNameLabel,
+            paramNameField,
+            varargsLabel,
+            varargsField,
+            throwsClauseLabel,
+            throwsClauseField,
+            returnTypeLabel,
+            returnTypeField,
+            annotationsLabel,
+            annotationsField,
+        )
+
+        fields.forEachIndexed { index, it ->
+            if (it is JBLabel) {
+                c.gridx = 0
+                c.gridy = index
+                c.weightx = 0.0
+                add(it, c)
+            } else {
+                c.gridx = 1
+                c.gridy = index - 1
+                c.weightx = 1.0
+                add(it, c)
+            }
+        }
+
+        c.gridx = 0
+        c.gridy = fields.size
+        c.gridwidth = 2
+        c.fill = GridBagConstraints.NONE
+        c.anchor = GridBagConstraints.CENTER
+        add(findMethodButton, c)
+    }
+
+    val toggleButton = JButton("Toggle Panel")
+    lateinit var splitter: JBSplitter
+
     fun createMainPanel(): JBPanel<JBPanel<*>> {
         val mainPanel = JBPanel<JBPanel<*>>(BorderLayout())
         mainPanel.add(createNorthContainer(), BorderLayout.NORTH)
-        mainPanel.add(createCenterPanel(), BorderLayout.CENTER)
+
+        val centerPanel = createCenterPanel()
+        splitter = JBSplitter(false, 0.8f).apply {
+            firstComponent = centerPanel
+            secondComponent = null
+            dividerWidth = 5
+        }
+        mainPanel.add(splitter, BorderLayout.CENTER)
+
         return mainPanel
     }
 
@@ -115,9 +228,10 @@ class CallGraphUIComponents(val project: Project) {
     }
 
     private fun createNorthContainer(): JBPanel<JBPanel<*>> {
-        val topPanel = JBPanel<JBPanel<*>>(FlowLayout(FlowLayout.LEFT)).apply {
+        val topPanel = JBPanel<JBPanel<*>>(FlowLayout(LEFT)).apply {
             add(runAnalysisButton)
             add(searchComboBox)
+            add(toggleButton)
             add(progressBar)
         }
         val searchPanel = createSearchPanel()
@@ -127,12 +241,11 @@ class CallGraphUIComponents(val project: Project) {
         return JBPanel<JBPanel<*>>(BorderLayout()).apply {
             add(topPanel, BorderLayout.NORTH)
             add(searchPanel, BorderLayout.SOUTH)
-
             border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         }
     }
 
-    //搜索模块布局
+    // 搜索模块布局
     private fun createSearchPanel(): JBPanel<JBPanel<*>> {
         val panel = JBPanel<JBPanel<*>>()
         panel.layout = GridBagLayout()
@@ -149,20 +262,22 @@ class CallGraphUIComponents(val project: Project) {
         panel.add(JBLabel("ROOT:"), c)
 
         c.gridx = 1
-        c.weightx = 0.0
         panel.add(sourceField, c)
 
         c.gridx = 2
-        c.weightx = 0.0
         panel.add(JBLabel("SINK:"), c)
 
         c.gridx = 3
-        c.weightx = 0.0
         panel.add(sinkField, c)
 
         c.gridx = 4
-        c.weightx = 0.0
         panel.add(searchButton, c)
+
+        c.gridx = 5
+        panel.add(containInfo, c)
+
+        c.gridx = 6
+        panel.add(containPath, c)
 
         c.weightx = 0.0
 
@@ -185,10 +300,8 @@ class CallGraphUIComponents(val project: Project) {
         return panel
     }
 
-
     fun initializeComboBoxes() {
-
-        //处理结果双击复制和跳转
+        // 处理结果双击复制和跳转
         searchResultTree.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 // 双击666
@@ -204,18 +317,15 @@ class CallGraphUIComponents(val project: Project) {
                     // 取出这个节点的 userObject
                     val userObject = node.userObject
 
-                    if (userObject is MethodNode) {
+                    if (userObject is BaseAstNode) {
                         val offset = userObject.sourceSpan
                         offset?.let {
-                            OpenFileDescriptor(project, it.virtualFile, offset.offset).navigate(true)
+                            OpenFileDescriptor(project, it.virtualFile, offset.offset-1).navigate(true)
                         }
                     }
-
                 }
             }
         })
-
-
     }
 
     private fun createCenterPanel(): JComponent {
@@ -305,4 +415,19 @@ class CallGraphUIComponents(val project: Project) {
         errorInfoLabel.text = "Error: $errorInfo"
     }
 
+    init {
+        var isPanelVisible = true
+        toggleButton.addActionListener {
+            if (!isPanelVisible) {
+                // 隐藏面板：将 secondComponent 设置为 null
+                splitter.secondComponent = null
+            } else {
+                // 显示面板：重新添加 newPanel
+                splitter.secondComponent = methodFinderPanel
+            }
+            isPanelVisible = !isPanelVisible // 切换状态
+            splitter.revalidate() // 重新布局
+            splitter.repaint()   // 重绘界面
+        }
+    }
 }
