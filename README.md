@@ -2,6 +2,8 @@
 
 **Author**：SpringKill、Unam4
 
+**非技术贡献者**：Ar3h、zjacky
+
 **插件支持版本**：`IDEA >= 2022.3`
 
 **Kotlin**：JDK17+
