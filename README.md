@@ -175,9 +175,9 @@
 
 ## 授权
 
-关于当前版本的授权问题，可联系公众号：阿呆攻防进行获取，也可以添加我的个人微信进行交流，如果你认为这个项目对你有帮助，请点个小小的Star和Follow鼓励一下我吧～
+关于当前版本的授权问题，可联系公众号：阿呆攻防进行获取，也可以添加我的个人微信（微信号：SpringKill_）进行交流，如果你认为这个项目对你有帮助，请点个小小的Star和Follow鼓励一下我吧～
 
-<img src="./img/image-20250401203201031.png" alt="image-20250401203201031" style="zoom: 67%;" /><img src="./img/image-20250401203425514.png" alt="image-20250401203425514" style="zoom: 25%;" />
+<img src="/home/springkill/.config/Typora/typora-user-images/image-20250401204010387.png" alt="image-20250401204010387" style="zoom:50%;" />
 
 ## 结语
 
