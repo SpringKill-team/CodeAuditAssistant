@@ -177,7 +177,7 @@
 
 关于当前版本的授权问题，可联系公众号：阿呆攻防进行获取，也可以添加我的个人微信（微信号：SpringKill_）进行交流，如果你认为这个项目对你有帮助，请点个小小的Star和Follow鼓励一下我吧～
 
-<img src="/home/springkill/.config/Typora/typora-user-images/image-20250401204010387.png" alt="image-20250401204010387" style="zoom:50%;" />
+<img src="./img/image-20250401204010387.png" alt="image-20250401204010387" style="zoom:50%;" />
 
 ## 结语
 
