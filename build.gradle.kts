@@ -1,12 +1,12 @@
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "1.9.25"
+    id("org.jetbrains.kotlin.jvm") version "1.8.20"
     id("org.jetbrains.intellij") version "1.17.4"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.skgroup"
-version = "1.0.1"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -23,8 +23,8 @@ dependencies {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    version.set("2024.3")
-    type.set("IU") // Target IDE Platform
+    version.set("2022.3")
+    type.set("IC") // Target IDE Platform
 
 
     plugins.set(listOf("Git4Idea", "java"))

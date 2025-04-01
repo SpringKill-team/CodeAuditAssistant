@@ -5,4 +5,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "SecurityInspector"
+rootProject.name = "CodeAuditAssistant"
