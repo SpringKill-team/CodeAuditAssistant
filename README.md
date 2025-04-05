@@ -1,5 +1,7 @@
 # CodeAuditAssistant
 
+[English Version](./README_en.md)
+
 **Author**：SpringKill、Unam4
 
 **插件支持版本**：`IDEA >= 2022.3`
