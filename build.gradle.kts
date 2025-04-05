@@ -5,7 +5,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-group = "com.skgroup"
+group = "org.skgroup"
 version = "1.0.0"
 
 repositories {
