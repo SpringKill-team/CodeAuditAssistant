@@ -1,32 +1,29 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>com.skgroup.SecurityInspector</id>
+    <id>com.skgroup.CodeAuditAssistant</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>SecurityInspector</name>
+    <name>CodeAuditAssistant</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="zzzlovestudy@gmail.com" url="https://github.com/SpringKill-team">SK-Team</vendor>
+    <vendor email="zzzlovestudy@gmail.com" url="https://github.com/SpringKill-team">WeiJie-SK-Team</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    本插件的目的在于快速寻找Java代码中的Sink点，辅助安全人员进行代码审计工作。<br/>
+    本插件是一个代码审计辅助工具，帮助你快速定位项目中的sink点并查找调用路径。<br/>
     <ui>
-        <li>本插件的工作原理是利用IDEA原生Inspection机制检查活跃文件，为原生Inspection提供了一套新的规则集。</li>
-        <li>本插件提供的规则均在<b>SecurityInspector</b>分组下。</li>
+        <li>本插件的工作原理是基于PSI去构建图，通过图中的调用关系对方法的调用链进行查找。</li>
+        <li>本插件包含两部分<b>CodeAuditAssistant</b>以及<b>SinkFinder</b>。</li>
     </ui>
     <hr>
     电子邮件<br/>
     SpringKill: <a href="mailto:zzzlovestudy@gmail.com">zzzlovestudy@gmail.com</a> <br/>
     Unam4: <a href="mailto:136979459@qq.com">136979459@qq.com</a><br/>
     GitHub: <a href="https://github.com/SpringKill-team" target="_blank">https://github.com/SpringKill-team</a><br/>
-    <br/>
-    感谢<br/>
-    深信服深蓝实验室天威战队开源项目: <a href="https://github.com/KimJun1010/inspector" target="_blank">https://github.com/KimJun1010/inspector</a>
     <br/>
     ]]></description>
 
@@ -38,22 +35,26 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="SecurityInspector"
-                    factoryClass="org.skgroup.securityinspector.ui.SecurityInspectorToolWindowFactory"
+        <toolWindow id="CodeAuditAssistant"
+                    factoryClass="org.skgroup.CodeAuditAssistant.ui.CodeAuditAssistantToolWindowFactory"
                     anchor="left"
                     icon="/icons/pluginIcon.svg"
         />
-        <annotator language="JAVA" implementationClass="org.skgroup.securityinspector.utils.ProblemAnnotator"/>
+        <annotator language="JAVA" implementationClass="org.skgroup.CodeAuditAssistant.utils.ProblemAnnotator"/>
     </extensions>
 
     <actions>
-        <action id="BuildCallGraphForMethod" class="org.skgroup.securityinspector.actions.BuildCallGraphAction"
+        <action id="BuildCallGraphForMethod" class="org.skgroup.CodeAuditAssistant.actions.BuildCallGraphAction"
                 text="Build Call Graph">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
-        <action id="SearchAsSink" class="org.skgroup.securityinspector.actions.SearchAsSinkAction"
+        <action id="SearchAsSink" class="org.skgroup.CodeAuditAssistant.actions.SearchAsSinkAction"
                 text="Search As Sink">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+        <action id="OpenConfig" class="org.skgroup.CodeAuditAssistant.actions.OpenConfigAction"
+                text="Open Code Audit Assistant Config">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
     </actions>
 </idea-plugin>
