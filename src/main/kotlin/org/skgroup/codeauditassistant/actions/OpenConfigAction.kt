@@ -11,7 +11,7 @@ import org.skgroup.codeauditassistant.ui.component.ConfigDialog
  * @author springkill
  * @version 1.0
  */
-class OpenConfigAction : AnAction() {
+class OpenConfigAction : AnAction(CAMessage.message("action.openconfig")) {
     override fun actionPerformed(e: AnActionEvent) {
         val dialog = ConfigDialog()
         dialog.show()

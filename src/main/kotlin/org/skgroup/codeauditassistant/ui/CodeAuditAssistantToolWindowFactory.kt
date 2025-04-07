@@ -15,7 +15,7 @@ class CodeAuditAssistantToolWindowFactory : ToolWindowFactory {
 
         // 用 ContentFactory 创建一个 Content
         val contentFactory = ContentFactory.getInstance()
-        val content = contentFactory.createContent(mainToolWindow.mainPanel, "", false)
+        val content = contentFactory.createContent(mainToolWindow.mainPanel, CAMessage.message("toolwindow.codeauditassistant"), false)
 
         // 把 Content 添加到 ToolWindow
         toolWindow.contentManager.addContent(content)

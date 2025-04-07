@@ -20,7 +20,7 @@ import org.skgroup.codeauditassistant.ui.service.CodeAuditAssistantProjectServic
  * @author springkill
  * @version 1.0
  */
-class BuildCallGraphAction : AnAction() {
+class BuildCallGraphAction : AnAction(CAMessage.message("action.buildcallgraph")) {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.getData(CommonDataKeys.PROJECT)
         val psiElement = e.getData(CommonDataKeys.PSI_ELEMENT)

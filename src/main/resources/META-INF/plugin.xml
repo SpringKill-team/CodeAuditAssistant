@@ -1,7 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
-    <id>com.skgroup.CodeAuditAssistant</id>
+    <id>org.skgroup.codeauditassistant</id>
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
@@ -36,23 +36,23 @@
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="CodeAuditAssistant"
-                    factoryClass="org.skgroup.CodeAuditAssistant.ui.CodeAuditAssistantToolWindowFactory"
+                    factoryClass="org.skgroup.codeauditassistant.ui.CodeAuditAssistantToolWindowFactory"
                     anchor="left"
                     icon="/icons/pluginIcon.svg"
         />
-        <annotator language="JAVA" implementationClass="org.skgroup.CodeAuditAssistant.utils.ProblemAnnotator"/>
+        <annotator language="JAVA" implementationClass="org.skgroup.codeauditassistant.utils.ProblemAnnotator"/>
     </extensions>
 
     <actions>
-        <action id="BuildCallGraphForMethod" class="org.skgroup.CodeAuditAssistant.actions.BuildCallGraphAction"
+        <action id="BuildCallGraphForMethod" class="org.skgroup.codeauditassistant.actions.BuildCallGraphAction"
                 text="Build Call Graph">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
-        <action id="SearchAsSink" class="org.skgroup.CodeAuditAssistant.actions.SearchAsSinkAction"
+        <action id="SearchAsSink" class="org.skgroup.codeauditassistant.actions.SearchAsSinkAction"
                 text="Search As Sink">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
-        <action id="OpenConfig" class="org.skgroup.CodeAuditAssistant.actions.OpenConfigAction"
+        <action id="OpenConfig" class="org.skgroup.codeauditassistant.actions.OpenConfigAction"
                 text="Open Code Audit Assistant Config">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
