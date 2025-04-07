@@ -11,25 +11,26 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
+import com.intellij.ui.treeStructure.Tree
 import org.skgroup.codeauditassistant.i18n.CAMessage
 import org.skgroup.codeauditassistant.ui.renderer.FirstColumnRenderer
 import org.skgroup.codeauditassistant.ui.renderer.HighlightRenderer
+import org.skgroup.codeauditassistant.ui.renderer.SinkTreeCellRenderer
 import org.skgroup.codeauditassistant.utils.SinkUtil.collectProjectIssues
 import java.awt.BorderLayout
+import java.awt.Dimension
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.util.*
 import javax.swing.JButton
+import javax.swing.JScrollPane
+import javax.swing.event.TreeSelectionEvent
+import javax.swing.event.TreeSelectionListener
 import javax.swing.table.DefaultTableModel
 import javax.swing.table.TableRowSorter
-import javax.swing.JTree
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 import javax.swing.tree.TreePath
-import javax.swing.JScrollPane
-import java.util.TreeMap
-import javax.swing.event.TreeSelectionEvent
-import javax.swing.event.TreeSelectionListener
-import java.io.Serializable
 
 class IssueProblemsTab(private val project: Project) : ProblemsViewTab {
 
@@ -57,7 +58,12 @@ class IssueProblemsTab(private val project: Project) : ProblemsViewTab {
     
     private val rootNode = DefaultMutableTreeNode(CAMessage.message("sink.tree.root"))
     private val treeModel = DefaultTreeModel(rootNode)
-    private val tree = JTree(treeModel)
+    private val sinkTree = Tree(treeModel).apply {
+        cellRenderer = SinkTreeCellRenderer()
+        preferredSize = Dimension(200, preferredSize.height)
+        isRootVisible = true
+        showsRootHandles = true
+    }
     
     private val allIssues = mutableListOf<Array<out Any>>()
     
@@ -85,9 +91,7 @@ class IssueProblemsTab(private val project: Project) : ProblemsViewTab {
             })
         }
 
-        tree.isRootVisible = false
-        tree.showsRootHandles = true
-        tree.addTreeSelectionListener(object : TreeSelectionListener {
+        sinkTree.addTreeSelectionListener(object : TreeSelectionListener {
             override fun valueChanged(e: TreeSelectionEvent) {
                 val path = e.path
                 filterTableByTreeSelection(path)
@@ -149,7 +153,7 @@ class IssueProblemsTab(private val project: Project) : ProblemsViewTab {
         }
 
         val splitPanel = JBPanel<JBPanel<*>>(BorderLayout())
-        splitPanel.add(JScrollPane(tree), BorderLayout.WEST)
+        splitPanel.add(JScrollPane(sinkTree), BorderLayout.WEST)
         splitPanel.add(JBScrollPane(table), BorderLayout.CENTER)
         
         panel.add(splitPanel, BorderLayout.CENTER)

@@ -25,4 +25,7 @@ object IconUtil {
     val callIcon = loadIcon("/icons/call-white.svg")
     val newIcon = loadIcon("/icons/new-white.svg")
     val declarationIcon = loadIcon("/icons/declare-white.svg")
+
+    val sinkIcon = loadIcon("/icons/vuln.svg")
+
 }
