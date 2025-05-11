@@ -184,7 +184,7 @@ log4j检测示例：
 ## 交流
 可以扫描下面二维码加入交流群，欢迎各位师傅。
 
-<img src="./img/qrcode.png" alt="搜索示例" width="15%" />
+<img src="./img/qrcode.png" alt="搜索示例" width="20%" />
 
 ## 结语
 
