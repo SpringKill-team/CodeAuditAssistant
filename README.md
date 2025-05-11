@@ -181,7 +181,10 @@ log4j检测示例：
 
 关于当前版本的授权问题，可联系公众号：卫界安全-阿呆攻防回复 `CodeAuditAssistant授权` 或 `代码审计工具授权` 进行获取，也可以添加我的个人微信（微信号：SpringKill_）进行交流，如果你认为这个项目对你有帮助，请点个小小的Star和Follow鼓励一下我吧～
 
-<img src="./img/qrconde.png" alt="搜索示例" width="50%" />
+## 交流
+可以扫描下面二维码加入交流群，欢迎各位师傅。
+
+<img src="./img/qrconde.png" alt="搜索示例" width="15%" />
 
 ## 结语
 
