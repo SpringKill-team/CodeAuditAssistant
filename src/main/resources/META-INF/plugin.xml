@@ -52,9 +52,5 @@
                 text="Search As Sink">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
         </action>
-        <action id="OpenConfig" class="org.skgroup.codeauditassistant.actions.OpenConfigAction"
-                text="Open Code Audit Assistant Config">
-            <add-to-group group-id="ToolsMenu" anchor="last"/>
-        </action>
     </actions>
 </idea-plugin>
